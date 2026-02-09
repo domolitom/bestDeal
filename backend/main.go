@@ -50,7 +50,7 @@ func main() {
 	api.HandleFunc("/scrape/lidl", scrapeLidl).Methods("POST")
 
 	// Serve newsletter images
-	r.PathPrefix("/newsletters/").Handler(http.StripPrefix("/newsletters/", http.FileServer(http.Dir("./newsletters"))))
+	r.PathPrefix("/newsletters/").Handler(http.StripPrefix("/newsletters/", http.FileServer(http.Dir("../newsletters"))))
 
 	// Serve static files (frontend)
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("../frontend")))

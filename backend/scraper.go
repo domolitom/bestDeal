@@ -153,7 +153,7 @@ func scrapeCatalogPages(ctx context.Context, baseURL string) (ScrapedCatalog, er
 
 func downloadCatalogImages(catalog ScrapedCatalog) (Newsletter, error) {
 	id := fmt.Sprintf("lidl-%s", strings.ReplaceAll(catalog.ValidFrom, "-", ""))
-	dir := filepath.Join("newsletters", id)
+	dir := filepath.Join("../newsletters", id)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return Newsletter{}, err
 	}
@@ -252,12 +252,12 @@ func saveNewslettersToFile(newsletters []Newsletter) error {
 		return err
 	}
 
-	return os.WriteFile("newsletters/newsletters.json", data, 0644)
+	return os.WriteFile("../newsletters/newsletters.json", data, 0644)
 }
 
 // loadNewslettersFromFile loads newsletters from JSON file
 func loadNewslettersFromFile() ([]Newsletter, error) {
-	data, err := os.ReadFile("newsletters/newsletters.json")
+	data, err := os.ReadFile("../newsletters/newsletters.json")
 	if err != nil {
 		if os.IsNotExist(err) {
 			return []Newsletter{}, nil

@@ -1,0 +1,4 @@
+# Ignore scraped newsletter content
+newsletters/*
+!newsletters/README.md
+!newsletters/.gitkeep

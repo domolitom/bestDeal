@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -30,14 +31,11 @@ type Page struct {
 var newsletters []Newsletter
 
 func main() {
-	// Load newsletters from file, or initialize with sample data
+	// Load newsletters from file
 	var err error
 	newsletters, err = loadNewslettersFromFile()
 	if err != nil {
 		log.Printf("Error loading newsletters: %v", err)
-		initializeSampleData()
-	} else if len(newsletters) == 0 {
-		initializeSampleData()
 	}
 
 	// Create router
@@ -47,7 +45,8 @@ func main() {
 	api := r.PathPrefix("/api").Subrouter()
 	api.HandleFunc("/newsletters", getNewsletters).Methods("GET")
 	api.HandleFunc("/newsletters/{id}", getNewsletter).Methods("GET")
-	api.HandleFunc("/scrape/lidl", scrapeLidl).Methods("POST")
+	api.HandleFunc("/scrape/{store}", scrapeStore).Methods("POST")
+	api.HandleFunc("/stores", getStores).Methods("GET")
 
 	// Serve newsletter images
 	r.PathPrefix("/newsletters/").Handler(http.StripPrefix("/newsletters/", http.FileServer(http.Dir("../newsletters"))))
@@ -85,28 +84,49 @@ func getNewsletter(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Newsletter not found", http.StatusNotFound)
 }
 
-func scrapeLidl(w http.ResponseWriter, r *http.Request) {
-	// Scrape Lidl Romania catalogs and download images
-	log.Println("Starting Lidl scraper and downloader...")
+func scrapeStore(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	storeName := vars["store"]
+
+	log.Printf("Starting %s scraper...", storeName)
 
 	// Run the scraper in a goroutine since it might take a while
 	go func() {
-		scrapedNewsletters, err := ScrapeAndDownloadLidl()
+		config, err := LoadScraperConfig(storeName)
 		if err != nil {
-			log.Printf("Error scraping Lidl: %v", err)
+			log.Printf("Error loading config for %s: %v", storeName, err)
+			return
+		}
+
+		scrapedNewsletters, err := ScrapeAndDownload(config)
+		if err != nil {
+			log.Printf("Error scraping %s: %v", storeName, err)
 			return
 		}
 
 		// Update the global newsletters
 		if len(scrapedNewsletters) > 0 {
-			newsletters = scrapedNewsletters
-			log.Printf("Successfully updated %d newsletters", len(scrapedNewsletters))
+			// Merge with existing newsletters
+			existingMap := make(map[string]Newsletter)
+			for _, n := range newsletters {
+				existingMap[n.ID] = n
+			}
+			for _, n := range scrapedNewsletters {
+				existingMap[n.ID] = n
+			}
+
+			newsletters = make([]Newsletter, 0, len(existingMap))
+			for _, n := range existingMap {
+				newsletters = append(newsletters, n)
+			}
+
+			log.Printf("Successfully updated %d newsletters from %s", len(scrapedNewsletters), storeName)
 		}
 	}()
 
 	// Return immediately to avoid timeout
 	response := map[string]interface{}{
-		"message": "Scraping started in background. This may take a few minutes.",
+		"message": fmt.Sprintf("Scraping %s started in background. This may take a few minutes.", storeName),
 		"status":  "processing",
 	}
 
@@ -114,38 +134,24 @@ func scrapeLidl(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-// Initialize with sample data based on Lidl Romania
-func initializeSampleData() {
-	newsletters = []Newsletter{
-		{
-			ID:         "lidl-2024-02-09",
-			Store:      "Lidl",
-			Title:      "Catalogul săptămânal pentru perioada 09.02-15.02.2026",
-			ValidFrom:  "2026-02-09",
-			ValidUntil: "2026-02-15",
-			CoverImage: "https://imgproxy.leaflets.schwarz/IUn0tdP5z4dbGegAFQ81ZrhvCYiUc1mkcrHrr7YNpvE/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5YzBmNzQtNTQ2Mi03ZmVmLWE2OGUtMmQ3MTlkM2U5MWU2L3BhZ2UtMDFfMDk1ODg5ZGViZGQxOTFiZDVlMDhmM2VjNzFlYTNhM2YucG5n.jpg",
-			Pages: []Page{
-				{PageNumber: 1, ImageURL: "https://imgproxy.leaflets.schwarz/IUn0tdP5z4dbGegAFQ81ZrhvCYiUc1mkcrHrr7YNpvE/rs:fit:800:800:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5YzBmNzQtNTQ2Mi03ZmVmLWE2OGUtMmQ3MTlkM2U5MWU2L3BhZ2UtMDFfMDk1ODg5ZGViZGQxOTFiZDVlMDhmM2VjNzFlYTNhM2YucG5n.jpg"},
-				{PageNumber: 2, ImageURL: "https://via.placeholder.com/800x1200/0050AA/FFFFFF?text=Page+2"},
-				{PageNumber: 3, ImageURL: "https://via.placeholder.com/800x1200/0050AA/FFFFFF?text=Page+3"},
-				{PageNumber: 4, ImageURL: "https://via.placeholder.com/800x1200/0050AA/FFFFFF?text=Page+4"},
-			},
-			LastUpdated: time.Now(),
-		},
-		{
-			ID:         "lidl-2024-02-02",
-			Store:      "Lidl",
-			Title:      "Catalogul săptămânal pentru perioada 02.02-08.02.2026",
-			ValidFrom:  "2026-02-02",
-			ValidUntil: "2026-02-08",
-			CoverImage: "https://imgproxy.leaflets.schwarz/M2tmlYyoczVIJPHXvI18R961hXrssjlhAt1txtEgJes/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5YmY5NzUtYTIzYy03ZTU1LWJkZWEtMjAxMzE3ZWM5NzE1L3BhZ2UtMDFfZjRmMjU5YjBmNzVmMTA5OGFhOThjNTE4YzRlZWEwMDQucG5n.jpg",
-			Pages: []Page{
-				{PageNumber: 1, ImageURL: "https://imgproxy.leaflets.schwarz/M2tmlYyoczVIJPHXvI18R961hXrssjlhAt1txtEgJes/rs:fit:800:800:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5YmY5NzUtYTIzYy03ZTU1LWJkZWEtMjAxMzE3ZWM5NzE1L3BhZ2UtMDFfZjRmMjU5YjBmNzVmMTA5OGFhOThjNTE4YzRlZWEwMDQucG5n.jpg"},
-				{PageNumber: 2, ImageURL: "https://via.placeholder.com/800x1200/0050AA/FFFFFF?text=Page+2"},
-			},
-			LastUpdated: time.Now(),
-		},
+func getStores(w http.ResponseWriter, r *http.Request) {
+	stores, err := ListAvailableStores()
+	if err != nil {
+		http.Error(w, "Error loading stores", http.StatusInternalServerError)
+		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"stores": stores,
+	})
+}
+
+func scrapeLidl(w http.ResponseWriter, r *http.Request) {
+	// Legacy endpoint - redirect to generic scraper
+	vars := map[string]string{"store": "lidl"}
+	r = mux.SetURLVars(r, vars)
+	scrapeStore(w, r)
 }
 
 // CORS middleware

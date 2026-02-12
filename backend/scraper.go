@@ -17,7 +17,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-// ScrapedCatalog represents a catalog scraped from Lidl
+// ScrapedCatalog represents a catalog scraped from a store
 type ScrapedCatalog struct {
 	Title      string
 	ValidFrom  string
@@ -26,8 +26,9 @@ type ScrapedCatalog struct {
 	PageImages []string
 }
 
-func ScrapeAndDownloadLidl() ([]Newsletter, error) {
-	log.Println("Starting Lidl scraper...")
+// ScrapeAndDownload scrapes catalogs for a configured store
+func ScrapeAndDownload(config *ScraperConfig) ([]Newsletter, error) {
+	log.Printf("Starting %s scraper...", config.StoreName)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
@@ -45,10 +46,12 @@ func ScrapeAndDownloadLidl() ([]Newsletter, error) {
 	defer cancel()
 
 	var htmlContent string
+	waitDuration := time.Duration(config.WaitTime) * time.Second
+
 	err := chromedp.Run(ctx,
-		chromedp.Navigate("https://www.lidl.ro/c/cataloage-online/s10019911"),
+		chromedp.Navigate(config.CatalogListURL),
 		chromedp.WaitReady("body"),
-		chromedp.Sleep(3*time.Second),
+		chromedp.Sleep(waitDuration),
 		chromedp.OuterHTML("html", &htmlContent),
 	)
 
@@ -56,23 +59,28 @@ func ScrapeAndDownloadLidl() ([]Newsletter, error) {
 		return nil, fmt.Errorf("failed to scrape: %v", err)
 	}
 
-	catalogURLs := extractCatalogURLs(htmlContent)
-	log.Printf("Found %d catalogs", len(catalogURLs))
+	catalogURLs := extractCatalogURLs(htmlContent, config)
+	log.Printf("Found %d catalogs for %s", len(catalogURLs), config.StoreName)
 
 	var newsletters []Newsletter
+	maxCatalogs := config.MaxCatalogs
+	if maxCatalogs == 0 {
+		maxCatalogs = len(catalogURLs)
+	}
+
 	for i, url := range catalogURLs {
-		if i >= 2 {
+		if i >= maxCatalogs {
 			break
 		}
 
-		log.Printf("Scraping %d/%d...", i+1, min(2, len(catalogURLs)))
-		catalog, err := scrapeCatalogPages(ctx, url)
+		log.Printf("Scraping %d/%d...", i+1, min(maxCatalogs, len(catalogURLs)))
+		catalog, err := scrapeCatalogPages(ctx, url, config)
 		if err != nil {
 			log.Printf("Skip: %v", err)
 			continue
 		}
 
-		newsletter, err := downloadCatalogImages(catalog)
+		newsletter, err := downloadCatalogImages(catalog, config)
 		if err != nil {
 			log.Printf("Skip: %v", err)
 			continue
@@ -88,8 +96,8 @@ func ScrapeAndDownloadLidl() ([]Newsletter, error) {
 	return newsletters, nil
 }
 
-func extractCatalogURLs(html string) []string {
-	regex := regexp.MustCompile(`href="((?:https://www\.lidl\.ro)?/l/ro/cataloage/[^"]+)"`)
+func extractCatalogURLs(html string, config *ScraperConfig) []string {
+	regex := regexp.MustCompile(config.Selectors.CatalogURLRegex)
 	matches := regex.FindAllStringSubmatch(html, -1)
 
 	var urls []string
@@ -117,30 +125,103 @@ func extractCatalogURLs(html string) []string {
 	return urls
 }
 
-func scrapeCatalogPages(ctx context.Context, baseURL string) (ScrapedCatalog, error) {
-	catalog := ScrapedCatalog{PageImages: []string{}}
+func scrapeCatalogPages(ctx context.Context, baseURL string, config *ScraperConfig) (ScrapedCatalog, error) {
+	var htmlContent string
+	waitDuration := time.Duration(config.WaitTime) * time.Second
 
-	pattern := regexp.MustCompile(`perioada-(\d{2})-(\d{2})-(\d{2})-(\d{2})-(\d{4})`)
-	if m := pattern.FindStringSubmatch(baseURL); len(m) > 5 {
-		catalog.ValidFrom = fmt.Sprintf("%s-%s-%s", m[5], m[2], m[1])
-		catalog.ValidUntil = fmt.Sprintf("%s-%s-%s", m[5], m[4], m[3])
-		catalog.Title = fmt.Sprintf("Catalogul săptămânal pentru perioada %s.%s-%s.%s.%s",
-			m[1], m[2], m[3], m[4], m[5])
+	// First load to get title and dates
+	err := chromedp.Run(ctx,
+		chromedp.Navigate(baseURL),
+		chromedp.WaitReady("body"),
+		chromedp.Sleep(waitDuration),
+		chromedp.OuterHTML("html", &htmlContent),
+	)
+
+	if err != nil {
+		return ScrapedCatalog{}, fmt.Errorf("failed to load catalog: %v", err)
 	}
 
-	for page := 1; page <= 30; page++ {
+	catalog := ScrapedCatalog{
+		Title:      extractTitle(htmlContent, config),
+		ValidFrom:  time.Now().Format("2006-01-02"),
+		ValidUntil: time.Now().AddDate(0, 0, 7).Format("2006-01-02"),
+	}
+
+	extractDates(&catalog, htmlContent)
+
+	// Try to scrape page-by-page (for page-by-page viewers)
+	seen := make(map[string]bool)
+	emptyCount := 0
+	for page := 1; page <= config.MaxPages; page++ {
 		var imageURL string
+		// Calculate page index based on config (0-indexed or 1-indexed)
+		pageIndex := page - 1 + config.PageIndexStart
+		pageURL := fmt.Sprintf("%s%s", baseURL, fmt.Sprintf(config.PageURLPattern, pageIndex))
+
+		// Build JavaScript selector query from config
+		selectorJS := buildSelectorJS(config.Selectors.PageImageSelector)
+
 		err := chromedp.Run(ctx,
-			chromedp.Navigate(fmt.Sprintf("%s/view/flyer/page/%d", baseURL, page)),
-			chromedp.WaitVisible(`img[src*="imgproxy.leaflets.schwarz"]`, chromedp.ByQuery),
-			chromedp.Evaluate(`document.querySelector('img[src*="imgproxy.leaflets.schwarz"]')?.src || ''`, &imageURL),
+			chromedp.Navigate(pageURL),
+			chromedp.Sleep(3*time.Second),
+			chromedp.Evaluate(selectorJS, &imageURL),
 		)
 
-		if err != nil || imageURL == "" {
-			break
+		if err != nil {
+			log.Printf("Error on page %d: %v", page, err)
+			emptyCount++
+			if emptyCount >= 3 {
+				break
+			}
+			continue
 		}
 
-		catalog.PageImages = append(catalog.PageImages, imageURL)
+		imageURL = strings.TrimSpace(imageURL)
+		if imageURL == "" {
+			log.Printf("Empty image URL on page %d (%s)", page, pageURL)
+			emptyCount++
+			if emptyCount >= 3 {
+				break
+			}
+			continue
+		}
+
+		if !seen[imageURL] {
+			seen[imageURL] = true
+			catalog.PageImages = append(catalog.PageImages, imageURL)
+			log.Printf("Found page %d: %s", page, imageURL[:min(80, len(imageURL))])
+			emptyCount = 0 // Reset counter on success
+		} else {
+			log.Printf("Duplicate image on page %d, stopping", page)
+			break
+		}
+	}
+
+	// Fallback: try to get all images from single page
+	if len(catalog.PageImages) == 0 {
+		log.Println("Page-by-page scraping failed, trying single page approach...")
+		var imageURLs []string
+
+		err := chromedp.Run(ctx,
+			chromedp.Navigate(baseURL),
+			chromedp.WaitReady("body"),
+			chromedp.Sleep(waitDuration),
+			chromedp.Evaluate(`
+				Array.from(document.querySelectorAll('img'))
+					.map(img => img.src || img.dataset.src || img.getAttribute('data-src'))
+					.filter(src => src && (src.includes('imgproxy.leaflets.schwarz') || src.includes('leaflets')))
+			`, &imageURLs),
+		)
+
+		if err == nil {
+			for _, imageURL := range imageURLs {
+				imageURL = strings.TrimSpace(imageURL)
+				if !seen[imageURL] && imageURL != "" {
+					seen[imageURL] = true
+					catalog.PageImages = append(catalog.PageImages, imageURL)
+				}
+			}
+		}
 	}
 
 	if len(catalog.PageImages) > 0 {
@@ -151,8 +232,9 @@ func scrapeCatalogPages(ctx context.Context, baseURL string) (ScrapedCatalog, er
 	return catalog, nil
 }
 
-func downloadCatalogImages(catalog ScrapedCatalog) (Newsletter, error) {
-	id := fmt.Sprintf("lidl-%s", strings.ReplaceAll(catalog.ValidFrom, "-", ""))
+func downloadCatalogImages(catalog ScrapedCatalog, config *ScraperConfig) (Newsletter, error) {
+	storeLower := strings.ToLower(config.StoreName)
+	id := fmt.Sprintf("%s-%s", storeLower, strings.ReplaceAll(catalog.ValidFrom, "-", ""))
 	dir := filepath.Join("../newsletters", id)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return Newsletter{}, err
@@ -170,7 +252,7 @@ func downloadCatalogImages(catalog ScrapedCatalog) (Newsletter, error) {
 	sem := make(chan struct{}, 5)
 
 	for i, url := range catalog.PageImages {
-		if i >= 20 {
+		if i >= config.MaxPages {
 			break
 		}
 
@@ -200,7 +282,7 @@ func downloadCatalogImages(catalog ScrapedCatalog) (Newsletter, error) {
 	log.Printf("Downloaded %d pages", len(pages))
 	return Newsletter{
 		ID:          id,
-		Store:       "Lidl",
+		Store:       config.StoreName,
 		Title:       catalog.Title,
 		ValidFrom:   catalog.ValidFrom,
 		ValidUntil:  catalog.ValidUntil,
@@ -218,6 +300,41 @@ func sortPages(pages []Page) {
 			}
 		}
 	}
+}
+
+func extractTitle(html string, config *ScraperConfig) string {
+	titleRegex := regexp.MustCompile(`<h1[^>]*>([^<]+)</h1>`)
+	matches := titleRegex.FindStringSubmatch(html)
+	if len(matches) > 1 {
+		return strings.TrimSpace(matches[1])
+	}
+	return fmt.Sprintf("%s Catalog", config.StoreName)
+}
+
+func extractDates(catalog *ScrapedCatalog, html string) {
+	dateRegex := regexp.MustCompile(`(\d{2})\.(\d{2})\.(\d{4})`)
+	matches := dateRegex.FindAllStringSubmatch(html, 2)
+
+	if len(matches) >= 2 {
+		catalog.ValidFrom = fmt.Sprintf("%s-%s-%s", matches[0][3], matches[0][2], matches[0][1])
+		catalog.ValidUntil = fmt.Sprintf("%s-%s-%s", matches[1][3], matches[1][2], matches[1][1])
+	}
+}
+
+// buildSelectorJS creates a JavaScript expression to find images using comma-separated CSS selectors
+func buildSelectorJS(selectorString string) string {
+	selectors := strings.Split(selectorString, ",")
+	var conditions []string
+	for _, sel := range selectors {
+		sel = strings.TrimSpace(sel)
+		conditions = append(conditions, fmt.Sprintf(`document.querySelector('%s')`, sel))
+	}
+	return fmt.Sprintf(`
+		(() => {
+			const img = %s;
+			return img ? img.src : '';
+		})()
+	`, strings.Join(conditions, " || "))
 }
 
 func downloadImage(url, dir, filename string) (string, error) {

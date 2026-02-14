@@ -126,10 +126,30 @@ func buildPageURL(templateURL string, pageNum int) string {
 func extractImageFromPage(ctx context.Context, pageURL string) (string, error) {
 	var imageURL string
 
-	// JavaScript to find the catalog image
+	// JavaScript to find the catalog image - try to get the largest/highest resolution image
 	selectorJS := `
 		(() => {
-			// Try different selectors in order of specificity
+			// First, try to find images by size (catalog images are usually large)
+			const allImages = Array.from(document.querySelectorAll('img'));
+			
+			// Filter out small images (icons, logos, etc) and get the largest
+			const largeImages = allImages.filter(img => {
+				const width = img.naturalWidth || img.width || 0;
+				const height = img.naturalHeight || img.height || 0;
+				return width > 500 && height > 500;
+			});
+			
+			if (largeImages.length > 0) {
+				// Sort by size and get the largest
+				largeImages.sort((a, b) => {
+					const sizeA = (a.naturalWidth || a.width) * (a.naturalHeight || a.height);
+					const sizeB = (b.naturalWidth || b.width) * (b.naturalHeight || b.height);
+					return sizeB - sizeA;
+				});
+				return largeImages[0].src;
+			}
+			
+			// Fallback: try specific selectors
 			const selectors = [
 				'img.flyer-image',
 				'img[class*="flyer"]',
@@ -144,7 +164,7 @@ func extractImageFromPage(ctx context.Context, pageURL string) (string, error) {
 			for (const selector of selectors) {
 				try {
 					const img = document.querySelector(selector);
-					if (img && img.src) {
+					if (img && img.src && !img.src.includes('.svg')) {
 						return img.src;
 					}
 				} catch (e) {}
@@ -156,7 +176,7 @@ func extractImageFromPage(ctx context.Context, pageURL string) (string, error) {
 	err := chromedp.Run(ctx,
 		chromedp.Navigate(pageURL),
 		chromedp.WaitReady("body"),
-		chromedp.Sleep(4*time.Second),
+		chromedp.Sleep(5*time.Second), // Increased wait time for images to load
 		chromedp.Evaluate(selectorJS, &imageURL),
 	)
 

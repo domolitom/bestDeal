@@ -1,14 +1,32 @@
 # BestDeal Backend
 
-A Go backend service that scrapes and downloads supermarket catalogs (currently supports Lidl Romania).
+A generic Go scraper service that downloads catalog images based on simple JSON configuration files.
 
 ## Features
 
-- **Web Scraping**: Uses chromedp (headless Chrome) to scrape JavaScript-rendered catalog pages
-- **Image Downloading**: Downloads all catalog pages and cover images locally
-- **REST API**: Serves catalog data as JSON
-- **Static File Serving**: Serves downloaded images and frontend files
-- **Persistent Storage**: Saves catalog data to JSON file
+- **Generic Image Scraping**: Extracts images from catalog viewer pages using chromedp
+- **Config-Based**: All scraping logic is driven by simple JSON config files
+- **Organized Output**: Creates folders with cover images and page images
+- **REST API**: Serves catalog images and provides scraping endpoints
+
+## Config File Format
+
+Each config file in `configs/` defines what to scrape:
+
+```json
+{
+  "id": "lidl-09-02-15-02-2026",
+  "cover_image": "https://example.com/catalog/page/1",
+  "first_page": "https://example.com/catalog/page/1",
+  "last_page": "https://example.com/catalog/page/80"
+}
+```
+
+The scraper will:
+
+1. Extract the image from the `cover_image` URL and save as `cover-image.jpg`
+2. Extract images from all pages between `first_page` and `last_page`
+3. Save everything to `newsletters/{id}/` folder
 
 ## Setup
 
@@ -21,31 +39,53 @@ go mod download
 2. **Run the server:**
 
 ```bash
-go run main.go scraper.go
+go run *.go
 ```
 
 The server will start on http://localhost:8080
 
-## API Endpoints
+## Manual Scraping
 
-### GET /api/newsletters
-
-Returns all available newsletters/catalogs.
-
-**Example:**
+To scrape a specific config:
 
 ```bash
-curl http://localhost:8080/api/newsletters
+# Use the API endpoint
+curl -X POST http://localhost:8080/api/scrape/lidl-09-02-15-02-2026
 ```
 
-### GET /api/newsletters/{id}
+## Output Structure
 
-Returns a specific newsletter by ID.
+```
+newsletters/
+  lidl-09-02-15-02-2026/
+    cover-image.jpg
+    pages/
+      page-001.jpg
+      page-002.jpg
+      ...
+      page-080.jpg
+```
+
+## API Endpoints
+
+### POST /api/scrape/{config-name}
+
+Triggers scraping for a specific config file (without .json extension).
 
 **Example:**
 
 ```bash
-curl http://localhost:8080/api/newsletters/lidl-20260209
+curl -X POST http://localhost:8080/api/scrape/lidl-09-02-15-02-2026
+```
+
+### GET /api/stores
+
+Returns all available config files.
+
+**Example:**
+
+```bash
+curl http://localhost:8080/api/stores
 ```
 
 ### POST /api/scrape/lidl

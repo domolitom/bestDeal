@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -42,12 +43,37 @@ func ScrapeAndDownloadFromConfig(configPath string) error {
 		chromedp.Flag("headless", true),
 		chromedp.Flag("disable-gpu", true),
 		chromedp.Flag("no-sandbox", true),
+		chromedp.Flag("disable-cache", true),
+		chromedp.Flag("disable-application-cache", true),
+		chromedp.Flag("disk-cache-size", "0"),
+		chromedp.WindowSize(800, 1200),
 	)
 
 	allocCtx, allocCancel := chromedp.NewExecAllocator(ctx, opts...)
 	defer allocCancel()
 
 	taskCtx, taskCancel := chromedp.NewContext(allocCtx)
+	defer taskCancel()
+
+	// Determine optimal viewport width for single-page rendering
+	optimalWidth := determineOptimalViewportWidth(taskCtx, config.FirstPage)
+	log.Printf("Using viewport width: %d (ensures single-page rendering)", optimalWidth)
+
+	// Recreate context with optimal viewport size
+	opts = append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Flag("headless", true),
+		chromedp.Flag("disable-gpu", true),
+		chromedp.Flag("no-sandbox", true),
+		chromedp.Flag("disable-cache", true),
+		chromedp.Flag("disable-application-cache", true),
+		chromedp.Flag("disk-cache-size", "0"),
+		chromedp.WindowSize(optimalWidth, 1200),
+	)
+
+	allocCtx, allocCancel = chromedp.NewExecAllocator(ctx, opts...)
+	defer allocCancel()
+
+	taskCtx, taskCancel = chromedp.NewContext(allocCtx)
 	defer taskCancel()
 
 	// Extract cover image
@@ -77,10 +103,9 @@ func ScrapeAndDownloadFromConfig(configPath string) error {
 
 	log.Printf("Extracting pages %d to %d", firstPageNum, lastPageNum)
 
-	// Extract and download all page images (sequentially to avoid rate limiting)
 	for pageNum := firstPageNum; pageNum <= lastPageNum; pageNum++ {
 		pageURL := buildPageURL(config.FirstPage, pageNum)
-		log.Printf("Processing page %d/%d: %s", pageNum-firstPageNum+1, lastPageNum-firstPageNum+1, pageURL)
+		log.Printf("Processing page %d/%d: %s", pageNum, lastPageNum, pageURL)
 
 		imageURL, err := extractImageFromPage(taskCtx, pageURL)
 		if err != nil {
@@ -93,10 +118,9 @@ func ScrapeAndDownloadFromConfig(configPath string) error {
 
 		if err := downloadImage(imageURL, imagePath); err != nil {
 			log.Printf("Warning: failed to download page %d: %v", pageNum, err)
-			continue
+		} else {
+			log.Printf("Downloaded page %d", pageNum)
 		}
-
-		log.Printf("Downloaded page %d", pageNum)
 
 		// Small delay between pages to be respectful
 		time.Sleep(500 * time.Millisecond)
@@ -122,74 +146,187 @@ func buildPageURL(templateURL string, pageNum int) string {
 	return re.ReplaceAllString(templateURL, fmt.Sprintf("/page/%d", pageNum))
 }
 
-// extractImageFromPage navigates to a page and extracts the main image URL
-func extractImageFromPage(ctx context.Context, pageURL string) (string, error) {
-	var imageURL string
+// determineOptimalViewportWidth tests different viewport widths to find the optimal size for single-page rendering
+func determineOptimalViewportWidth(ctx context.Context, testPageURL string) int {
+	testURL := buildPageURL(testPageURL, 2)
+	widthsToTest := []int{600, 800, 1000, 1200, 1400, 1600, 1800, 2000}
 
-	// JavaScript to find the catalog image - try to get the largest/highest resolution image
-	selectorJS := `
+	log.Printf("Testing viewport widths...")
+
+	for _, width := range widthsToTest {
+		imageCount := countCatalogImages(ctx, testURL, width)
+
+		if imageCount == 1 {
+			return width
+		}
+
+		if imageCount >= 2 {
+			for i := len(widthsToTest) - 1; i >= 0; i-- {
+				if widthsToTest[i] < width {
+					return widthsToTest[i]
+				}
+			}
+			return 600
+		}
+	}
+
+	return 800
+}
+
+// countCatalogImages counts how many catalog page images are rendered at a given viewport width
+func countCatalogImages(ctx context.Context, pageURL string, viewportWidth int) int {
+	var result string
+
+	countJS := `
 		(() => {
-			// First, try to find images by size (catalog images are usually large)
-			const allImages = Array.from(document.querySelectorAll('img'));
+			const currentPages = document.querySelectorAll('.page--current img, [class*="page--current"] img');
 			
-			// Filter out small images (icons, logos, etc) and get the largest
-			const largeImages = allImages.filter(img => {
+			if (currentPages.length > 0) {
+				const catalogImages = Array.from(currentPages).filter(img => {
+					const width = img.naturalWidth || img.width || 0;
+					const height = img.naturalHeight || img.height || 0;
+					return img.complete && width > 500 && height > 500 && 
+					       img.src && !img.src.includes('data:image') && 
+					       !img.src.includes('rs:fit:400') && !img.src.includes('rs:fit:200');
+				});
+				return JSON.stringify({count: catalogImages.length, total: currentPages.length, method: 'page--current'});
+			}
+			
+			const images = Array.from(document.querySelectorAll('img'));
+			const catalogImages = images.filter(img => {
+				if (img.closest('nav') || img.closest('aside') || img.closest('.cuprins') || 
+				    img.closest('[class*="sidebar"]') || img.closest('[class*="thumbnail"]')) {
+					return false;
+				}
+				
 				const width = img.naturalWidth || img.width || 0;
 				const height = img.naturalHeight || img.height || 0;
-				return width > 500 && height > 500;
+				return img.complete && width > 500 && height > 500 && 
+				       img.src && !img.src.includes('data:image') && 
+				       !img.src.includes('rs:fit:400') && !img.src.includes('rs:fit:200');
 			});
 			
-			if (largeImages.length > 0) {
-				// Sort by size and get the largest
-				largeImages.sort((a, b) => {
-					const sizeA = (a.naturalWidth || a.width) * (a.naturalHeight || a.height);
-					const sizeB = (b.naturalWidth || b.width) * (b.naturalHeight || b.height);
-					return sizeB - sizeA;
+			return JSON.stringify({count: catalogImages.length, total: images.length, method: 'fallback'});
+		})()
+	`
+
+	testOpts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Flag("headless", true),
+		chromedp.Flag("disable-gpu", true),
+		chromedp.Flag("no-sandbox", true),
+		chromedp.WindowSize(viewportWidth, 1200),
+	)
+
+	testAllocCtx, testAllocCancel := chromedp.NewExecAllocator(context.Background(), testOpts...)
+	defer testAllocCancel()
+
+	testTaskCtx, testTaskCancel := chromedp.NewContext(testAllocCtx)
+	defer testTaskCancel()
+
+	err := chromedp.Run(testTaskCtx,
+		chromedp.Navigate(pageURL),
+		chromedp.WaitReady("body"),
+		chromedp.Sleep(5*time.Second),
+		chromedp.WaitVisible("img", chromedp.ByQuery),
+		chromedp.Sleep(3*time.Second),
+		chromedp.Evaluate(countJS, &result),
+	)
+
+	if err != nil {
+		log.Printf("Error testing width %d: %v", viewportWidth, err)
+		return 0
+	}
+
+	// Parse the JSON result
+	var debugInfo struct {
+		Count  int    `json:"count"`
+		Total  int    `json:"total"`
+		Method string `json:"method"`
+	}
+	if err := json.Unmarshal([]byte(result), &debugInfo); err != nil {
+		return 0
+	}
+
+	return debugInfo.Count
+}
+
+// extractImageFromPage navigates to a page and extracts the main image URL
+func extractImageFromPage(ctx context.Context, pageURL string) (string, error) {
+	var result string
+
+	selectorJS := `
+		(() => {
+			const currentPages = document.querySelectorAll('.page--current img, [class*="page--current"] img');
+			
+			if (currentPages.length > 0) {
+				const catalogImages = Array.from(currentPages).filter(img => {
+					const width = img.naturalWidth || img.width || 0;
+					const height = img.naturalHeight || img.height || 0;
+					return img.complete && width > 500 && height > 500 && 
+					       img.src && !img.src.includes('data:image') && 
+					       !img.src.includes('rs:fit:400') && !img.src.includes('rs:fit:200');
 				});
-				return largeImages[0].src;
+				
+				if (catalogImages.length > 0) {
+					return JSON.stringify({success: true, url: catalogImages[0].src});
+				}
 			}
 			
-			// Fallback: try specific selectors
-			const selectors = [
-				'img.flyer-image',
-				'img[class*="flyer"]',
-				'img[class*="catalog"]',
-				'div.flyer-container img',
-				'div[class*="flyer"] img',
-				'div[class*="catalog"] img',
-				'main img',
-				'article img'
-			];
-			
-			for (const selector of selectors) {
-				try {
-					const img = document.querySelector(selector);
-					if (img && img.src && !img.src.includes('.svg')) {
-						return img.src;
-					}
-				} catch (e) {}
+			const mainContainers = ['main', 'article', '.flyer-content'];
+			let targetContainer = document.body;
+			for (const selector of mainContainers) {
+				const container = document.querySelector(selector);
+				if (container) {
+					targetContainer = container;
+					break;
+				}
 			}
-			return '';
+			
+			const images = Array.from(targetContainer.querySelectorAll('img'));
+			const catalogImages = images.filter(img => {
+				if (img.closest('nav') || img.closest('aside') || img.closest('.cuprins') || 
+				    img.closest('[class*="sidebar"]') || img.closest('[class*="thumbnail"]')) {
+					return false;
+				}
+				
+				const width = img.naturalWidth || img.width || 0;
+				const height = img.naturalHeight || img.height || 0;
+				return img.complete && width > 500 && height > 500 && 
+				       img.src && !img.src.includes('data:image') && 
+				       !img.src.includes('rs:fit:400') && !img.src.includes('rs:fit:200');
+			});
+			
+			if (catalogImages.length > 0) {
+				return JSON.stringify({success: true, url: catalogImages[0].src});
+			}
+			return JSON.stringify({success: false});
 		})()
 	`
 
 	err := chromedp.Run(ctx,
 		chromedp.Navigate(pageURL),
 		chromedp.WaitReady("body"),
-		chromedp.Sleep(5*time.Second), // Increased wait time for images to load
-		chromedp.Evaluate(selectorJS, &imageURL),
+		chromedp.Sleep(3*time.Second),
+		chromedp.Reload(),
+		chromedp.Sleep(5*time.Second),
+		chromedp.WaitVisible("img", chromedp.ByQuery),
+		chromedp.Sleep(2*time.Second),
+		chromedp.Evaluate(selectorJS, &result),
 	)
 
 	if err != nil {
 		return "", err
 	}
 
-	imageURL = strings.TrimSpace(imageURL)
-	if imageURL == "" {
+	var extractResult struct {
+		Success bool   `json:"success"`
+		URL     string `json:"url"`
+	}
+	if err := json.Unmarshal([]byte(result), &extractResult); err != nil || !extractResult.Success {
 		return "", fmt.Errorf("no image found on page")
 	}
 
-	// Ensure the URL is absolute
+	imageURL := extractResult.URL
 	if !strings.HasPrefix(imageURL, "http") {
 		parsedURL, err := url.Parse(pageURL)
 		if err == nil {

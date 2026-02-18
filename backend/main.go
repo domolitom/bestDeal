@@ -118,13 +118,6 @@ func getStores(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func scrapeLidl(w http.ResponseWriter, r *http.Request) {
-	// Legacy endpoint - redirect to generic scraper
-	vars := map[string]string{"store": "lidl"}
-	r = mux.SetURLVars(r, vars)
-	scrapeStore(w, r)
-}
-
 // CORS middleware
 func enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

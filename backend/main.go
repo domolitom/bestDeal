@@ -5,30 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 )
-
-// Newsletter represents a supermarket newsletter/catalog
-type Newsletter struct {
-	ID          string    `json:"id"`
-	Store       string    `json:"store"`
-	Title       string    `json:"title"`
-	ValidFrom   string    `json:"validFrom"`
-	ValidUntil  string    `json:"validUntil"`
-	CoverImage  string    `json:"coverImage"`
-	Pages       []Page    `json:"pages"`
-	LastUpdated time.Time `json:"lastUpdated"`
-}
-
-// Page represents a single page of a newsletter
-type Page struct {
-	PageNumber int    `json:"pageNumber"`
-	ImageURL   string `json:"imageUrl"`
-}
-
-var newsletters []Newsletter
 
 func main() {
 	// Create router
@@ -59,21 +38,10 @@ func main() {
 // API Handlers
 func getNewsletters(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(newsletters)
+	json.NewEncoder(w).Encode([]struct{}{})
 }
 
 func getNewsletter(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	for _, newsletter := range newsletters {
-		if newsletter.ID == id {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(newsletter)
-			return
-		}
-	}
-
 	http.Error(w, "Newsletter not found", http.StatusNotFound)
 }
 
@@ -81,18 +49,24 @@ func scrapeStore(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	configName := vars["store"]
 
-	log.Printf("Starting scraper for config: %s", configName)
+	log.Printf("Starting scrape for config: %s", configName)
 
-	// Run the scraper in a goroutine since it might take a while
+	// Run resolver + downloader in a goroutine since it takes a while
 	go func() {
 		configPath := fmt.Sprintf("configs/%s.json", configName)
-		err := ScrapeAndDownloadFromConfig(configPath)
+
+		manifest, err := ResolveManifest(configPath)
 		if err != nil {
-			log.Printf("Error scraping with config %s: %v", configName, err)
+			log.Printf("Error resolving manifest for %s: %v", configName, err)
 			return
 		}
 
-		log.Printf("Successfully scraped with config %s", configName)
+		if err := DownloadFromManifest(manifest); err != nil {
+			log.Printf("Error downloading images for %s: %v", configName, err)
+			return
+		}
+
+		log.Printf("Successfully scraped %s", configName)
 	}()
 
 	// Return immediately to avoid timeout

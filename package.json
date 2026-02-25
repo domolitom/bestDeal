@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun run src/server.ts",
     "scrape": "bun run src/resolver.ts",
+    "discover": "bun run src/discoverer.ts",
     "test": "bun test"
   },
   "devDependencies": {

@@ -5,6 +5,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { resolveManifest } from "./resolver.ts";
 import { downloadFromManifest } from "./downloader.ts";
+import { discoverAll } from "./discoverer.ts";
 import type { Manifest } from "./resolver.ts";
 
 export const app = new Hono();
@@ -99,6 +100,19 @@ app.post("/api/scrape/:store", async (c) => {
     message: `Scraping with config ${configName} started in background. This may take a few minutes.`,
     status: "processing",
   });
+});
+
+// Discover new catalogs
+app.post("/api/discover", async (c) => {
+  try {
+    const body = await c.req.json().catch(() => ({}));
+    const autoScrape = body?.autoScrape === true;
+    const report = await discoverAll({ autoScrape });
+    return c.json(report);
+  } catch (err) {
+    console.error("[discover] error:", err);
+    return c.json({ error: "Discovery failed" }, 500);
+  }
 });
 
 // List available store configs

@@ -43,6 +43,7 @@ export interface CatalogTypePattern {
 
 export interface StoreDefinition {
   name: string;
+  country: string;
   landingUrl: string;
   waitAfterLoad: number;
   linkDomain?: string;
@@ -57,15 +58,23 @@ export interface StoreDefinition {
 export async function loadStoreDefinitions(
   dir = "stores"
 ): Promise<StoreDefinition[]> {
-  const files = await readdir(dir);
-  const jsonFiles = files.filter((f) => f.endsWith(".json")).sort();
+  const entries = await readdir(dir, { withFileTypes: true });
+  const countryDirs = entries.filter((e) => e.isDirectory()).sort((a, b) => a.name.localeCompare(b.name));
   const definitions: StoreDefinition[] = [];
 
-  for (const file of jsonFiles) {
-    const raw = await readFile(join(dir, file), "utf-8");
-    const def: StoreDefinition = JSON.parse(raw);
-    validateStoreDefinition(def, file);
-    definitions.push(def);
+  for (const countryDir of countryDirs) {
+    const country = countryDir.name;
+    const countryPath = join(dir, country);
+    const files = await readdir(countryPath);
+    const jsonFiles = files.filter((f) => f.endsWith(".json")).sort();
+
+    for (const file of jsonFiles) {
+      const raw = await readFile(join(countryPath, file), "utf-8");
+      const def: StoreDefinition = JSON.parse(raw);
+      def.country = country;
+      validateStoreDefinition(def, `${country}/${file}`);
+      definitions.push(def);
+    }
   }
 
   return definitions;

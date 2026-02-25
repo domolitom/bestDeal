@@ -11,15 +11,23 @@ describe("loadStoreDefinitions", () => {
     expect(names).toContain("kaufland");
   });
 
-  test("each definition has required fields", async () => {
+  test("each definition has required fields including country", async () => {
     const defs = await loadStoreDefinitions();
     for (const def of defs) {
       expect(def.name).toBeString();
+      expect(def.country).toBeString();
       expect(def.landingUrl).toBeString();
       expect(def.waitAfterLoad).toBeNumber();
       expect(def.linkPatterns.length).toBeGreaterThan(0);
       expect(def.datePatterns.length).toBeGreaterThan(0);
       expect(["slug", "text", "slug_then_text"]).toContain(def.dateSource);
+    }
+  });
+
+  test("country is derived from folder name", async () => {
+    const defs = await loadStoreDefinitions();
+    for (const def of defs) {
+      expect(def.country).toBe("ro");
     }
   });
 

@@ -1,0 +1,19 @@
+{
+  "name": "bestdeal",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run src/server.ts",
+    "scrape": "bun run src/resolver.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "hono": "^4.12.2",
+    "playwright": "^1.58.2"
+  }
+}

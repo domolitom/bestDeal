@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "bun run src/server.ts",
-    "scrape": "bun run src/resolver.ts"
+    "scrape": "bun run src/resolver.ts",
+    "test": "bun test"
   },
   "devDependencies": {
     "@types/bun": "latest"

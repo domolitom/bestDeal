@@ -7,7 +7,7 @@ import { resolveManifest } from "./resolver.ts";
 import { downloadFromManifest } from "./downloader.ts";
 import type { Manifest } from "./resolver.ts";
 
-const app = new Hono();
+export const app = new Hono();
 
 // CORS for development
 app.use("*", cors());
@@ -161,7 +161,7 @@ function directoryToSummary(dirName: string) {
 }
 
 // Parse "lidl-09-02-15-02-2026" -> { validFrom: "09-02", validUntil: "15-02-2026" }
-function parseDatesFromId(id: string): {
+export function parseDatesFromId(id: string): {
   validFrom: string;
   validUntil: string;
 } {

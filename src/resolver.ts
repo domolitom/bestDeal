@@ -63,13 +63,13 @@ function extractMainImage(): { success: boolean; url?: string } {
 
 // --- Helpers ---
 
-function extractPageNumber(url: string): number {
+export function extractPageNumber(url: string): number {
   const match = url.match(/\/page\/(\d+)/);
   if (!match) throw new Error(`Page number not found in URL: ${url}`);
   return parseInt(match[1]!, 10);
 }
 
-function buildPageURL(templateURL: string, pageNum: number): string {
+export function buildPageURL(templateURL: string, pageNum: number): string {
   return templateURL.replace(/\/page\/\d+/, `/page/${pageNum}`);
 }
 

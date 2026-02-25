@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { buildPageURL } from "./resolver.ts";
 import { resolveManifest } from "./resolver.ts";
 import { downloadFromManifest } from "./downloader.ts";
+import { loadStoreDefinitions } from "./store-config.ts";
+import { discoverStore } from "./discovery-engine.ts";
 
 // --- Types ---
 
@@ -14,6 +16,7 @@ export interface DiscoveredCatalog {
   dateTo: string;
   firstPageUrl: string;
   coverImageUrl: string;
+  catalogType?: string;
 }
 
 export interface CatalogResult {
@@ -32,30 +35,9 @@ export interface DiscoveryReport {
 // --- Pure helpers (exported for testing) ---
 
 export function buildConfigId(catalog: DiscoveredCatalog): string {
-  return `${catalog.store}-${catalog.dateFrom}-${catalog.dateTo}`;
-}
-
-export function parseLidlDates(
-  slug: string
-): { dateFrom: string; dateTo: string } | null {
-  // Slug like "catalogul-saptamanal-pentru-perioada-09-02-15-02-2026"
-  const match = slug.match(/(\d{2}-\d{2})-(\d{2}-\d{2}-\d{4})$/);
-  if (!match) return null;
-  return { dateFrom: match[1]!, dateTo: match[2]! };
-}
-
-export function parseKauflandDates(
-  text: string
-): { dateFrom: string; dateTo: string } | null {
-  // Text like "25.02.2026-03.03.2026" or "25.02.2026 - 03.03.2026"
-  const match = text.match(
-    /(\d{2})\.(\d{2})\.(\d{4})\s*-\s*(\d{2})\.(\d{2})\.(\d{4})/
-  );
-  if (!match) return null;
-  return {
-    dateFrom: `${match[1]}-${match[2]}`,
-    dateTo: `${match[4]}-${match[5]}-${match[6]}`,
-  };
+  const base = `${catalog.store}-${catalog.dateFrom}-${catalog.dateTo}`;
+  if (catalog.catalogType) return `${base}-${catalog.catalogType}`;
+  return base;
 }
 
 // --- Page validation ---
@@ -65,6 +47,15 @@ async function isPageValid(page: Page, url: string): Promise<boolean> {
     const response = await page.goto(url, { waitUntil: "domcontentloaded" });
     if (!response || response.status() >= 400) return false;
     await page.waitForTimeout(2000);
+
+    // Check if the viewer redirected us to a different page number
+    const requestedPage = url.match(/\/page\/(\d+)/)?.[1];
+    const actualUrl = page.url();
+    const actualPage = actualUrl.match(/\/page\/(\d+)/)?.[1];
+    if (requestedPage && actualPage && requestedPage !== actualPage) {
+      return false;
+    }
+
     const hasLargeImage = await page.evaluate(() => {
       const images = Array.from(
         document.querySelectorAll("img")
@@ -87,7 +78,6 @@ export async function findLastPage(
   page: Page,
   firstPageUrl: string
 ): Promise<number> {
-  // Exponential probe to find upper bound
   const probes = [10, 20, 40, 60, 80, 100, 120];
   let lastValid = 1;
   let firstInvalid = -1;
@@ -104,12 +94,10 @@ export async function findLastPage(
     }
   }
 
-  // If all probes were valid, the catalog is very large
   if (firstInvalid === -1) {
     return lastValid;
   }
 
-  // Binary search between lastValid and firstInvalid
   let lo = lastValid;
   let hi = firstInvalid;
 
@@ -160,135 +148,6 @@ async function writeConfig(
   return configPath;
 }
 
-// --- Per-store discovery functions ---
-
-async function discoverLidl(page: Page): Promise<DiscoveredCatalog[]> {
-  console.log("[discoverer] discovering Lidl catalogs...");
-  await page.goto("https://www.lidl.ro/l/ro/cataloage", {
-    waitUntil: "domcontentloaded",
-  });
-  await page.waitForTimeout(3000);
-
-  const catalogs = await page.evaluate(() => {
-    const links = Array.from(document.querySelectorAll("a[href]"));
-    const results: {
-      slug: string;
-      firstPageUrl: string;
-      coverImageUrl: string;
-    }[] = [];
-
-    for (const link of links) {
-      const href = (link as HTMLAnchorElement).href;
-      // Match catalog page links like /cataloage/.../view/flyer/page/
-      const match = href.match(
-        /\/cataloage\/([^/]+)\/view\/flyer\/page\/\d+/
-      );
-      if (!match) continue;
-
-      const slug = match[1]!;
-      // Skip if we already found this slug
-      if (results.some((r) => r.slug === slug)) continue;
-
-      // Build first page URL from the matched pattern
-      const firstPageUrl = href.replace(/\/page\/\d+/, "/page/1");
-      results.push({
-        slug,
-        firstPageUrl,
-        coverImageUrl: firstPageUrl,
-      });
-    }
-    return results;
-  });
-
-  const discovered: DiscoveredCatalog[] = [];
-  for (const c of catalogs) {
-    const dates = parseLidlDates(c.slug);
-    if (!dates) {
-      console.log(`[discoverer] skipping Lidl slug (no dates): ${c.slug}`);
-      continue;
-    }
-    discovered.push({
-      store: "lidl",
-      slug: c.slug,
-      dateFrom: dates.dateFrom,
-      dateTo: dates.dateTo,
-      firstPageUrl: c.firstPageUrl,
-      coverImageUrl: c.coverImageUrl,
-    });
-  }
-
-  console.log(`[discoverer] found ${discovered.length} Lidl catalog(s)`);
-  return discovered;
-}
-
-async function discoverKaufland(page: Page): Promise<DiscoveredCatalog[]> {
-  console.log("[discoverer] discovering Kaufland catalogs...");
-  await page.goto("https://www.kaufland.ro/cataloage-cu-reduceri.html", {
-    waitUntil: "domcontentloaded",
-  });
-  await page.waitForTimeout(3000);
-
-  const catalogs = await page.evaluate(() => {
-    const links = Array.from(document.querySelectorAll("a[href]"));
-    const results: {
-      href: string;
-      dateText: string;
-    }[] = [];
-
-    for (const link of links) {
-      const href = (link as HTMLAnchorElement).href;
-      if (!href.includes("leaflets.kaufland.com")) continue;
-      // Skip if we already found this href
-      if (results.some((r) => r.href === href)) continue;
-
-      // Look for date text near this link
-      const card = link.closest("[class*='card']") || link.parentElement;
-      const dateText = card?.textContent || "";
-
-      results.push({ href, dateText });
-    }
-    return results;
-  });
-
-  const discovered: DiscoveredCatalog[] = [];
-  for (const c of catalogs) {
-    const dates = parseKauflandDates(c.dateText);
-    if (!dates) {
-      console.log(
-        `[discoverer] skipping Kaufland link (no dates): ${c.href}`
-      );
-      continue;
-    }
-
-    // Normalize the leaflet URL to page 1
-    const firstPageUrl = c.href.includes("/page/")
-      ? c.href.replace(/\/page\/\d+/, "/page/1")
-      : c.href.replace(/\/?$/, "/view/flyer/page/1");
-
-    discovered.push({
-      store: "kaufland",
-      slug: c.href,
-      dateFrom: dates.dateFrom,
-      dateTo: dates.dateTo,
-      firstPageUrl,
-      coverImageUrl: firstPageUrl,
-    });
-  }
-
-  console.log(`[discoverer] found ${discovered.length} Kaufland catalog(s)`);
-  return discovered;
-}
-
-// --- Store registry ---
-
-const STORE_DISCOVERERS: Record<
-  string,
-  (page: Page) => Promise<DiscoveredCatalog[]>
-> = {
-  lidl: discoverLidl,
-  kaufland: discoverKaufland,
-};
-
 // --- Main function ---
 
 export async function discoverAll(
@@ -301,6 +160,8 @@ export async function discoverAll(
   };
 
   const existingIds = await getExistingConfigIds();
+  const seenIds = new Set<string>();
+  const storeDefinitions = await loadStoreDefinitions();
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
@@ -309,17 +170,17 @@ export async function discoverAll(
   const page = await context.newPage();
 
   try {
-    for (const [store, discover] of Object.entries(STORE_DISCOVERERS)) {
+    for (const storeDef of storeDefinitions) {
       const storeResult: { store: string; catalogs: CatalogResult[] } = {
-        store,
+        store: storeDef.name,
         catalogs: [],
       };
 
       let catalogs: DiscoveredCatalog[];
       try {
-        catalogs = await discover(page);
+        catalogs = await discoverStore(page, storeDef);
       } catch (err) {
-        console.error(`[discoverer] failed to discover ${store}:`, err);
+        console.error(`[discoverer] failed to discover ${storeDef.name}:`, err);
         report.stores.push(storeResult);
         continue;
       }
@@ -328,14 +189,14 @@ export async function discoverAll(
         const configId = buildConfigId(catalog);
         report.summary.total++;
 
-        if (existingIds.has(configId)) {
+        if (existingIds.has(configId) || seenIds.has(configId)) {
           console.log(`[discoverer] existing: ${configId}`);
           storeResult.catalogs.push({ configId, status: "existing" });
           report.summary.existing++;
           continue;
         }
+        seenIds.add(configId);
 
-        // New catalog — find last page
         try {
           console.log(
             `[discoverer] new catalog: ${configId} — probing pages...`

@@ -108,9 +108,14 @@ export async function discoverStore(
           // Deduplicate by slug
           if (results.some((r) => r.slug === slug)) break;
 
-          const card =
-            link.closest("[class*='card']") || link.parentElement;
-          const dateText = card?.textContent || "";
+          // Walk up the DOM to find text content (some sites nest links deep)
+          let dateText = "";
+          let el: Element | null = link.closest("[class*='card']") || link as Element;
+          for (let i = 0; i < 5 && el; i++) {
+            const text = (el.textContent || "").trim();
+            if (text) { dateText = text; break; }
+            el = el.parentElement;
+          }
 
           results.push({ href, slug, dateText });
           break; // First matching pattern wins

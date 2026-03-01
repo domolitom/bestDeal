@@ -1,0 +1,18 @@
+{
+  "name": "@bestdeal/scraper",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "scraper": "bun run src/cli.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@bestdeal/shared": "workspace:*",
+    "playwright": "^1.58.2"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5"
+  }
+}

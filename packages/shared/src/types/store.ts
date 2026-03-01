@@ -1,0 +1,76 @@
+// --- URL Transform types ---
+
+export interface UrlReplace {
+  type: "replace";
+  match: string;
+  replacement: string;
+}
+
+export interface UrlAppend {
+  type: "append";
+  suffix: string;
+}
+
+export interface UrlElse {
+  type: "else";
+  condition: string;
+  ifTrue: UrlReplace;
+  ifFalse: UrlReplace;
+}
+
+export type UrlTransform = UrlReplace | UrlAppend | UrlElse;
+
+// --- Link pattern ---
+
+export interface LinkPattern {
+  match: string;
+  slugGroup: number;
+  normalizeUrl: UrlTransform[];
+}
+
+// --- Date pattern ---
+
+export interface DatePattern {
+  match: string;
+  dateFrom: string;
+  dateTo: string;
+}
+
+// --- Catalog type pattern ---
+
+export interface CatalogTypePattern {
+  match: string;
+  caseInsensitive?: boolean;
+  transform?: "lowercase" | "uppercase";
+}
+
+// --- Image extraction config ---
+
+export interface ImageExtraction {
+  /** CSS selector to find the main page image */
+  selector?: string;
+  /** Minimum width in px to consider an image valid */
+  minWidth?: number;
+  /** Minimum height in px to consider an image valid */
+  minHeight?: number;
+  /** CSS selectors to exclude (e.g. nav, sidebar) */
+  excludeSelectors?: string[];
+}
+
+// --- Store definition ---
+
+export interface StoreDefinition {
+  name: string;
+  country: string; // injected from folder name at load time
+  displayName?: string;
+  logoPath?: string;
+  landingUrl: string;
+  waitAfterLoad: number;
+  delayBetweenPages?: number;
+  linkDomain?: string;
+  linkPatterns: LinkPattern[];
+  dateSource: "slug" | "text" | "slug_then_text";
+  datePatterns: DatePattern[];
+  catalogTypePattern?: CatalogTypePattern;
+  imageExtraction?: ImageExtraction;
+}

@@ -2,20 +2,22 @@
   "name": "bestdeal",
   "type": "module",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "bun run src/server.ts",
-    "scrape": "bun run src/resolver.ts",
-    "discover": "bun run src/discoverer.ts",
-    "test": "bun test"
+    "dev": "bun run --filter @bestdeal/web dev",
+    "scraper": "bun run --filter @bestdeal/scraper scraper",
+    "test": "bun run --filter '*' test",
+    "typecheck": "bun run --filter '*' typecheck",
+    "dev:old": "bun run src/server.ts",
+    "scrape:old": "bun run src/resolver.ts",
+    "discover:old": "bun run src/discoverer.ts",
+    "test:old": "bun test --cwd ."
   },
   "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
+    "@types/bun": "latest",
+    "turbo": "^2",
     "typescript": "^5"
-  },
-  "dependencies": {
-    "hono": "^4.12.2",
-    "playwright": "^1.58.2"
   }
 }

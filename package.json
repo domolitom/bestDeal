@@ -10,10 +10,7 @@
     "scraper": "bun run --filter @bestdeal/scraper scraper",
     "test": "bun run --filter '*' test",
     "typecheck": "bun run --filter '*' typecheck",
-    "dev:old": "bun run src/server.ts",
-    "scrape:old": "bun run src/resolver.ts",
-    "discover:old": "bun run src/discoverer.ts",
-    "test:old": "bun test --cwd ."
+    "test:scraper": "bun test --filter packages/scraper"
   },
   "devDependencies": {
     "@types/bun": "latest",

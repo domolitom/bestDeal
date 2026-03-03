@@ -2,6 +2,10 @@ import type { StorageAdapter, CatalogMeta } from "@bestdeal/shared";
 import { discoverAll } from "./discovery/discoverer.ts";
 import type { DiscoveryReport } from "./discovery/discoverer.ts";
 import { resolvePages } from "./scraping/resolver.ts";
+import {
+  isLeafletsUrl,
+  resolveViaLeafletsApi,
+} from "./scraping/leaflets-api-resolver.ts";
 import { downloadCatalogImages } from "./scraping/downloader.ts";
 import { parseCatalogId } from "@bestdeal/shared";
 
@@ -97,14 +101,19 @@ export async function runPipeline(
       };
       await storage.writeCatalogMeta(metaUpdate);
 
-      // Resolve image URLs
+      // Resolve image URLs — use fast API path for leaflets.schwarz URLs
       console.log(`\n[pipeline] resolving ${catalog.catalogId}...`);
-      const resolved = await resolvePages({
-        firstPageUrl: scrapingInfo.firstPageUrl,
-        lastPage: scrapingInfo.lastPage,
-        coverImageUrl: scrapingInfo.coverImageUrl,
-        catalogId: catalog.catalogId,
-      });
+      const resolved = isLeafletsUrl(scrapingInfo.firstPageUrl)
+        ? await resolveViaLeafletsApi({
+            firstPageUrl: scrapingInfo.firstPageUrl,
+            catalogId: catalog.catalogId,
+          })
+        : await resolvePages({
+            firstPageUrl: scrapingInfo.firstPageUrl,
+            lastPage: scrapingInfo.lastPage,
+            coverImageUrl: scrapingInfo.coverImageUrl,
+            catalogId: catalog.catalogId,
+          });
 
       // Download images
       console.log(`[pipeline] downloading ${catalog.catalogId}...`);

@@ -149,7 +149,7 @@ export async function resolvePages(
     lastPage,
     coverImageUrl,
     catalogId,
-    delayBetweenPages = 500,
+    delayBetweenPages = 3000,
     imageExtraction,
   } = options;
 
@@ -158,10 +158,12 @@ export async function resolvePages(
   const firstPageNum = extractPageNumber(firstPageUrl);
 
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
+  let context = await browser.newContext({
     viewport: { width: 800, height: 1200 },
   });
-  const page = await context.newPage();
+  let page = await context.newPage();
+
+  const REFRESH_EVERY = 15; // restart browser context every N pages
 
   try {
     const result: ResolveResult = {
@@ -184,7 +186,21 @@ export async function resolvePages(
 
     // Resolve each page
     console.log(`[resolver] resolving pages ${firstPageNum}-${lastPage}`);
+    let consecutiveFailures = 0;
+
     for (let pageNum = firstPageNum; pageNum <= lastPage; pageNum++) {
+      // Refresh browser context periodically to avoid rate-limiting
+      const pageIndex = pageNum - firstPageNum;
+      if (pageIndex > 0 && pageIndex % REFRESH_EVERY === 0) {
+        console.log(`[resolver] refreshing browser context...`);
+        await context.close();
+        context = await browser.newContext({
+          viewport: { width: 800, height: 1200 },
+        });
+        page = await context.newPage();
+        await new Promise((r) => setTimeout(r, 5000));
+      }
+
       const pageURL = buildPageURL(firstPageUrl, pageNum);
       console.log(`[resolver] page ${pageNum}/${lastPage}: ${pageURL}`);
 
@@ -195,8 +211,16 @@ export async function resolvePages(
           imageExtraction
         );
         result.pages.push({ number: pageNum, imageUrl: imageURL });
+        consecutiveFailures = 0;
       } catch (err) {
         console.warn(`[resolver] warning: page ${pageNum} failed: ${err}`);
+        consecutiveFailures++;
+        if (consecutiveFailures >= 5) {
+          console.warn(
+            `[resolver] aborting — ${consecutiveFailures} consecutive failures`
+          );
+          break;
+        }
       }
 
       await new Promise((r) => setTimeout(r, delayBetweenPages));

@@ -26,8 +26,10 @@ describe("loadStoreDefinitions", () => {
 
   test("country is derived from folder name", async () => {
     const defs = await loadStoreDefinitions();
+    const countries = new Set(defs.map((d) => d.country));
+    expect(countries).toContain("romania");
     for (const def of defs) {
-      expect(def.country).toBe("romania");
+      expect(def.country).toMatch(/^[a-z]+$/);
     }
   });
 

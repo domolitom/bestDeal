@@ -19,6 +19,9 @@ packages/web/out/
 # Build
 dist/
 
+# Environment variables
+.env
+
 # OS
 .DS_Store
 

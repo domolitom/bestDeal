@@ -38,12 +38,25 @@ export async function discoverStore(
 
   const rawLinks: RawLink[] = await page.evaluate(
     ({ patterns, domain }) => {
-      const links = Array.from(document.querySelectorAll("a[href]"));
       const results: { href: string; slug: string; dateText: string }[] = [];
 
-      for (const link of links) {
-        const href = (link as HTMLAnchorElement).href;
+      // Collect candidate URLs from <a> and <iframe> elements
+      const candidates: { href: string; element: Element }[] = [];
 
+      for (const link of Array.from(document.querySelectorAll("a[href]"))) {
+        candidates.push({
+          href: (link as HTMLAnchorElement).href,
+          element: link,
+        });
+      }
+      for (const iframe of Array.from(
+        document.querySelectorAll("iframe[src]")
+      )) {
+        const src = (iframe as HTMLIFrameElement).src;
+        if (src) candidates.push({ href: src, element: iframe });
+      }
+
+      for (const { href, element } of candidates) {
         if (domain && !href.includes(domain)) continue;
 
         for (const pat of patterns) {
@@ -58,7 +71,7 @@ export async function discoverStore(
 
           let dateText = "";
           let el: Element | null =
-            link.closest("[class*='card']") || (link as Element);
+            element.closest("[class*='card']") || element;
           for (let i = 0; i < 5 && el; i++) {
             const text = (el.textContent || "").trim();
             if (text) {
@@ -76,6 +89,29 @@ export async function discoverStore(
     },
     { patterns: serializedPatterns, domain: linkDomain }
   );
+
+  // For links with no dateText, try fetching the linked page's meta description
+  const needsTextDate =
+    storeDef.dateSource === "text" || storeDef.dateSource === "slug_then_text";
+  if (needsTextDate) {
+    for (const raw of rawLinks) {
+      if (raw.dateText) continue;
+      try {
+        await page.goto(raw.href, { waitUntil: "domcontentloaded" });
+        await page.waitForTimeout(3000);
+        const meta = await page.evaluate(() => {
+          const el = document.querySelector('meta[name="description"]');
+          return el ? el.getAttribute("content") || "" : "";
+        });
+        if (meta) raw.dateText = meta;
+      } catch {
+        // ignore — best effort
+      }
+    }
+    // Navigate back so the page state is clean
+    await page.goto(storeDef.landingUrl, { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(storeDef.waitAfterLoad);
+  }
 
   const discovered: DiscoveredCatalog[] = [];
   for (const raw of rawLinks) {

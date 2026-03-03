@@ -32,12 +32,12 @@ export async function discoverLinks(url: string): Promise<LinkDiscoveryResult> {
     const pageTitle = await page.title();
 
     const rawLinks = await page.evaluate(() => {
-      const anchors = Array.from(document.querySelectorAll("a[href]"));
       const results: { href: string; text: string; surroundingText: string }[] =
         [];
       const seen = new Set<string>();
 
-      for (const anchor of anchors) {
+      // Extract <a href> links
+      for (const anchor of Array.from(document.querySelectorAll("a[href]"))) {
         const el = anchor as HTMLAnchorElement;
         const href = el.href;
         if (!href || href.startsWith("javascript:") || href === "#") continue;
@@ -62,6 +62,28 @@ export async function discoverLinks(url: string): Promise<LinkDiscoveryResult> {
         }
 
         results.push({ href, text, surroundingText });
+      }
+
+      // Extract <iframe src> (embedded catalog viewers)
+      for (const iframe of Array.from(
+        document.querySelectorAll("iframe[src]")
+      )) {
+        const src = (iframe as HTMLIFrameElement).src;
+        if (!src || seen.has(src)) continue;
+        seen.add(src);
+
+        let surroundingText = "";
+        if (iframe.parentElement) {
+          surroundingText = (iframe.parentElement.textContent || "")
+            .trim()
+            .slice(0, 300);
+        }
+
+        results.push({
+          href: src,
+          text: "[iframe]",
+          surroundingText,
+        });
       }
 
       return results;

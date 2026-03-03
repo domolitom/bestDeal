@@ -130,7 +130,7 @@ export async function runAutoDiscover(options: {
 
   // Step 4: Write config file (strip country field — injected at load time)
   console.log("\n=== Step 4: Writing config ===");
-  const storesDir = join(import.meta.dir, "../../../stores", country);
+  const storesDir = join(import.meta.dir, "../../stores", country);
   await mkdir(storesDir, { recursive: true });
   const configPath = join(storesDir, `${store}.json`);
 

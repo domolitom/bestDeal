@@ -1,0 +1,26 @@
+{
+    "name": "lidl",
+    "landingUrl": "https://www.lidl.fr/",
+    "waitAfterLoad": 8000,
+    "linkPatterns": [
+        {
+            "match": "/l/catalogue-de-la-semaine/([^/]+)/ar/\\d+",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                {
+                    "type": "replace",
+                    "match": "/ar/\\d+.*$",
+                    "replacement": "/view/flyer/page/1"
+                }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "Du (\\d{2})/(\\d{2}) au (\\d{2})/(\\d{2})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4"
+        }
+    ]
+}

@@ -8,6 +8,7 @@ newsletters/*
 
 # Scraped catalog data
 data/catalogs/
+packages/data/
 
 # Next.js
 packages/web/.next/

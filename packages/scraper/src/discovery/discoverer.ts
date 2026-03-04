@@ -6,6 +6,7 @@ import { loadStoreDefinitions } from "../config/store-loader.ts";
 import { discoverStore } from "./discovery-engine.ts";
 import type { DiscoveredCatalog } from "./discovery-engine.ts";
 import { toISODate } from "@bestdeal/shared";
+import { detectResolverName } from "../scraping/resolver-registry.ts";
 
 // --- Types ---
 
@@ -187,10 +188,23 @@ export async function discoverAll(
         seenIds.add(catalogId);
 
         try {
-          console.log(
-            `[discovery] new catalog: ${catalogId} — probing pages...`
+          const resolverName = detectResolverName(
+            catalog.firstPageUrl,
+            storeDef.resolver
           );
-          const lastPage = await findLastPage(page, catalog.firstPageUrl);
+          const needsLastPage = resolverName === "browser";
+
+          let lastPage: number | undefined;
+          if (needsLastPage) {
+            console.log(
+              `[discovery] new catalog: ${catalogId} — probing pages...`
+            );
+            lastPage = await findLastPage(page, catalog.firstPageUrl);
+          } else {
+            console.log(
+              `[discovery] new catalog: ${catalogId} — resolver "${resolverName}" (skipping page probe)`
+            );
+          }
 
           // Write catalog meta through storage adapter
           const meta: CatalogMeta = {
@@ -205,22 +219,17 @@ export async function discoverAll(
             dateTo: toISODate(catalog.dateTo),
             catalogType: catalog.catalogType,
             coverImage: "cover.jpg",
-            pageCount: lastPage,
+            pageCount: lastPage ?? 0,
             discoveredAt: new Date().toISOString(),
+            _scraping: {
+              resolver: resolverName,
+              firstPageUrl: catalog.firstPageUrl,
+              coverImageUrl: catalog.coverImageUrl,
+              lastPage,
+            },
           };
 
-          // Store additional scraping info alongside meta
-          const scrapingInfo = {
-            firstPageUrl: catalog.firstPageUrl,
-            coverImageUrl: catalog.coverImageUrl,
-            lastPage,
-          };
-
-          await options.storage.writeCatalogMeta({
-            ...meta,
-            // Store scraping URLs in meta for pipeline to use
-            ...({ _scraping: scrapingInfo } as Record<string, unknown>),
-          } as CatalogMeta);
+          await options.storage.writeCatalogMeta(meta);
 
           storeResult.catalogs.push({
             catalogId,

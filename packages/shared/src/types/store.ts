@@ -73,4 +73,5 @@ export interface StoreDefinition {
   datePatterns: DatePattern[];
   catalogTypePattern?: CatalogTypePattern;
   imageExtraction?: ImageExtraction;
+  resolver?: string; // override auto-detection ("leaflets" | "browser" | etc.)
 }

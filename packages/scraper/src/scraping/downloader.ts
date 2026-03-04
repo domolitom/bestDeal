@@ -1,5 +1,5 @@
 import type { StorageAdapter } from "@bestdeal/shared";
-import type { ResolveResult } from "./resolver.ts";
+import type { ResolveResult } from "./resolver-types.ts";
 
 /**
  * Download all images from a resolve result and write them through the storage adapter.

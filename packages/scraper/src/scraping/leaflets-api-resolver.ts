@@ -1,4 +1,6 @@
-import type { ResolveResult } from "./resolver.ts";
+import type { ResolveResult } from "./resolver-types.ts";
+import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
+import { registerResolver } from "./resolver-registry.ts";
 
 interface LeafletsPage {
   number: number;
@@ -12,7 +14,7 @@ interface LeafletsFlyer {
 }
 
 /**
- * Extract the flyer slug from a leaflets.schwarz viewer URL.
+ * Extract the flyer slug from a leaflets viewer URL.
  * e.g. ".../du-26-02-au-04-03-les-promos-de-la-semaine/view/flyer/page/1" → "du-26-02-au-04-03-les-promos-de-la-semaine"
  */
 export function extractFlyerSlug(url: string): string | null {
@@ -21,21 +23,21 @@ export function extractFlyerSlug(url: string): string | null {
 }
 
 /**
- * Check if a firstPageUrl can be resolved via the leaflets.schwarz API.
+ * Derive the API endpoint host from the viewer URL.
+ * "leaflets.schwarz" → "endpoints.leaflets.schwarz"
+ * "leaflets.kaufland.com" → "endpoints.leaflets.kaufland.com"
  */
-export function isLeafletsUrl(url: string): boolean {
-  return url.includes("leaflets.schwarz") || url.includes("/view/flyer/page/");
+function deriveApiHost(url: string): string {
+  const match = url.match(/https?:\/\/([^/]*leaflets\.[^/]+)/);
+  if (!match) return "endpoints.leaflets.schwarz";
+  const host = match[1]!;
+  return `endpoints.${host}`;
 }
 
-/**
- * Resolve all page image URLs via the leaflets.schwarz API.
- * Returns the same ResolveResult shape as the browser-based resolver.
- */
-export async function resolveViaLeafletsApi(options: {
-  firstPageUrl: string;
-  catalogId: string;
-}): Promise<ResolveResult> {
-  const { firstPageUrl, catalogId } = options;
+async function resolveViaLeafletsApi(
+  input: ResolveInput
+): Promise<ResolveResult> {
+  const { firstPageUrl, catalogId } = input;
 
   const slug = extractFlyerSlug(firstPageUrl);
   if (!slug) {
@@ -44,12 +46,15 @@ export async function resolveViaLeafletsApi(options: {
     );
   }
 
-  const apiUrl = `https://endpoints.leaflets.schwarz/v4/flyer?flyer_identifier=${encodeURIComponent(slug)}`;
+  const apiHost = deriveApiHost(firstPageUrl);
+  const apiUrl = `https://${apiHost}/v4/flyer?flyer_identifier=${encodeURIComponent(slug)}`;
   console.log(`[leaflets-api] fetching ${apiUrl}`);
 
   const resp = await fetch(apiUrl);
   if (!resp.ok) {
-    throw new Error(`Leaflets API returned ${resp.status}: ${resp.statusText}`);
+    throw new Error(
+      `Leaflets API returned ${resp.status}: ${resp.statusText}`
+    );
   }
 
   const data = await resp.json();
@@ -72,3 +77,13 @@ export async function resolveViaLeafletsApi(options: {
     })),
   };
 }
+
+// --- CatalogResolver implementation ---
+
+const leafletsResolver: CatalogResolver = {
+  name: "leaflets",
+  needsLastPage: false,
+  resolve: resolveViaLeafletsApi,
+};
+
+registerResolver(leafletsResolver);

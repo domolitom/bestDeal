@@ -5,6 +5,7 @@ export type {
   CatalogMeta,
   Catalog,
   CatalogSummary,
+  ScrapingInfo,
 } from "./types/catalog";
 
 export type {

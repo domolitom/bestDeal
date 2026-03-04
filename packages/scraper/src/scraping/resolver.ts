@@ -1,65 +1,15 @@
 import type { Page } from "playwright";
 import { chromium } from "playwright";
 import { buildPageURL, extractPageNumber } from "@bestdeal/shared";
-import type { StorageAdapter, CatalogMeta, ImageExtraction } from "@bestdeal/shared";
+import type { ImageExtraction } from "@bestdeal/shared";
+import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
+import { registerResolver } from "./resolver-registry.ts";
 
-export interface ResolvedPage {
-  number: number;
-  imageUrl: string;
-}
-
-export interface ResolveResult {
-  catalogId: string;
-  coverImageUrl: string;
-  pages: ResolvedPage[];
-}
+// Re-export types from resolver-types for backwards compatibility
+export type { ResolvedPage, ResolveResult } from "./resolver-types.ts";
+import type { ResolveResult } from "./resolver-types.ts";
 
 // --- Image extraction (runs inside the browser) ---
-
-function createExtractMainImage(config?: ImageExtraction) {
-  const minW = config?.minWidth ?? 500;
-  const minH = config?.minHeight ?? 500;
-  const excludes = config?.excludeSelectors ?? [
-    "nav",
-    "aside",
-    ".cuprins",
-    '[class*="sidebar"]',
-    '[class*="thumbnail"]',
-  ];
-
-  return function extractMainImage(): { success: boolean; url?: string } {
-    const currentPages = document.querySelectorAll(
-      ".page--current img, [class*='page--current'] img"
-    );
-    const candidates =
-      currentPages.length > 0
-        ? (Array.from(currentPages) as HTMLImageElement[])
-        : (
-            Array.from(document.querySelectorAll("img")) as HTMLImageElement[]
-          ).filter(
-            (img) => !excludes.some((sel) => img.closest(sel))
-          );
-
-    const good = candidates.filter((img) => {
-      const w = img.naturalWidth || img.width || 0;
-      const h = img.naturalHeight || img.height || 0;
-      return (
-        img.complete &&
-        w > minW &&
-        h > minH &&
-        img.src &&
-        !img.src.includes("data:image") &&
-        !img.src.includes("rs:fit:400") &&
-        !img.src.includes("rs:fit:200")
-      );
-    });
-
-    if (good.length > 0) {
-      return { success: true, url: good[0]!.src };
-    }
-    return { success: false };
-  };
-}
 
 async function extractImageFromPage(
   page: Page,
@@ -234,3 +184,22 @@ export async function resolvePages(
     await browser.close();
   }
 }
+
+// --- CatalogResolver implementation ---
+
+const browserResolver: CatalogResolver = {
+  name: "browser",
+  needsLastPage: true,
+  resolve: async (input: ResolveInput) => {
+    return resolvePages({
+      firstPageUrl: input.firstPageUrl,
+      lastPage: input.lastPage ?? 1,
+      coverImageUrl: input.coverImageUrl ?? input.firstPageUrl,
+      catalogId: input.catalogId,
+      delayBetweenPages: input.delayBetweenPages,
+      imageExtraction: input.imageExtraction,
+    });
+  },
+};
+
+registerResolver(browserResolver);

@@ -6,6 +6,13 @@ export interface CatalogPage {
   filename: string; // "page-001.jpg"
 }
 
+export interface ScrapingInfo {
+  resolver?: string; // "leaflets" | "browser" | etc.
+  firstPageUrl: string;
+  coverImageUrl?: string;
+  lastPage?: number; // only set for browser resolver
+}
+
 export interface CatalogMeta {
   id: string; // "ro-lidl-2026-02-09-2026-02-15"
   store: string; // "lidl"
@@ -18,6 +25,7 @@ export interface CatalogMeta {
   pageCount: number;
   discoveredAt: string; // ISO 8601 timestamp
   scrapedAt?: string; // ISO 8601 timestamp
+  _scraping?: ScrapingInfo;
 }
 
 export interface Catalog extends CatalogMeta {

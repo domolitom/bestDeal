@@ -1,4 +1,5 @@
 import type { StorageAdapter, CatalogMeta } from "@bestdeal/shared";
+import { isCatalogActive } from "@bestdeal/shared";
 import { discoverAll } from "./discovery/discoverer.ts";
 import type { DiscoveryReport } from "./discovery/discoverer.ts";
 import { getResolver } from "./scraping/resolver-registry.ts";
@@ -45,18 +46,49 @@ export async function recoverStaleCatalogs(
 }
 
 /**
- * Full scraping pipeline: recover → discover → resolve → download.
+ * Mark catalogs whose dateTo has passed as "expired".
+ */
+export async function expireOldCatalogs(
+  storage: StorageAdapter
+): Promise<string[]> {
+  const ready = await storage.listCatalogs({ status: "ready" });
+  const expired: string[] = [];
+
+  for (const summary of ready) {
+    if (isCatalogActive(summary.dateTo)) continue;
+
+    const catalog = await storage.getCatalog(summary.id);
+    if (!catalog) continue;
+
+    const { pages, ...meta } = catalog;
+    await storage.writeCatalogMeta({ ...meta, status: "expired" });
+    expired.push(summary.id);
+    console.log(`[pipeline] expired catalog: ${summary.id}`);
+  }
+
+  return expired;
+}
+
+/**
+ * Full scraping pipeline: recover → expire → discover → resolve → download.
  */
 export async function runPipeline(
   options: PipelineOptions
 ): Promise<PipelineReport> {
   const { storage, country, store, discoverOnly } = options;
 
-  // Phase 0: Recover stale catalogs from previous crashed runs
+  // Phase 0: Housekeeping — recover stale + expire old catalogs
   const recovered = await recoverStaleCatalogs(storage);
   if (recovered.length > 0) {
     console.log(
-      `\n[pipeline] recovered ${recovered.length} stale catalog(s)\n`
+      `[pipeline] recovered ${recovered.length} stale catalog(s)`
+    );
+  }
+
+  const expired = await expireOldCatalogs(storage);
+  if (expired.length > 0) {
+    console.log(
+      `[pipeline] expired ${expired.length} old catalog(s)\n`
     );
   }
 

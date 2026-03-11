@@ -7,12 +7,15 @@ export interface CatalogFilter {
   status?: CatalogStatus;
 }
 
-export interface StorageAdapter {
+export interface ReadonlyStorageAdapter {
   listCatalogs(filter?: CatalogFilter): Promise<CatalogSummary[]>;
   getCatalog(id: string): Promise<Catalog | null>;
-  writeCatalogMeta(meta: CatalogMeta): Promise<void>;
-  writeImage(catalogId: string, filename: string, data: Buffer): Promise<void>;
   getImageUrl(catalogId: string, filename: string): string;
   listCountries(): Promise<Country[]>;
   listStores(country: string): Promise<string[]>;
+}
+
+export interface StorageAdapter extends ReadonlyStorageAdapter {
+  writeCatalogMeta(meta: CatalogMeta): Promise<void>;
+  writeImage(catalogId: string, filename: string, data: Buffer): Promise<void>;
 }

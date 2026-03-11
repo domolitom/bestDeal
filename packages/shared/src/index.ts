@@ -20,7 +20,13 @@ export type {
   StoreDefinition,
 } from "./types/store";
 
-export type { CatalogFilter, StorageAdapter } from "./types/storage";
+export type {
+  CatalogFilter,
+  ReadonlyStorageAdapter,
+  StorageAdapter,
+} from "./types/storage";
+
+export { FsReadAdapter } from "./storage/fs-read-adapter";
 
 export type { Country } from "./types/country";
 export { COUNTRY_META } from "./types/country";

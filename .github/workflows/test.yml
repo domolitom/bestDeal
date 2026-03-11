@@ -1,4 +1,4 @@
-name: Tests
+name: CI
 on:
   push:
     branches: [master]
@@ -13,4 +13,7 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
-      - run: bun test
+      - name: Typecheck
+        run: bun run typecheck
+      - name: Tests
+        run: bun test

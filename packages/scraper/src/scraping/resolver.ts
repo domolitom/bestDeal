@@ -5,8 +5,6 @@ import type { ImageExtraction } from "@bestdeal/shared";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
 import { registerResolver } from "./resolver-registry.ts";
 
-// Re-export types from resolver-types for backwards compatibility
-export type { ResolvedPage, ResolveResult } from "./resolver-types.ts";
 import type { ResolveResult } from "./resolver-types.ts";
 
 // --- Image extraction (runs inside the browser) ---
@@ -82,7 +80,7 @@ async function extractImageFromPage(
 
 // --- Main resolver ---
 
-export interface ResolveOptions {
+interface ResolveOptions {
   firstPageUrl: string;
   lastPage: number;
   coverImageUrl: string;
@@ -91,7 +89,7 @@ export interface ResolveOptions {
   imageExtraction?: ImageExtraction;
 }
 
-export async function resolvePages(
+async function resolvePages(
   options: ResolveOptions
 ): Promise<ResolveResult> {
   const {

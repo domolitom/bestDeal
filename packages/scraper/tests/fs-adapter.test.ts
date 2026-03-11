@@ -78,7 +78,7 @@ describe("FilesystemAdapter (write methods)", () => {
     // Read back via inherited methods
     const catalogs = await adapter.listCatalogs();
     expect(catalogs).toHaveLength(1);
-    expect(catalogs[0].id).toBe(meta.id);
+    expect(catalogs[0]!.id).toBe(meta.id);
 
     const catalog = await adapter.getCatalog(meta.id);
     expect(catalog).not.toBeNull();

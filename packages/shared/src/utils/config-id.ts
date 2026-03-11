@@ -11,12 +11,12 @@ export interface ConfigIdInput {
 /**
  * Build a canonical catalog ID from discovery data.
  * Format: {country}-{store}-{isoDateFrom}-{isoDateTo}[-{catalogType}]
- * Example: "ro-lidl-2026-02-09-2026-02-15"
+ * Example: "romania-lidl-2026-02-09-2026-02-15"
  */
 export function buildCatalogId(input: ConfigIdInput): string {
   const isoFrom = toISODate(input.dateFrom, extractYear(input.dateTo));
   const isoTo = toISODate(input.dateTo);
-  const base = `${countryCode(input.country)}-${input.store}-${isoFrom}-${isoTo}`;
+  const base = `${input.country}-${input.store}-${isoFrom}-${isoTo}`;
   if (input.catalogType) return `${base}-${input.catalogType}`;
   return base;
 }
@@ -31,9 +31,10 @@ export function parseCatalogId(id: string): {
   dateTo: string;
   catalogType?: string;
 } | null {
-  // Format: cc-store-YYYY-MM-DD-YYYY-MM-DD[-type]
+  // Format: country-store-YYYY-MM-DD-YYYY-MM-DD[-type]
+  // Store group is non-greedy to handle hyphenated names like "mega-image"
   const match = id.match(
-    /^([a-z]{2})-([a-z]+)-(\d{4}-\d{2}-\d{2})-(\d{4}-\d{2}-\d{2})(?:-(.+))?$/
+    /^([a-z]+)-([a-z]+(?:-[a-z]+)*?)-(\d{4}-\d{2}-\d{2})-(\d{4}-\d{2}-\d{2})(?:-(.+))?$/
   );
   if (!match) return null;
   return {
@@ -45,18 +46,6 @@ export function parseCatalogId(id: string): {
   };
 }
 
-/** Map country folder name to 2-letter code */
-function countryCode(country: string): string {
-  const map: Record<string, string> = {
-    romania: "ro",
-    germany: "de",
-    poland: "pl",
-    hungary: "hu",
-    bulgaria: "bg",
-    czechia: "cz",
-  };
-  return map[country] || country.slice(0, 2);
-}
 
 function extractYear(dateTo: string): number {
   // DD-MM-YYYY → extract year

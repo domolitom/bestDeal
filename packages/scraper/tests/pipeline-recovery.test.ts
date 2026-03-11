@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
-import { rmSync, readFileSync } from "node:fs";
+import { rmSync } from "node:fs";
 import { join } from "node:path";
 import { FilesystemAdapter } from "../src/storage/fs-adapter.ts";
 import { recoverStaleCatalogs } from "../src/pipeline.ts";
@@ -9,9 +9,9 @@ const TMP_DIR = join(import.meta.dir, ".tmp-test-pipeline-recovery");
 
 function makeMeta(overrides: Partial<CatalogMeta> = {}): CatalogMeta {
   return {
-    id: "ro-lidl-2026-02-09-2026-02-15",
+    id: "romania-lidl-2026-02-09-2026-02-15",
     store: "lidl",
-    country: "ro",
+    country: "romania",
     status: "discovered",
     dateFrom: "2026-02-09",
     dateTo: "2026-02-15",
@@ -44,9 +44,9 @@ describe("recoverStaleCatalogs", () => {
 
     const recovered = await recoverStaleCatalogs(storage);
 
-    expect(recovered).toEqual(["ro-lidl-2026-02-09-2026-02-15"]);
+    expect(recovered).toEqual(["romania-lidl-2026-02-09-2026-02-15"]);
 
-    const catalog = await storage.getCatalog("ro-lidl-2026-02-09-2026-02-15");
+    const catalog = await storage.getCatalog("romania-lidl-2026-02-09-2026-02-15");
     expect(catalog!.status).toBe("discovered");
   });
 
@@ -56,7 +56,7 @@ describe("recoverStaleCatalogs", () => {
 
     await recoverStaleCatalogs(storage);
 
-    const catalog = await storage.getCatalog("ro-lidl-2026-02-09-2026-02-15");
+    const catalog = await storage.getCatalog("romania-lidl-2026-02-09-2026-02-15");
     expect(catalog!._scraping).toEqual({
       resolver: "browser",
       firstPageUrl: "https://example.com/page/1",
@@ -71,7 +71,7 @@ describe("recoverStaleCatalogs", () => {
 
     expect(recovered).toEqual([]);
 
-    const catalog = await storage.getCatalog("ro-lidl-2026-02-09-2026-02-15");
+    const catalog = await storage.getCatalog("romania-lidl-2026-02-09-2026-02-15");
     expect(catalog!.status).toBe("discovered");
   });
 
@@ -82,27 +82,27 @@ describe("recoverStaleCatalogs", () => {
 
     expect(recovered).toEqual([]);
 
-    const catalog = await storage.getCatalog("ro-lidl-2026-02-09-2026-02-15");
+    const catalog = await storage.getCatalog("romania-lidl-2026-02-09-2026-02-15");
     expect(catalog!.status).toBe("ready");
   });
 
   test("recovers multiple stale catalogs", async () => {
     await storage.writeCatalogMeta(
       makeMeta({
-        id: "ro-lidl-2026-02-09-2026-02-15",
+        id: "romania-lidl-2026-02-09-2026-02-15",
         status: "scraping",
       })
     );
     await storage.writeCatalogMeta(
       makeMeta({
-        id: "ro-kaufland-2026-02-09-2026-02-15",
+        id: "romania-kaufland-2026-02-09-2026-02-15",
         store: "kaufland",
         status: "scraping",
       })
     );
     await storage.writeCatalogMeta(
       makeMeta({
-        id: "ro-penny-2026-02-09-2026-02-15",
+        id: "romania-penny-2026-02-09-2026-02-15",
         store: "penny",
         status: "ready",
         pageCount: 3,
@@ -112,11 +112,11 @@ describe("recoverStaleCatalogs", () => {
     const recovered = await recoverStaleCatalogs(storage);
 
     expect(recovered).toHaveLength(2);
-    expect(recovered).toContain("ro-lidl-2026-02-09-2026-02-15");
-    expect(recovered).toContain("ro-kaufland-2026-02-09-2026-02-15");
+    expect(recovered).toContain("romania-lidl-2026-02-09-2026-02-15");
+    expect(recovered).toContain("romania-kaufland-2026-02-09-2026-02-15");
 
     // ready catalog untouched
-    const penny = await storage.getCatalog("ro-penny-2026-02-09-2026-02-15");
+    const penny = await storage.getCatalog("romania-penny-2026-02-09-2026-02-15");
     expect(penny!.status).toBe("ready");
   });
 

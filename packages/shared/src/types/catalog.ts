@@ -14,7 +14,7 @@ export interface ScrapingInfo {
 }
 
 export interface CatalogMeta {
-  id: string; // "ro-lidl-2026-02-09-2026-02-15"
+  id: string; // "romania-lidl-2026-02-09-2026-02-15"
   store: string; // "lidl"
   country: string; // "romania"
   status: CatalogStatus;

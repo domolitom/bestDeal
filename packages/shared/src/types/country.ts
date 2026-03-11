@@ -1,5 +1,5 @@
 export interface Country {
-  code: string; // "ro", "de", "pl"
+  code: string; // "romania", "germany", "poland"
   name: string; // "Romania", "Germany", "Poland"
   flag: string; // "🇷🇴", "🇩🇪", "🇵🇱"
   storeCount: number;

@@ -10,7 +10,7 @@ describe("buildCatalogId", () => {
         dateFrom: "09-02",
         dateTo: "15-02-2026",
       })
-    ).toBe("ro-lidl-2026-02-09-2026-02-15");
+    ).toBe("romania-lidl-2026-02-09-2026-02-15");
   });
 
   test("Romanian Kaufland catalog without type", () => {
@@ -21,7 +21,7 @@ describe("buildCatalogId", () => {
         dateFrom: "11-02",
         dateTo: "17-02-2026",
       })
-    ).toBe("ro-kaufland-2026-02-11-2026-02-17");
+    ).toBe("romania-kaufland-2026-02-11-2026-02-17");
   });
 
   test("Romanian Kaufland catalog with type", () => {
@@ -33,7 +33,7 @@ describe("buildCatalogId", () => {
         dateTo: "03-03-2026",
         catalogType: "leaflet",
       })
-    ).toBe("ro-kaufland-2026-02-25-2026-03-03-leaflet");
+    ).toBe("romania-kaufland-2026-02-25-2026-03-03-leaflet");
   });
 
   test("German Lidl catalog", () => {
@@ -44,14 +44,14 @@ describe("buildCatalogId", () => {
         dateFrom: "01-03",
         dateTo: "07-03-2026",
       })
-    ).toBe("de-lidl-2026-03-01-2026-03-07");
+    ).toBe("germany-lidl-2026-03-01-2026-03-07");
   });
 });
 
 describe("parseCatalogId", () => {
   test("parses standard ID", () => {
-    expect(parseCatalogId("ro-lidl-2026-02-09-2026-02-15")).toEqual({
-      country: "ro",
+    expect(parseCatalogId("romania-lidl-2026-02-09-2026-02-15")).toEqual({
+      country: "romania",
       store: "lidl",
       dateFrom: "2026-02-09",
       dateTo: "2026-02-15",
@@ -61,13 +61,25 @@ describe("parseCatalogId", () => {
 
   test("parses ID with catalog type", () => {
     expect(
-      parseCatalogId("ro-kaufland-2026-02-25-2026-03-03-leaflet")
+      parseCatalogId("romania-kaufland-2026-02-25-2026-03-03-leaflet")
     ).toEqual({
-      country: "ro",
+      country: "romania",
       store: "kaufland",
       dateFrom: "2026-02-25",
       dateTo: "2026-03-03",
       catalogType: "leaflet",
+    });
+  });
+
+  test("parses ID with hyphenated store name", () => {
+    expect(
+      parseCatalogId("romania-mega-image-2026-02-09-2026-02-15")
+    ).toEqual({
+      country: "romania",
+      store: "mega-image",
+      dateFrom: "2026-02-09",
+      dateTo: "2026-02-15",
+      catalogType: undefined,
     });
   });
 

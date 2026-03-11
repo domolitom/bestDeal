@@ -8,9 +8,9 @@ const TMP_DIR = join(import.meta.dir, ".tmp-test-data");
 
 function makeMeta(overrides: Partial<CatalogMeta> = {}): CatalogMeta {
   return {
-    id: "ro-lidl-2026-02-09-2026-02-15",
+    id: "romania-lidl-2026-02-09-2026-02-15",
     store: "lidl",
-    country: "ro",
+    country: "romania",
     status: "ready",
     dateFrom: "2026-02-09",
     dateTo: "2026-02-15",
@@ -60,9 +60,9 @@ describe("FsReadAdapter", () => {
 
       const results = await adapter.listCatalogs();
       expect(results).toHaveLength(1);
-      expect(results[0].id).toBe("ro-lidl-2026-02-09-2026-02-15");
+      expect(results[0].id).toBe("romania-lidl-2026-02-09-2026-02-15");
       expect(results[0].store).toBe("lidl");
-      expect(results[0].country).toBe("ro");
+      expect(results[0].country).toBe("romania");
       expect(results[0].status).toBe("ready");
     });
 
@@ -70,21 +70,21 @@ describe("FsReadAdapter", () => {
       writeCatalog(makeMeta());
       writeCatalog(
         makeMeta({
-          id: "de-lidl-2026-02-09-2026-02-15",
-          country: "de",
+          id: "germany-lidl-2026-02-09-2026-02-15",
+          country: "germany",
         })
       );
 
-      const results = await adapter.listCatalogs({ country: "ro" });
+      const results = await adapter.listCatalogs({ country: "romania" });
       expect(results).toHaveLength(1);
-      expect(results[0].country).toBe("ro");
+      expect(results[0].country).toBe("romania");
     });
 
     test("filters by store", async () => {
       writeCatalog(makeMeta());
       writeCatalog(
         makeMeta({
-          id: "ro-kaufland-2026-02-09-2026-02-15",
+          id: "romania-kaufland-2026-02-09-2026-02-15",
           store: "kaufland",
         })
       );
@@ -98,7 +98,7 @@ describe("FsReadAdapter", () => {
       writeCatalog(makeMeta({ status: "ready" }));
       writeCatalog(
         makeMeta({
-          id: "ro-kaufland-2026-02-09-2026-02-15",
+          id: "romania-kaufland-2026-02-09-2026-02-15",
           store: "kaufland",
           status: "discovered",
         })
@@ -113,7 +113,7 @@ describe("FsReadAdapter", () => {
       writeCatalog(makeMeta({ dateFrom: "2026-01-01", dateTo: "2026-01-07" }));
       writeCatalog(
         makeMeta({
-          id: "ro-kaufland-2026-03-01-2026-03-07",
+          id: "romania-kaufland-2026-03-01-2026-03-07",
           store: "kaufland",
           dateFrom: "2026-03-01",
           dateTo: "2026-03-07",
@@ -128,7 +128,7 @@ describe("FsReadAdapter", () => {
     test("skips directories without valid meta.json", async () => {
       writeCatalog(makeMeta());
       // Create a catalog dir with no meta.json
-      mkdirSync(join(TMP_DIR, "ro", "lidl", "ro-lidl-2026-03-01-2026-03-07"), {
+      mkdirSync(join(TMP_DIR, "romania", "lidl", "romania-lidl-2026-03-01-2026-03-07"), {
         recursive: true,
       });
 
@@ -144,7 +144,7 @@ describe("FsReadAdapter", () => {
 
     test("returns null for non-existent catalog", async () => {
       expect(
-        await adapter.getCatalog("ro-lidl-2099-01-01-2099-01-07")
+        await adapter.getCatalog("romania-lidl-2099-01-01-2099-01-07")
       ).toBeNull();
     });
 
@@ -152,10 +152,10 @@ describe("FsReadAdapter", () => {
       writeCatalog(makeMeta(), 3);
 
       const catalog = await adapter.getCatalog(
-        "ro-lidl-2026-02-09-2026-02-15"
+        "romania-lidl-2026-02-09-2026-02-15"
       );
       expect(catalog).not.toBeNull();
-      expect(catalog!.id).toBe("ro-lidl-2026-02-09-2026-02-15");
+      expect(catalog!.id).toBe("romania-lidl-2026-02-09-2026-02-15");
       expect(catalog!.pages).toHaveLength(3);
       expect(catalog!.pages[0].number).toBe(1);
       expect(catalog!.pages[0].filename).toBe("page-001.jpg");
@@ -166,7 +166,7 @@ describe("FsReadAdapter", () => {
       writeCatalog(makeMeta(), 0);
 
       const catalog = await adapter.getCatalog(
-        "ro-lidl-2026-02-09-2026-02-15"
+        "romania-lidl-2026-02-09-2026-02-15"
       );
       expect(catalog).not.toBeNull();
       expect(catalog!.pages).toHaveLength(0);
@@ -176,11 +176,11 @@ describe("FsReadAdapter", () => {
   describe("getImageUrl", () => {
     test("builds correct URL", () => {
       const url = adapter.getImageUrl(
-        "ro-lidl-2026-02-09-2026-02-15",
+        "romania-lidl-2026-02-09-2026-02-15",
         "pages/page-001.jpg"
       );
       expect(url).toBe(
-        "/data/catalogs/ro/lidl/ro-lidl-2026-02-09-2026-02-15/pages/page-001.jpg"
+        "/data/catalogs/romania/lidl/romania-lidl-2026-02-09-2026-02-15/pages/page-001.jpg"
       );
     });
 
@@ -198,14 +198,14 @@ describe("FsReadAdapter", () => {
       writeCatalog(makeMeta());
       writeCatalog(
         makeMeta({
-          id: "ro-kaufland-2026-02-09-2026-02-15",
+          id: "romania-kaufland-2026-02-09-2026-02-15",
           store: "kaufland",
         })
       );
 
       const countries = await adapter.listCountries();
       expect(countries).toHaveLength(1);
-      expect(countries[0].code).toBe("ro");
+      expect(countries[0].code).toBe("romania");
       expect(countries[0].storeCount).toBe(2);
       expect(countries[0].catalogCount).toBe(2);
     });
@@ -220,12 +220,12 @@ describe("FsReadAdapter", () => {
       writeCatalog(makeMeta());
       writeCatalog(
         makeMeta({
-          id: "ro-kaufland-2026-02-09-2026-02-15",
+          id: "romania-kaufland-2026-02-09-2026-02-15",
           store: "kaufland",
         })
       );
 
-      const stores = await adapter.listStores("ro");
+      const stores = await adapter.listStores("romania");
       expect(stores).toEqual(["kaufland", "lidl"]);
     });
   });

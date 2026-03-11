@@ -22,12 +22,43 @@ export interface PipelineReport {
 }
 
 /**
- * Full scraping pipeline: discover → resolve → download.
+ * Recover catalogs stuck in "scraping" status from a previous crashed run.
+ * Resets them to "discovered" so they get retried on the next scrape phase.
+ */
+export async function recoverStaleCatalogs(
+  storage: StorageAdapter
+): Promise<string[]> {
+  const stale = await storage.listCatalogs({ status: "scraping" });
+  const recovered: string[] = [];
+
+  for (const summary of stale) {
+    const catalog = await storage.getCatalog(summary.id);
+    if (!catalog) continue;
+
+    const { pages, ...meta } = catalog;
+    await storage.writeCatalogMeta({ ...meta, status: "discovered" });
+    recovered.push(summary.id);
+    console.log(`[pipeline] recovered stale catalog: ${summary.id}`);
+  }
+
+  return recovered;
+}
+
+/**
+ * Full scraping pipeline: recover → discover → resolve → download.
  */
 export async function runPipeline(
   options: PipelineOptions
 ): Promise<PipelineReport> {
   const { storage, country, store, discoverOnly } = options;
+
+  // Phase 0: Recover stale catalogs from previous crashed runs
+  const recovered = await recoverStaleCatalogs(storage);
+  if (recovered.length > 0) {
+    console.log(
+      `\n[pipeline] recovered ${recovered.length} stale catalog(s)\n`
+    );
+  }
 
   // Phase 1: Discovery
   console.log("\n=== Phase 1: Discovery ===\n");
@@ -130,6 +161,17 @@ export async function runPipeline(
         err
       );
       report.failed.push(catalog.catalogId);
+
+      // Mark as failed so it doesn't stay stuck in "scraping"
+      try {
+        const failedCatalog = await storage.getCatalog(catalog.catalogId);
+        if (failedCatalog) {
+          const { pages, ...meta } = failedCatalog;
+          await storage.writeCatalogMeta({ ...meta, status: "failed" });
+        }
+      } catch {
+        // Best effort — don't mask the original error
+      }
     }
   }
 

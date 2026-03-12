@@ -1,5 +1,27 @@
 import type { DatePattern } from "../types/store";
 
+const MONTH_NAMES: Record<string, string> = {
+  ianuarie: "01", februarie: "02", martie: "03", aprilie: "04",
+  mai: "05", iunie: "06", iulie: "07", august: "08",
+  septembrie: "09", octombrie: "10", noiembrie: "11", decembrie: "12",
+  // French
+  janvier: "01", février: "02", mars: "03", avril: "04",
+  juin: "06", juillet: "07", août: "08",
+  septembre: "09", octobre: "10", novembre: "11", décembre: "12",
+  // German
+  januar: "01", februar: "02", märz: "03",
+  juni: "06", juli: "07",
+  september: "09", oktober: "10", november: "11", dezember: "12",
+};
+
+/** Replace month name tokens with two-digit month numbers. */
+function normalizeMonthNames(s: string): string {
+  return s.replace(
+    /[a-zăâîșțéû]+/gi,
+    (word) => MONTH_NAMES[word.toLowerCase()] ?? word,
+  );
+}
+
 /**
  * Parse dates from text using regex patterns with group references ($1, $2, etc.)
  * Returns raw matched groups assembled by the template — no format conversion.
@@ -33,17 +55,19 @@ export function toISODate(raw: string, fallbackYear?: number): string {
     return raw;
   }
 
-  const parts = raw.split("-");
+  // Normalize month names (e.g. "martie" → "03") before splitting
+  const normalized = normalizeMonthNames(raw);
+  const parts = normalized.split("-");
   if (parts.length === 2) {
     // DD-MM format
     const [dd, mm] = parts;
     const year = fallbackYear ?? new Date().getFullYear();
-    return `${year}-${mm}-${dd}`;
+    return `${year}-${mm!.padStart(2, "0")}-${dd!.padStart(2, "0")}`;
   }
   if (parts.length === 3) {
     // DD-MM-YYYY format
     const [dd, mm, yyyy] = parts;
-    return `${yyyy}-${mm}-${dd}`;
+    return `${yyyy}-${mm!.padStart(2, "0")}-${dd!.padStart(2, "0")}`;
   }
   return raw; // unknown format
 }

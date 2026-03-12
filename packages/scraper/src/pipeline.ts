@@ -9,6 +9,7 @@ import { downloadCatalogImages } from "./scraping/downloader.ts";
 import "./scraping/leaflets-api-resolver.ts";
 import "./scraping/publitas-api-resolver.ts";
 import "./scraping/yumpu-api-resolver.ts";
+import "./scraping/ipaper-api-resolver.ts";
 import "./scraping/resolver.ts";
 
 export interface PipelineOptions {

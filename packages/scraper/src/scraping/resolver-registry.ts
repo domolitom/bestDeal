@@ -37,7 +37,12 @@ const detectionRules: DetectionRule[] = [
     test: (url) => url.includes("yumpu.com"),
     resolverName: "yumpu",
   },
-  // Future: { test: (url) => url.includes("ipapercms.dk"), resolverName: "ipaper" },
+  {
+    test: (url) =>
+      url.includes("ipapercms.dk") || url.includes("ipaper.io") ||
+      url.includes("/CampaignPaper/") || url.includes("/Catalog/"),
+    resolverName: "ipaper",
+  },
 ];
 
 // --- Registry ---

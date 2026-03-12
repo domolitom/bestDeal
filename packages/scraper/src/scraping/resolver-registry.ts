@@ -33,6 +33,10 @@ const detectionRules: DetectionRule[] = [
       url.includes("publitas.com") || url.includes("cataloage.carrefour.ro"),
     resolverName: "publitas",
   },
+  {
+    test: (url) => url.includes("yumpu.com"),
+    resolverName: "yumpu",
+  },
   // Future: { test: (url) => url.includes("ipapercms.dk"), resolverName: "ipaper" },
 ];
 

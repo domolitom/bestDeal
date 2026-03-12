@@ -70,15 +70,29 @@ export async function discoverStore(
           if (results.some((r) => r.slug === slug)) break;
 
           let dateText = "";
-          let el: Element | null =
-            element.closest("[class*='card']") || element;
-          for (let i = 0; i < 5 && el; i++) {
-            const text = (el.textContent || "").trim();
-            if (text) {
-              dateText = text;
-              break;
+          const card =
+            element.closest("[class*='card']") ||
+            element.closest("[class*='item']") ||
+            element.closest("[class*='tile']") ||
+            element.closest("[class*='brosur']") ||
+            element.closest("[class*='leaflet']") ||
+            element.closest("[class*='catalog']") ||
+            element.closest("[class*='flyer']") ||
+            element.closest("[class*='promo']") ||
+            element.closest("li") ||
+            element.closest("article");
+          if (card) {
+            dateText = (card.textContent || "").trim();
+          } else {
+            // Walk up to find the widest reasonable parent text
+            let el: Element | null = element;
+            for (let i = 0; i < 5 && el; i++) {
+              const text = (el.textContent || "").trim();
+              if (text && text.length < 2000) {
+                dateText = text;
+              }
+              el = el.parentElement;
             }
-            el = el.parentElement;
           }
 
           results.push({ href, slug, dateText });
@@ -164,6 +178,111 @@ export async function discoverStore(
 
   console.log(
     `[discovery] found ${discovered.length} ${storeDef.name} catalog(s)`
+  );
+  return discovered;
+}
+
+/**
+ * Discover catalogs via API-based discovery.
+ * Extracts catalog IDs from DOM data attributes, then fetches
+ * catalog metadata from an API endpoint.
+ */
+export async function discoverStoreViaApi(
+  page: Page,
+  storeDef: StoreDefinition
+): Promise<DiscoveredCatalog[]> {
+  const api = storeDef.apiDiscovery!;
+  console.log(`[discovery] discovering ${storeDef.name} catalogs via API...`);
+
+  await page.goto(storeDef.landingUrl, { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(storeDef.waitAfterLoad);
+
+  // Extract catalog IDs from DOM
+  const catalogIds: string[] = await page.evaluate(
+    ({ selector, idAttribute }) => {
+      const els = document.querySelectorAll(selector);
+      const ids = new Set<string>();
+      for (const el of Array.from(els)) {
+        const id = el.getAttribute(idAttribute);
+        if (id) ids.add(id);
+      }
+      return [...ids];
+    },
+    { selector: api.selector, idAttribute: api.idAttribute }
+  );
+
+  if (catalogIds.length === 0) {
+    console.log(`[discovery] no catalog IDs found for ${storeDef.name}`);
+    return [];
+  }
+
+  console.log(
+    `[discovery] found ${catalogIds.length} catalog ID(s) for ${storeDef.name}`
+  );
+
+  const discovered: DiscoveredCatalog[] = [];
+
+  for (const id of catalogIds) {
+    const apiUrl = api.apiUrl.replace("{id}", id);
+    try {
+      const resp = await fetch(apiUrl);
+      if (!resp.ok) {
+        console.log(
+          `[discovery] API ${resp.status} for ${storeDef.name} catalog ${id}`
+        );
+        continue;
+      }
+
+      const data = await resp.json();
+
+      const firstPageUrl = data[api.fieldMap.firstPageUrl];
+      const rawDateFrom = data[api.fieldMap.dateFrom];
+      const rawDateTo = data[api.fieldMap.dateTo];
+
+      if (!firstPageUrl || !rawDateFrom || !rawDateTo) {
+        console.log(
+          `[discovery] skipping ${storeDef.name} catalog ${id} (missing fields)`
+        );
+        continue;
+      }
+
+      // Parse dates through datePatterns if available, otherwise use raw
+      let dateFrom = rawDateFrom;
+      let dateTo = rawDateTo;
+      if (storeDef.datePatterns?.length) {
+        const parsedFrom = parseDates(rawDateFrom, storeDef.datePatterns);
+        const parsedTo = parseDates(rawDateTo, storeDef.datePatterns);
+        if (parsedFrom) dateFrom = parsedFrom.dateFrom;
+        if (parsedTo) dateTo = parsedTo.dateTo;
+      }
+
+      const coverImageUrl = api.fieldMap.coverImageUrl
+        ? data[api.fieldMap.coverImageUrl] || firstPageUrl
+        : firstPageUrl;
+
+      const catalogType = api.fieldMap.catalogType
+        ? data[api.fieldMap.catalogType]
+        : undefined;
+
+      discovered.push({
+        store: storeDef.name,
+        country: storeDef.country,
+        slug: id,
+        dateFrom,
+        dateTo,
+        firstPageUrl,
+        coverImageUrl,
+        catalogType: catalogType || undefined,
+      });
+    } catch (err) {
+      console.log(
+        `[discovery] API error for ${storeDef.name} catalog ${id}: ${err}`
+      );
+    }
+  }
+
+  console.log(
+    `[discovery] found ${discovered.length} ${storeDef.name} catalog(s) via API`
   );
   return discovered;
 }

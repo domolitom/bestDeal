@@ -3,7 +3,7 @@ import type { Page } from "playwright";
 import { buildCatalogId, buildPageURL } from "@bestdeal/shared";
 import type { StorageAdapter, CatalogMeta } from "@bestdeal/shared";
 import { loadStoreDefinitions } from "../config/store-loader.ts";
-import { discoverStore } from "./discovery-engine.ts";
+import { discoverStore, discoverStoreViaApi } from "./discovery-engine.ts";
 import type { DiscoveredCatalog } from "./discovery-engine.ts";
 import { toISODate } from "@bestdeal/shared";
 import { detectResolverName } from "../scraping/resolver-registry.ts";
@@ -159,7 +159,9 @@ export async function discoverAll(
 
       let catalogs: DiscoveredCatalog[];
       try {
-        catalogs = await discoverStore(page, storeDef);
+        catalogs = storeDef.apiDiscovery
+          ? await discoverStoreViaApi(page, storeDef)
+          : await discoverStore(page, storeDef);
       } catch (err) {
         console.error(
           `[discovery] failed to discover ${storeDef.name}:`,

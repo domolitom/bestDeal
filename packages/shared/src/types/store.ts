@@ -57,6 +57,27 @@ export interface ImageExtraction {
   excludeSelectors?: string[];
 }
 
+// --- API-based discovery config ---
+
+export interface ApiDiscoveryFieldMap {
+  firstPageUrl: string;
+  dateFrom: string;
+  dateTo: string;
+  coverImageUrl?: string;
+  catalogType?: string;
+}
+
+export interface ApiDiscoveryConfig {
+  /** CSS selector for catalog elements on the landing page */
+  selector: string;
+  /** Data attribute containing the catalog identifier (e.g. "data-catalog") */
+  idAttribute: string;
+  /** API URL template. Use `{id}` as placeholder for the catalog ID */
+  apiUrl: string;
+  /** Mappings from API response fields to catalog fields */
+  fieldMap: ApiDiscoveryFieldMap;
+}
+
 // --- Store definition ---
 
 export interface StoreDefinition {
@@ -74,4 +95,5 @@ export interface StoreDefinition {
   catalogTypePattern?: CatalogTypePattern;
   imageExtraction?: ImageExtraction;
   resolver?: string; // override auto-detection ("leaflets" | "browser" | etc.)
+  apiDiscovery?: ApiDiscoveryConfig;
 }

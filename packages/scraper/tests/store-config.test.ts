@@ -18,9 +18,17 @@ describe("loadStoreDefinitions", () => {
       expect(def.country).toBeString();
       expect(def.landingUrl).toBeString();
       expect(def.waitAfterLoad).toBeNumber();
-      expect(def.linkPatterns.length).toBeGreaterThan(0);
-      expect(def.datePatterns.length).toBeGreaterThan(0);
-      expect(["slug", "text", "slug_then_text"]).toContain(def.dateSource);
+
+      if (def.apiDiscovery) {
+        expect(def.apiDiscovery.selector).toBeString();
+        expect(def.apiDiscovery.idAttribute).toBeString();
+        expect(def.apiDiscovery.apiUrl).toBeString();
+        expect(def.apiDiscovery.fieldMap).toBeDefined();
+      } else {
+        expect(def.linkPatterns.length).toBeGreaterThan(0);
+        expect(def.datePatterns.length).toBeGreaterThan(0);
+        expect(["slug", "text", "slug_then_text"]).toContain(def.dateSource);
+      }
     }
   });
 

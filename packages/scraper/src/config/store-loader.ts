@@ -34,14 +34,7 @@ export async function loadStoreDefinitions(
 }
 
 function validateStoreDefinition(def: StoreDefinition, file: string): void {
-  const required = [
-    "name",
-    "landingUrl",
-    "waitAfterLoad",
-    "linkPatterns",
-    "dateSource",
-    "datePatterns",
-  ] as const;
+  const required = ["name", "landingUrl", "waitAfterLoad"] as const;
   for (const field of required) {
     if (def[field] == null) {
       throw new Error(
@@ -49,14 +42,29 @@ function validateStoreDefinition(def: StoreDefinition, file: string): void {
       );
     }
   }
-  if (def.linkPatterns.length === 0) {
-    throw new Error(
-      `Store definition ${file} must have at least one linkPattern`
-    );
-  }
-  if (def.datePatterns.length === 0) {
-    throw new Error(
-      `Store definition ${file} must have at least one datePattern`
-    );
+
+  if (def.apiDiscovery) {
+    const { selector, idAttribute, apiUrl, fieldMap } = def.apiDiscovery;
+    if (!selector || !idAttribute || !apiUrl || !fieldMap) {
+      throw new Error(
+        `Store definition ${file} has incomplete apiDiscovery config`
+      );
+    }
+  } else {
+    if (!def.linkPatterns?.length) {
+      throw new Error(
+        `Store definition ${file} must have at least one linkPattern`
+      );
+    }
+    if (!def.dateSource) {
+      throw new Error(
+        `Store definition ${file} missing required field: dateSource`
+      );
+    }
+    if (!def.datePatterns?.length) {
+      throw new Error(
+        `Store definition ${file} must have at least one datePattern`
+      );
+    }
   }
 }

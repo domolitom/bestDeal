@@ -1,0 +1,24 @@
+{
+    "name": "carrefour",
+    "landingUrl": "https://carrefour.ro/corporate/cataloage",
+    "waitAfterLoad": 10000,
+    "linkPatterns": [],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{2})-(\\d{2})-(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$1-$2-$3"
+        }
+    ],
+    "apiDiscovery": {
+        "selector": "div[data-catalog]",
+        "idAttribute": "data-catalog",
+        "apiUrl": "https://corporate.carrefour.ro/api/catalog/{id}",
+        "fieldMap": {
+            "firstPageUrl": "catalog_link",
+            "dateFrom": "start_date",
+            "dateTo": "end_date"
+        }
+    }
+}

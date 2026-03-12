@@ -17,6 +17,8 @@ export type {
   DatePattern,
   CatalogTypePattern,
   ImageExtraction,
+  ApiDiscoveryFieldMap,
+  ApiDiscoveryConfig,
   StoreDefinition,
 } from "./types/store";
 

@@ -28,8 +28,12 @@ const detectionRules: DetectionRule[] = [
     test: (url) => /leaflets\.(schwarz|kaufland)/.test(url),
     resolverName: "leaflets",
   },
+  {
+    test: (url) =>
+      url.includes("publitas.com") || url.includes("cataloage.carrefour.ro"),
+    resolverName: "publitas",
+  },
   // Future: { test: (url) => url.includes("ipapercms.dk"), resolverName: "ipaper" },
-  // Future: { test: (url) => url.includes("view.publitas.com"), resolverName: "publitas" },
 ];
 
 // --- Registry ---

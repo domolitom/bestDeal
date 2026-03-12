@@ -7,6 +7,7 @@ import { downloadCatalogImages } from "./scraping/downloader.ts";
 
 // Side-effect imports: register resolvers
 import "./scraping/leaflets-api-resolver.ts";
+import "./scraping/publitas-api-resolver.ts";
 import "./scraping/resolver.ts";
 
 export interface PipelineOptions {

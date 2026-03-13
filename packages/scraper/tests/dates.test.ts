@@ -24,6 +24,14 @@ describe("toISODate", () => {
   test("already ISO passes through", () => {
     expect(toISODate("2026-02-09")).toBe("2026-02-09");
   });
+
+  test("Romanian abbreviated month name", () => {
+    expect(toISODate("1-mar", 2026)).toBe("2026-03-01");
+  });
+
+  test("Romanian abbreviated month name dec", () => {
+    expect(toISODate("15-dec", 2026)).toBe("2026-12-15");
+  });
 });
 
 describe("isCatalogActive", () => {

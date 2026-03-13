@@ -43,6 +43,10 @@ const detectionRules: DetectionRule[] = [
       url.includes("/CampaignPaper/") || url.includes("/Catalog/"),
     resolverName: "ipaper",
   },
+  {
+    test: (url) => /\.pdf(\?|$)/i.test(url),
+    resolverName: "pdf",
+  },
 ];
 
 // --- Registry ---

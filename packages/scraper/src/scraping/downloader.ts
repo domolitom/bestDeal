@@ -10,8 +10,12 @@ export async function downloadCatalogImages(
 ): Promise<void> {
   const { catalogId, coverImageUrl, pages } = result;
 
-  // Download cover image
-  if (coverImageUrl) {
+  // Download cover image (use first page's imageData if available)
+  const coverData = pages[0]?.imageData;
+  if (coverData) {
+    await storage.writeImage(catalogId, "cover.jpg", coverData);
+    console.log(`[downloader] wrote cover image from page data for ${catalogId}`);
+  } else if (coverImageUrl) {
     try {
       const data = await downloadImage(coverImageUrl);
       await storage.writeImage(catalogId, "cover.jpg", data);
@@ -25,7 +29,7 @@ export async function downloadCatalogImages(
   for (const page of pages) {
     const filename = `page-${String(page.number).padStart(3, "0")}.jpg`;
     try {
-      const data = await downloadImage(page.imageUrl);
+      const data = page.imageData ?? await downloadImage(page.imageUrl);
       await storage.writeImage(catalogId, filename, data);
       console.log(`[downloader] downloaded page ${page.number}`);
     } catch (err) {

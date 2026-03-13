@@ -35,25 +35,39 @@ export async function discoverStore(
     slugGroup: lp.slugGroup,
   }));
   const linkDomain = storeDef.linkDomain || null;
+  const customSelector = storeDef.linkSelector || null;
+  const customAttribute = storeDef.linkAttribute || null;
 
   const rawLinks: RawLink[] = await page.evaluate(
-    ({ patterns, domain }) => {
+    ({ patterns, domain, customSelector, customAttribute }) => {
       const results: { href: string; slug: string; dateText: string }[] = [];
 
       // Collect candidate URLs from <a> and <iframe> elements
       const candidates: { href: string; element: Element }[] = [];
 
-      for (const link of Array.from(document.querySelectorAll("a[href]"))) {
-        candidates.push({
-          href: (link as HTMLAnchorElement).href,
-          element: link,
-        });
-      }
-      for (const iframe of Array.from(
-        document.querySelectorAll("iframe[src]")
-      )) {
-        const src = (iframe as HTMLIFrameElement).src;
-        if (src) candidates.push({ href: src, element: iframe });
+      if (customSelector && customAttribute) {
+        // Custom selector mode: extract URLs from arbitrary elements
+        for (const el of Array.from(document.querySelectorAll(customSelector))) {
+          const val = el.getAttribute(customAttribute);
+          if (!val) continue;
+          // Resolve relative URLs and decode (data attributes often have spaces)
+          const raw = val.startsWith("http") ? val : new URL(val, location.origin).href;
+          const href = decodeURI(raw);
+          candidates.push({ href, element: el });
+        }
+      } else {
+        for (const link of Array.from(document.querySelectorAll("a[href]"))) {
+          candidates.push({
+            href: (link as HTMLAnchorElement).href,
+            element: link,
+          });
+        }
+        for (const iframe of Array.from(
+          document.querySelectorAll("iframe[src]")
+        )) {
+          const src = (iframe as HTMLIFrameElement).src;
+          if (src) candidates.push({ href: src, element: iframe });
+        }
       }
 
       for (const { href, element } of candidates) {
@@ -101,7 +115,7 @@ export async function discoverStore(
       }
       return results;
     },
-    { patterns: serializedPatterns, domain: linkDomain }
+    { patterns: serializedPatterns, domain: linkDomain, customSelector, customAttribute }
   );
 
   // For links with no dateText, try fetching the linked page's meta description

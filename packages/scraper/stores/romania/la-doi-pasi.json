@@ -1,0 +1,22 @@
+{
+    "name": "la-doi-pasi",
+    "landingUrl": "https://www.la-doi-pasi.ro/rasfoieste-catalog",
+    "waitAfterLoad": 10000,
+    "linkSelector": "[data-file]",
+    "linkAttribute": "data-file",
+    "linkPatterns": [
+        {
+            "match": "/var/uploads/offer/(.+\\.pdf)",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        }
+    ],
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})-(\\d{1,2})\\s+(ian|feb|mar|apr|mai|iun|iul|aug|sep|oct|noi|dec)",
+            "dateFrom": "$1-$3",
+            "dateTo": "$2-$3"
+        }
+    ]
+}

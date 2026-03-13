@@ -89,6 +89,10 @@ export interface StoreDefinition {
   waitAfterLoad: number;
   delayBetweenPages?: number;
   linkDomain?: string;
+  /** CSS selector for elements containing catalog URLs (default: a[href], iframe[src]) */
+  linkSelector?: string;
+  /** DOM attribute to read the URL from (default: href/src depending on element) */
+  linkAttribute?: string;
   linkPatterns: LinkPattern[];
   dateSource: "slug" | "text" | "slug_then_text";
   datePatterns: DatePattern[];

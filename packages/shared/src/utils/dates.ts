@@ -4,6 +4,10 @@ const MONTH_NAMES: Record<string, string> = {
   ianuarie: "01", februarie: "02", martie: "03", aprilie: "04",
   mai: "05", iunie: "06", iulie: "07", august: "08",
   septembrie: "09", octombrie: "10", noiembrie: "11", decembrie: "12",
+  // Romanian abbreviations
+  ian: "01", feb: "02", mar: "03", apr: "04",
+  iun: "06", iul: "07", aug: "08",
+  sep: "09", oct: "10", noi: "11", dec: "12",
   // French
   janvier: "01", février: "02", mars: "03", avril: "04",
   juin: "06", juillet: "07", août: "08",

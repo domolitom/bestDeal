@@ -99,5 +99,7 @@ export interface StoreDefinition {
   catalogTypePattern?: CatalogTypePattern;
   imageExtraction?: ImageExtraction;
   resolver?: string; // override auto-detection ("leaflets" | "browser" | etc.)
+  /** When visiting linked pages, extract an iframe URL matching this pattern to use as firstPageUrl */
+  iframeExtract?: string;
   apiDiscovery?: ApiDiscoveryConfig;
 }

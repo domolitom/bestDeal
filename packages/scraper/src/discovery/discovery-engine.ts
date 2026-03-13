@@ -17,6 +17,8 @@ interface RawLink {
   href: string;
   slug: string;
   dateText: string;
+  /** Overridden firstPageUrl extracted from an iframe on the linked page */
+  iframeUrl?: string;
 }
 
 /**
@@ -118,26 +120,48 @@ export async function discoverStore(
     { patterns: serializedPatterns, domain: linkDomain, customSelector, customAttribute }
   );
 
-  // For links with no dateText, try fetching the linked page's meta description
+  // Visit linked pages if we need text-based dates or iframe URL extraction
   const needsTextDate =
     storeDef.dateSource === "text" || storeDef.dateSource === "slug_then_text";
-  if (needsTextDate) {
+  const needsPageVisit = needsTextDate || !!storeDef.iframeExtract;
+  if (needsPageVisit) {
     for (const raw of rawLinks) {
-      // Skip if we already have dates from surrounding text
-      if (raw.dateText && parseDates(raw.dateText, storeDef.datePatterns)) continue;
+      const hasDates = raw.dateText && parseDates(raw.dateText, storeDef.datePatterns);
+      // Skip if dates are found AND no iframe extraction needed
+      if (hasDates && !storeDef.iframeExtract) continue;
+      // Skip if dates are found AND iframe already extracted
+      if (hasDates && raw.iframeUrl) continue;
       try {
         await page.goto(raw.href, { waitUntil: "domcontentloaded" });
-        await page.waitForTimeout(5000);
-        // Try meta description first; if no dates there, fall back to raw HTML
-        const meta = await page.evaluate(() => {
-          const el = document.querySelector('meta[name="description"]');
-          return el ? el.getAttribute("content") || "" : "";
-        });
-        if (meta && parseDates(meta, storeDef.datePatterns)) {
-          raw.dateText = meta;
-        } else {
-          const html = await page.content();
-          raw.dateText = html.slice(0, 50000);
+        await page.waitForTimeout(storeDef.iframeExtract ? 8000 : 5000);
+
+        // Extract iframe URL if configured
+        if (storeDef.iframeExtract) {
+          const pattern = storeDef.iframeExtract;
+          const iframeSrc = await page.evaluate((pat: string) => {
+            for (const iframe of Array.from(document.querySelectorAll("iframe[src]"))) {
+              const src = (iframe as HTMLIFrameElement).src;
+              if (new RegExp(pat).test(src)) return src;
+            }
+            return null;
+          }, pattern);
+          if (iframeSrc) {
+            raw.iframeUrl = iframeSrc;
+          }
+        }
+
+        // Extract dates if still needed
+        if (!hasDates && needsTextDate) {
+          const meta = await page.evaluate(() => {
+            const el = document.querySelector('meta[name="description"]');
+            return el ? el.getAttribute("content") || "" : "";
+          });
+          if (meta && parseDates(meta, storeDef.datePatterns)) {
+            raw.dateText = meta;
+          } else {
+            const html = await page.content();
+            raw.dateText = html.slice(0, 50000);
+          }
         }
       } catch (err) {
         console.warn(`[discovery] failed to visit ${raw.href}: ${err}`);
@@ -150,11 +174,13 @@ export async function discoverStore(
 
   const discovered: DiscoveredCatalog[] = [];
   for (const raw of rawLinks) {
-    let firstPageUrl = raw.href;
-    for (const lp of storeDef.linkPatterns) {
-      if (new RegExp(lp.match).test(raw.href)) {
-        firstPageUrl = applyUrlTransforms(raw.href, lp.normalizeUrl);
-        break;
+    let firstPageUrl = raw.iframeUrl || raw.href;
+    if (!raw.iframeUrl) {
+      for (const lp of storeDef.linkPatterns) {
+        if (new RegExp(lp.match).test(raw.href)) {
+          firstPageUrl = applyUrlTransforms(raw.href, lp.normalizeUrl);
+          break;
+        }
       }
     }
 

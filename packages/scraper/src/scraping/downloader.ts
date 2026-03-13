@@ -45,7 +45,14 @@ export async function downloadCatalogImages(
 }
 
 async function downloadImage(imageURL: string): Promise<Buffer> {
-  const resp = await fetch(imageURL);
+  const url = new URL(imageURL);
+  const resp = await fetch(imageURL, {
+    headers: {
+      "Referer": `${url.protocol}//${url.host}/`,
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    },
+  });
   if (!resp.ok) {
     throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
   }

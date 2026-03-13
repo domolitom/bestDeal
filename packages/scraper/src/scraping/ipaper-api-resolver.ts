@@ -1,3 +1,4 @@
+import { chromium } from "../browser.ts";
 import type { ResolveResult, ResolvedPage } from "./resolver-types.ts";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
 import { registerResolver } from "./resolver-registry.ts";
@@ -33,44 +34,62 @@ export function parseIPaperSettings(html: string): IPaperSettings | null {
   }
 }
 
+/**
+ * iPaper embeds page settings in window.staticSettings.
+ * We use Playwright to extract the settings (which include signed AWS URLs),
+ * then construct Zoom-quality image URLs for each page.
+ */
 async function resolveViaIPaperApi(
   input: ResolveInput
 ): Promise<ResolveResult> {
   const { firstPageUrl, catalogId } = input;
 
-  console.log(`[ipaper-api] fetching ${firstPageUrl}`);
+  console.log(`[ipaper-api] fetching ${firstPageUrl} via browser`);
 
-  const resp = await fetch(firstPageUrl);
-  if (!resp.ok) {
-    throw new Error(
-      `iPaper page returned ${resp.status}: ${resp.statusText}`
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.goto(firstPageUrl, { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(5000);
+
+    // Extract settings from the page
+    const settings = await page.evaluate(() => {
+      const w = window as any;
+      const s = w.staticSettings;
+      if (!s?.pages || !s?.aws) return null;
+      return {
+        pages: s.pages as number[],
+        aws: { url: s.aws.url as string, policy: s.aws.policy as string },
+      };
+    });
+
+    if (!settings) {
+      throw new Error(
+        `Could not extract iPaper settings from: ${firstPageUrl}`
+      );
+    }
+
+    const { pages: pageNumbers, aws } = settings;
+    console.log(`[ipaper-api] found ${pageNumbers.length} pages`);
+
+    // Build Zoom-quality image URLs — downloaded by the downloader with Referer headers
+    const resolvedPages: ResolvedPage[] = pageNumbers.map((nr) => ({
+      number: nr,
+      imageUrl: `${aws.url}Pages/${nr}/Zoom.jpg?${aws.policy}`,
+    }));
+
+    console.log(
+      `[ipaper-api] got ${resolvedPages.length} pages for ${catalogId}`
     );
+
+    return {
+      catalogId,
+      coverImageUrl: resolvedPages[0]?.imageUrl ?? "",
+      pages: resolvedPages,
+    };
+  } finally {
+    await browser.close();
   }
-
-  const html = await resp.text();
-  const settings = parseIPaperSettings(html);
-
-  if (!settings) {
-    throw new Error(
-      `Could not extract iPaper settings from: ${firstPageUrl}`
-    );
-  }
-
-  const { pages: pageNumbers, aws } = settings;
-  const pages: ResolvedPage[] = pageNumbers.map((nr) => ({
-    number: nr,
-    imageUrl: `${aws.url}Pages/${nr}.jpg?${aws.policy}`,
-  }));
-
-  console.log(
-    `[ipaper-api] got ${pages.length} pages for ${catalogId}`
-  );
-
-  return {
-    catalogId,
-    coverImageUrl: pages[0]?.imageUrl ?? "",
-    pages,
-  };
 }
 
 // --- CatalogResolver implementation ---

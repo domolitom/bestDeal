@@ -51,6 +51,14 @@ const detectionRules: DetectionRule[] = [
     test: (url) => /\.pdf(\?|$)/i.test(url),
     resolverName: "pdf",
   },
+  {
+    test: (url) => url.includes("files.rewe.co.at"),
+    resolverName: "flippingbook",
+  },
+  {
+    test: (url) => url.includes("digital-catalogue.com"),
+    resolverName: "digital-catalogue",
+  },
 ];
 
 // --- Registry ---

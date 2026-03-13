@@ -72,73 +72,91 @@ describe("iPaper URL detection", () => {
 });
 
 describe("resolveViaIPaperApi", () => {
-  beforeEach(() => {
-    // @ts-ignore - mock global fetch
-    globalThis.fetch = mock((url: string) => {
-      if (url.includes("CampaignPaper") || url.includes("ipapercms")) {
-        return Promise.resolve({
-          ok: true,
-          text: () => Promise.resolve(mockHtml),
-        });
-      }
-      return Promise.resolve({
-        ok: false,
-        status: 404,
-        statusText: "Not Found",
-      });
-    });
-  });
+  const mockSettings = {
+    pages: [1, 2, 3, 4, 5],
+    aws: {
+      url: "https://b-cdn.ipaper.io/iPaper/Papers/8ab875f0-3e43-4256-9593-7b6d365cb400/",
+      policy: "Policy=eyJ0ZXN0IjoxfQ__&Signature=abc123&Key-Pair-Id=APKATEST",
+    },
+  };
 
-  test("resolves all pages from iPaper HTML", async () => {
-    const { getResolver } = await import(
-      "../src/scraping/resolver-registry.ts"
-    );
-    const resolver = getResolver(
-      "https://brosura-de-campanie.jysk.ro/CampaignPaper/abc-123/"
-    );
+  function createMockBrowser(evaluateResult: unknown) {
+    const mockPage = {
+      goto: mock(() => Promise.resolve()),
+      waitForTimeout: mock(() => Promise.resolve()),
+      evaluate: mock(() => Promise.resolve(evaluateResult)),
+    };
+    const mockBrowser = {
+      newPage: mock(() => Promise.resolve(mockPage)),
+      close: mock(() => Promise.resolve()),
+    };
+    return { mockBrowser, mockPage };
+  }
 
-    expect(resolver.name).toBe("ipaper");
-    expect(resolver.needsLastPage).toBe(false);
+  test("resolves all pages from iPaper settings", async () => {
+    const { mockBrowser } = createMockBrowser(mockSettings);
 
-    const result = await resolver.resolve({
-      catalogId: "romania-jysk-2026-03-06-2026-03-19",
-      firstPageUrl:
-        "https://brosura-de-campanie.jysk.ro/CampaignPaper/abc-123/",
-    });
+    // Mock chromium.launch
+    const browserModule = await import("../src/browser.ts");
+    const originalLaunch = browserModule.chromium.launch;
+    browserModule.chromium.launch = mock(() => Promise.resolve(mockBrowser)) as any;
 
-    expect(result.catalogId).toBe("romania-jysk-2026-03-06-2026-03-19");
-    expect(result.pages).toHaveLength(5);
-    expect(result.pages[0]!.number).toBe(1);
-    expect(result.pages[0]!.imageUrl).toBe(
-      "https://b-cdn.ipaper.io/iPaper/Papers/8ab875f0-3e43-4256-9593-7b6d365cb400/Pages/1.jpg?Policy=eyJ0ZXN0IjoxfQ__&Signature=abc123&Key-Pair-Id=APKATEST"
-    );
-    expect(result.pages[4]!.number).toBe(5);
-    expect(result.pages[4]!.imageUrl).toContain("/Pages/5.jpg?");
-    expect(result.coverImageUrl).toBe(result.pages[0]!.imageUrl);
-  });
+    try {
+      const { getResolver } = await import(
+        "../src/scraping/resolver-registry.ts"
+      );
+      const resolver = getResolver(
+        "https://brosura-de-campanie.jysk.ro/CampaignPaper/abc-123/"
+      );
 
-  test("throws on non-iPaper HTML", async () => {
-    // @ts-ignore
-    globalThis.fetch = mock(() =>
-      Promise.resolve({
-        ok: true,
-        text: () => Promise.resolve("<html>not ipaper</html>"),
-      })
-    );
+      expect(resolver.name).toBe("ipaper");
+      expect(resolver.needsLastPage).toBe(false);
 
-    const { getResolver } = await import(
-      "../src/scraping/resolver-registry.ts"
-    );
-    const resolver = getResolver(
-      "https://brosura-de-campanie.jysk.ro/CampaignPaper/abc/"
-    );
-
-    expect(
-      resolver.resolve({
-        catalogId: "test",
+      const result = await resolver.resolve({
+        catalogId: "romania-jysk-2026-03-06-2026-03-19",
         firstPageUrl:
-          "https://brosura-de-campanie.jysk.ro/CampaignPaper/abc/",
-      })
-    ).rejects.toThrow("Could not extract iPaper settings");
+          "https://brosura-de-campanie.jysk.ro/CampaignPaper/abc-123/",
+      });
+
+      expect(result.catalogId).toBe("romania-jysk-2026-03-06-2026-03-19");
+      expect(result.pages).toHaveLength(5);
+      expect(result.pages[0]!.number).toBe(1);
+      expect(result.pages[0]!.imageUrl).toBe(
+        "https://b-cdn.ipaper.io/iPaper/Papers/8ab875f0-3e43-4256-9593-7b6d365cb400/Pages/1/Zoom.jpg?Policy=eyJ0ZXN0IjoxfQ__&Signature=abc123&Key-Pair-Id=APKATEST"
+      );
+      expect(result.pages[4]!.number).toBe(5);
+      expect(result.pages[4]!.imageUrl).toContain("/Pages/5/Zoom.jpg?");
+      expect(result.coverImageUrl).toBe(result.pages[0]!.imageUrl);
+      expect(mockBrowser.close).toHaveBeenCalled();
+    } finally {
+      browserModule.chromium.launch = originalLaunch;
+    }
+  });
+
+  test("throws on non-iPaper page", async () => {
+    const { mockBrowser } = createMockBrowser(null);
+
+    const browserModule = await import("../src/browser.ts");
+    const originalLaunch = browserModule.chromium.launch;
+    browserModule.chromium.launch = mock(() => Promise.resolve(mockBrowser)) as any;
+
+    try {
+      const { getResolver } = await import(
+        "../src/scraping/resolver-registry.ts"
+      );
+      const resolver = getResolver(
+        "https://brosura-de-campanie.jysk.ro/CampaignPaper/abc/"
+      );
+
+      expect(
+        resolver.resolve({
+          catalogId: "test",
+          firstPageUrl:
+            "https://brosura-de-campanie.jysk.ro/CampaignPaper/abc/",
+        })
+      ).rejects.toThrow("Could not extract iPaper settings");
+    } finally {
+      browserModule.chromium.launch = originalLaunch;
+    }
   });
 });

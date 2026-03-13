@@ -12,6 +12,8 @@ import "./scraping/yumpu-api-resolver.ts";
 import "./scraping/ipaper-api-resolver.ts";
 import "./scraping/pdf-resolver.ts";
 import "./scraping/fliphtml5-resolver.ts";
+import "./scraping/flippingbook-resolver.ts";
+import "./scraping/digital-catalogue-resolver.ts";
 import "./scraping/resolver.ts";
 
 export interface PipelineOptions {
@@ -116,21 +118,30 @@ export async function runPipeline(
     return report;
   }
 
-  // Phase 2: Scrape new catalogs
-  const newCatalogs = discovery.stores.flatMap((s) =>
-    s.catalogs.filter((c) => c.status === "new")
+  // Phase 2: Scrape new + previously-discovered-but-not-yet-scraped catalogs
+  const allCatalogIds = discovery.stores.flatMap((s) =>
+    s.catalogs.map((c) => c.catalogId)
   );
 
-  if (newCatalogs.length === 0) {
-    console.log("\n[pipeline] no new catalogs to scrape");
+  // Collect catalogs that need scraping (status = "discovered" in storage)
+  const toScrape: { catalogId: string }[] = [];
+  for (const id of [...new Set(allCatalogIds)]) {
+    const cat = await storage.getCatalog(id);
+    if (cat && cat.status === "discovered") {
+      toScrape.push({ catalogId: id });
+    }
+  }
+
+  if (toScrape.length === 0) {
+    console.log("\n[pipeline] no catalogs to scrape");
     return report;
   }
 
   console.log(
-    `\n=== Phase 2: Scraping ${newCatalogs.length} new catalog(s) ===\n`
+    `\n=== Phase 2: Scraping ${toScrape.length} catalog(s) ===\n`
   );
 
-  for (const catalog of newCatalogs) {
+  for (const catalog of toScrape) {
     try {
       const fullCatalog = await storage.getCatalog(catalog.catalogId);
       if (!fullCatalog) {

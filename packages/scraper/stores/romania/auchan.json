@@ -1,7 +1,9 @@
 {
     "name": "auchan",
     "landingUrl": "https://www.auchan.ro/cataloagele-auchan",
-    "waitAfterLoad": 3000,
+    "waitAfterLoad": 8000,
+    "resolver": "digital-catalogue",
+    "iframeExtract": "digital-catalogue\\.com",
     "linkPatterns": [
         {
             "match": "/cataloagele-auchan/(catalog-[^/]+)",

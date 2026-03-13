@@ -2,9 +2,10 @@
     "name": "pepco",
     "landingUrl": "https://pepco.ro/brosuri/",
     "waitAfterLoad": 5000,
+    "linkDomain": "pepco.ro",
     "linkPatterns": [
         {
-            "match": "/brosuri/((?!archiwum)[a-z][a-z0-9-]+[a-z0-9])/?$",
+            "match": "/wp-content/uploads/\\d{4}/\\d{2}/([^/]+\\.pdf)",
             "slugGroup": 1,
             "normalizeUrl": []
         }
@@ -17,7 +18,7 @@
             "dateTo": "$4-$5-$6"
         },
         {
-            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\s*-\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\s*[–-]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
             "dateFrom": "$1-$2-$3",
             "dateTo": "$4-$5-$6"
         }

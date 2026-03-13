@@ -2,10 +2,10 @@
     "name": "jysk",
     "landingUrl": "https://jysk.ro/campaign",
     "waitAfterLoad": 10000,
-    "linkDomain": "brosura-de-campanie.jysk.ro",
+    "linkDomain": "ipapercms.dk",
     "linkPatterns": [
         {
-            "match": "brosura-de-campanie\\.jysk\\.ro/CampaignPaper/([a-f0-9_-]+)",
+            "match": "ipapercms\\.dk/jysk/ro/CampaignPaper/([a-f0-9_-]+)",
             "slugGroup": 1,
             "normalizeUrl": [
                 {

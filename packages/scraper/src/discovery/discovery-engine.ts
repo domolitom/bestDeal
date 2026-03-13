@@ -123,17 +123,24 @@ export async function discoverStore(
     storeDef.dateSource === "text" || storeDef.dateSource === "slug_then_text";
   if (needsTextDate) {
     for (const raw of rawLinks) {
-      if (raw.dateText) continue;
+      // Skip if we already have dates from surrounding text
+      if (raw.dateText && parseDates(raw.dateText, storeDef.datePatterns)) continue;
       try {
         await page.goto(raw.href, { waitUntil: "domcontentloaded" });
-        await page.waitForTimeout(3000);
+        await page.waitForTimeout(5000);
+        // Try meta description first; if no dates there, fall back to raw HTML
         const meta = await page.evaluate(() => {
           const el = document.querySelector('meta[name="description"]');
           return el ? el.getAttribute("content") || "" : "";
         });
-        if (meta) raw.dateText = meta;
-      } catch {
-        // ignore — best effort
+        if (meta && parseDates(meta, storeDef.datePatterns)) {
+          raw.dateText = meta;
+        } else {
+          const html = await page.content();
+          raw.dateText = html.slice(0, 50000);
+        }
+      } catch (err) {
+        console.warn(`[discovery] failed to visit ${raw.href}: ${err}`);
       }
     }
     // Navigate back so the page state is clean

@@ -63,55 +63,11 @@ describe("Yumpu URL detection", () => {
 describe("resolveViaYumpuApi", () => {
   const mockResponse = {
     document: {
-      base_path:
-        "https://documents.yumpu.com/000/067/944/690/abc123/",
-      pages_count: 3,
+      url_title: "catalog-carne",
       pages: [
-        {
-          nr: 1,
-          images: {
-            thumb: "t1/page1.jpg",
-            small: "s1/page1.jpg",
-            medium: "m1/page1.jpg",
-            large: "l1/page1.jpg",
-          },
-          qss: {
-            thumb: "AWSAccessKeyId=KEY&Expires=123&Signature=aaa",
-            small: "AWSAccessKeyId=KEY&Expires=123&Signature=bbb",
-            medium: "AWSAccessKeyId=KEY&Expires=123&Signature=ccc",
-            large: "AWSAccessKeyId=KEY&Expires=123&Signature=ddd",
-          },
-        },
-        {
-          nr: 2,
-          images: {
-            thumb: "t1/page2.jpg",
-            small: "s1/page2.jpg",
-            medium: "m1/page2.jpg",
-            large: "l1/page2.jpg",
-          },
-          qss: {
-            thumb: "AWSAccessKeyId=KEY&Expires=123&Signature=eee",
-            small: "AWSAccessKeyId=KEY&Expires=123&Signature=fff",
-            medium: "AWSAccessKeyId=KEY&Expires=123&Signature=ggg",
-            large: "AWSAccessKeyId=KEY&Expires=123&Signature=hhh",
-          },
-        },
-        {
-          nr: 3,
-          images: {
-            thumb: "t1/page3.jpg",
-            small: "s1/page3.jpg",
-            medium: "m1/page3.jpg",
-            large: "l1/page3.jpg",
-          },
-          qss: {
-            thumb: "AWSAccessKeyId=KEY&Expires=123&Signature=iii",
-            small: "AWSAccessKeyId=KEY&Expires=123&Signature=jjj",
-            medium: "AWSAccessKeyId=KEY&Expires=123&Signature=kkk",
-            large: "AWSAccessKeyId=KEY&Expires=123&Signature=lll",
-          },
-        },
+        { nr: 1 },
+        { nr: 2 },
+        { nr: 3 },
       ],
     },
   };
@@ -154,58 +110,11 @@ describe("resolveViaYumpuApi", () => {
     expect(result.pages).toHaveLength(3);
     expect(result.pages[0]!.number).toBe(1);
     expect(result.pages[0]!.imageUrl).toBe(
-      "https://documents.yumpu.com/000/067/944/690/abc123/l1/page1.jpg?AWSAccessKeyId=KEY&Expires=123&Signature=ddd"
+      "https://img.yumpu.com/67944690/1/1132x1600/catalog-carne.jpg"
     );
     expect(result.pages[1]!.number).toBe(2);
     expect(result.pages[2]!.number).toBe(3);
     expect(result.coverImageUrl).toBe(result.pages[0]!.imageUrl);
-  });
-
-  test("falls back to medium if large not available", async () => {
-    const noLargeResponse = {
-      document: {
-        base_path: "https://documents.yumpu.com/base/",
-        pages_count: 1,
-        pages: [
-          {
-            nr: 1,
-            images: {
-              thumb: "t/p1.jpg",
-              small: "s/p1.jpg",
-              medium: "m/p1.jpg",
-            },
-            qss: {
-              thumb: "sig=t",
-              small: "sig=s",
-              medium: "sig=m",
-            },
-          },
-        ],
-      },
-    };
-
-    // @ts-ignore
-    globalThis.fetch = mock(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(noLargeResponse),
-      })
-    );
-
-    const { getResolver } = await import(
-      "../src/scraping/resolver-registry.ts"
-    );
-    const resolver = getResolver(
-      "https://www.yumpu.com/ro/document/read/123/test"
-    );
-    const result = await resolver.resolve({
-      catalogId: "test",
-      firstPageUrl: "https://www.yumpu.com/ro/document/read/123/test",
-    });
-
-    expect(result.pages[0]!.imageUrl).toBe(
-      "https://documents.yumpu.com/base/m/p1.jpg?sig=m"
-    );
   });
 
   test("constructs correct API URL with language", async () => {

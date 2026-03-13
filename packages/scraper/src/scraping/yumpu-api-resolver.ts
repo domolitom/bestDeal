@@ -2,21 +2,15 @@ import type { ResolveResult, ResolvedPage } from "./resolver-types.ts";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
 import { registerResolver } from "./resolver-registry.ts";
 
-interface YumpuPage {
-  nr: number;
-  images: Record<string, string>;
-  qss: Record<string, string>;
-}
-
 interface YumpuDocument {
-  base_path: string;
-  pages: YumpuPage[];
-  pages_count: number;
+  pages: { nr: number }[];
+  url_title: string;
 }
 
-/** Preferred image size (large ≈ 1132×1600). */
-const PREFERRED_SIZE = "large";
-const FALLBACK_SIZES = ["medium", "small", "thumb"] as const;
+/** Public CDN base — no auth needed. */
+const IMG_CDN = "https://img.yumpu.com";
+/** Large size ≈ 1132×1600 */
+const IMG_SIZE = "1132x1600";
 
 /**
  * Extract the Yumpu document ID from a URL.
@@ -66,25 +60,11 @@ async function resolveViaYumpuApi(
     throw new Error(`Yumpu API returned no pages for doc: ${docId}`);
   }
 
-  const basePath = doc.base_path;
-  const pages: ResolvedPage[] = [];
-
-  for (const page of doc.pages) {
-    const size =
-      PREFERRED_SIZE in page.images
-        ? PREFERRED_SIZE
-        : FALLBACK_SIZES.find((s) => s in page.images);
-
-    if (!size) continue;
-
-    const imagePath = page.images[size]!;
-    const qs = page.qss[size] ?? "";
-    const imageUrl = qs
-      ? `${basePath}${imagePath}?${qs}`
-      : `${basePath}${imagePath}`;
-
-    pages.push({ number: page.nr, imageUrl });
-  }
+  const slug = doc.url_title || "page";
+  const pages: ResolvedPage[] = doc.pages.map((page) => ({
+    number: page.nr,
+    imageUrl: `${IMG_CDN}/${docId}/${page.nr}/${IMG_SIZE}/${slug}.jpg`,
+  }));
 
   console.log(
     `[yumpu-api] got ${pages.length} pages for ${catalogId}`

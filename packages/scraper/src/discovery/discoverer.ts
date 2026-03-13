@@ -1,4 +1,4 @@
-import { chromium } from "playwright";
+import { chromium } from "../browser.ts";
 import type { Page } from "playwright";
 import { buildCatalogId, buildPageURL } from "@bestdeal/shared";
 import type { StorageAdapter, CatalogMeta } from "@bestdeal/shared";

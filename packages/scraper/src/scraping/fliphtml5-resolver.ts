@@ -1,4 +1,4 @@
-import { chromium } from "playwright";
+import { chromium } from "../browser.ts";
 import type { ResolveResult, ResolvedPage } from "./resolver-types.ts";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
 import { registerResolver } from "./resolver-registry.ts";

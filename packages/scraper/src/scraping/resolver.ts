@@ -1,5 +1,5 @@
 import type { Page } from "playwright";
-import { chromium } from "playwright";
+import { chromium } from "../browser.ts";
 import { buildPageURL, extractPageNumber } from "@bestdeal/shared";
 import type { ImageExtraction } from "@bestdeal/shared";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";

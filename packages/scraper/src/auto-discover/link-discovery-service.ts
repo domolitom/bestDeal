@@ -1,4 +1,4 @@
-import { chromium } from "playwright";
+import { chromium } from "../browser.ts";
 
 export interface ExtractedLink {
   href: string;

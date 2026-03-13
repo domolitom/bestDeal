@@ -1,0 +1,22 @@
+{
+    "name": "metro",
+    "landingUrl": "https://www.metro.ro/cataloagele-metro",
+    "waitAfterLoad": 10000,
+    "linkDomain": "cataloagele.metro.ro",
+    "linkPatterns": [
+        {
+            "match": "cataloagele\\.metro\\.ro/([^/?#]+)/page/\\d+",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        }
+    ],
+    "resolver": "publitas",
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\s*-\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

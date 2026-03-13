@@ -11,6 +11,7 @@ import "./scraping/publitas-api-resolver.ts";
 import "./scraping/yumpu-api-resolver.ts";
 import "./scraping/ipaper-api-resolver.ts";
 import "./scraping/pdf-resolver.ts";
+import "./scraping/fliphtml5-resolver.ts";
 import "./scraping/resolver.ts";
 
 export interface PipelineOptions {

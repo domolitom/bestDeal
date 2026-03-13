@@ -15,7 +15,7 @@ export interface ConfigIdInput {
  */
 export function buildCatalogId(input: ConfigIdInput): string {
   const isoFrom = toISODate(input.dateFrom, extractYear(input.dateTo));
-  const isoTo = toISODate(input.dateTo);
+  const isoTo = toISODate(input.dateTo, undefined, true);
   const base = `${input.country}-${input.store}-${isoFrom}-${isoTo}`;
   if (input.catalogType) return `${base}-${input.catalogType}`;
   return base;

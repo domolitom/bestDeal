@@ -44,6 +44,10 @@ const detectionRules: DetectionRule[] = [
     resolverName: "ipaper",
   },
   {
+    test: (url) => url.includes("fliphtml5.com"),
+    resolverName: "fliphtml5",
+  },
+  {
     test: (url) => /\.pdf(\?|$)/i.test(url),
     resolverName: "pdf",
   },

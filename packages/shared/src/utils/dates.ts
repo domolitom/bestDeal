@@ -53,7 +53,7 @@ function applyGroupRefs(template: string, match: RegExpMatchArray): string {
  * Convert a DD-MM or DD-MM-YYYY date string to ISO 8601 (YYYY-MM-DD).
  * If no year is provided, uses the given fallback year.
  */
-export function toISODate(raw: string, fallbackYear?: number): string {
+export function toISODate(raw: string, fallbackYear?: number, endOfMonth?: boolean): string {
   // Already ISO format (YYYY-MM-DD)
   if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
     return raw;
@@ -63,6 +63,17 @@ export function toISODate(raw: string, fallbackYear?: number): string {
   const normalized = normalizeMonthNames(raw);
   const parts = normalized.split("-");
   if (parts.length === 2) {
+    const [a, b] = parts;
+    // Check for MM-YYYY (month-year) vs DD-MM (day-month)
+    if (b!.length === 4 && parseInt(b!) > 1900) {
+      // MM-YYYY format — return first day of month (or last if endOfMonth)
+      const mm = a!.padStart(2, "0");
+      if (endOfMonth) {
+        const lastDay = new Date(parseInt(b!), parseInt(mm), 0).getDate();
+        return `${b}-${mm}-${String(lastDay).padStart(2, "0")}`;
+      }
+      return `${b}-${mm}-01`;
+    }
     // DD-MM format
     const [dd, mm] = parts;
     const year = fallbackYear ?? new Date().getFullYear();

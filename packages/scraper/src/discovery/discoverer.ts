@@ -218,7 +218,7 @@ export async function discoverAll(
               catalog.dateFrom,
               extractYear(catalog.dateTo)
             ),
-            dateTo: toISODate(catalog.dateTo),
+            dateTo: toISODate(catalog.dateTo, undefined, true),
             catalogType: catalog.catalogType,
             coverImage: "cover.jpg",
             pageCount: lastPage ?? 0,

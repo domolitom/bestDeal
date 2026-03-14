@@ -8,6 +8,7 @@ packages/data/
 # Next.js
 packages/web/.next/
 packages/web/out/
+packages/web/.vercel/
 
 # Turbo
 .turbo/
@@ -17,6 +18,12 @@ dist/
 
 # Environment variables
 .env
+.env.*
+.env.local
+.env.production
+
+# English corrections log
+english-corrections.md
 
 # OS
 .DS_Store

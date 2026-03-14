@@ -10,7 +10,8 @@
     "scraper": "bun run --filter @bestdeal/scraper scraper",
     "test": "bun run --filter '*' test",
     "typecheck": "bun run --filter '*' typecheck",
-    "test:scraper": "bun test --filter packages/scraper"
+    "test:scraper": "bun test --filter packages/scraper",
+    "deploy": "bun run --filter @bestdeal/web deploy"
   },
   "devDependencies": {
     "@types/bun": "latest",

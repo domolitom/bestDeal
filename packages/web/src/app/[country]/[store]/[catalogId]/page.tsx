@@ -5,6 +5,7 @@ import { CatalogViewer } from "@/components/CatalogViewer";
 import { FreshnessIndicator, StatusBadge } from "@/components/FreshnessIndicator";
 import { formatDate } from "@bestdeal/shared";
 
+export const runtime = "edge";
 export const revalidate = 300;
 
 export default async function CatalogPage({

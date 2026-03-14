@@ -2,6 +2,7 @@ import { storage } from "@/lib/storage";
 import { Header } from "@/components/Header";
 import { CountrySelector } from "@/components/CountrySelector";
 
+export const runtime = "edge";
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export default async function HomePage() {

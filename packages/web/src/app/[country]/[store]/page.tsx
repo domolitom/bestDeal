@@ -4,6 +4,7 @@ import { Header, getCountryName } from "@/components/Header";
 import { CatalogGrid } from "@/components/CatalogGrid";
 import Link from "next/link";
 
+export const runtime = "edge";
 export const revalidate = 300;
 
 export default async function StorePage({

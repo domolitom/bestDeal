@@ -2,6 +2,3 @@ name = "bestdeal"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "packages/web/.vercel/output/static"
-
-[build]
-command = "curl -fsSL https://bun.sh/install | bash && ~/.bun/bin/bun install && cd packages/web && ~/.bun/bin/bun run build:cf"

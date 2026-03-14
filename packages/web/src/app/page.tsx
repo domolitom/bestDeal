@@ -17,9 +17,9 @@ export default async function HomePage() {
     <>
       <Header />
       <main className="container">
-        <h1 className="page-title">Browse Catalogs</h1>
+        <h1 className="page-title">Which country do you live in?</h1>
         <p className="page-subtitle">
-          Weekly retail catalogs from stores across Europe
+          Browse the latest weekly catalogs from your favorite stores
         </p>
         <CountrySelector countries={countries} />
       </main>

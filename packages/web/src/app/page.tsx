@@ -6,7 +6,12 @@ export const runtime = "edge";
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export default async function HomePage() {
-  const countries = await storage.listCountries();
+  let countries;
+  try {
+    countries = await storage.listCountries();
+  } catch {
+    countries = [];
+  }
 
   return (
     <>

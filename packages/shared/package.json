@@ -5,7 +5,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./storage/fs": "./src/storage/fs-read-adapter.ts",
-    "./storage/r2": "./src/storage/r2-read-adapter.ts"
+    "./storage/r2": "./src/storage/r2-read-adapter.ts",
+    "./storage/cdn": "./src/storage/cdn-read-adapter.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

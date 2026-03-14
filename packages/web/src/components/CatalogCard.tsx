@@ -2,9 +2,10 @@ import Link from "next/link";
 import type { CatalogSummary } from "@bestdeal/shared";
 import { formatDate } from "@bestdeal/shared";
 import { StatusBadge, FreshnessIndicator } from "./FreshnessIndicator";
+import { getCoverUrl } from "@/lib/image-url";
 
 export function CatalogCard({ catalog }: { catalog: CatalogSummary }) {
-  const coverUrl = `/data/catalogs/${catalog.country}/${catalog.store}/${catalog.id}/cover.jpg`;
+  const coverUrl = getCoverUrl(catalog);
 
   return (
     <Link href={`/${catalog.country}/${catalog.store}/${catalog.id}`}>

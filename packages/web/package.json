@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:cf": "npx @cloudflare/next-on-pages",
+    "deploy": "npx wrangler pages deploy",
     "start": "next start",
     "typecheck": "tsc --noEmit"
   },
@@ -15,9 +17,11 @@
     "react-dom": "^19"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.73.0"
   }
 }

@@ -6,11 +6,11 @@ export const runtime = "edge";
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export default async function HomePage() {
-  let countries;
+  let countries: Awaited<ReturnType<typeof storage.listCountries>> = [];
   try {
     countries = await storage.listCountries();
   } catch {
-    countries = [];
+    // Empty bucket or R2 connection error — show empty state
   }
 
   return (

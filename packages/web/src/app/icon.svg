@@ -1,4 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#3366FF"/>
-  <text x="16" y="23" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="white" text-anchor="middle">B</text>
+  <!-- Leaves -->
+  <path d="M14 8c-2-4-6-6-6-6s2 4 4 6" fill="#4CAF50"/>
+  <path d="M16 7c0-5-2-7-2-7s-1 4 0 7" fill="#66BB6A"/>
+  <path d="M18 8c2-4 6-6 6-6s-2 4-4 6" fill="#4CAF50"/>
+  <!-- Carrot body -->
+  <path d="M11 9c0 0-1 6 1 12s4 10 4 10 2-4 4-10 1-12 1-12c0 0-3-1.5-5-1.5S11 9 11 9z" fill="#FF9800"/>
+  <!-- Carrot lines -->
+  <line x1="14" y1="14" x2="18" y2="14" stroke="#F57C00" stroke-width="0.7" stroke-linecap="round"/>
+  <line x1="13.5" y1="18" x2="17.5" y2="18" stroke="#F57C00" stroke-width="0.7" stroke-linecap="round"/>
+  <line x1="14" y1="22" x2="17" y2="22" stroke="#F57C00" stroke-width="0.7" stroke-linecap="round"/>
 </svg>

@@ -1,0 +1,38 @@
+{
+    "name": "metro",
+    "landingUrl": "https://prospekte.metro.de/",
+    "waitAfterLoad": 10000,
+    "linkDomain": "prospekte.metro.de",
+    "linkPatterns": [
+        {
+            "match": "prospekte\\.metro\\.de/([^/?#]+)/page/\\d+",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        },
+        {
+            "match": "prospekte\\.metro\\.de/([^/?#]+)/?$",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                {
+                    "type": "replace",
+                    "match": "/?$",
+                    "replacement": "/page/1"
+                }
+            ]
+        }
+    ],
+    "resolver": "publitas",
+    "dateSource": "slug_then_text",
+    "datePatterns": [
+        {
+            "match": "(\\d{2})(\\d{2})(\\d{2})-(\\d{2})(\\d{2})(\\d{2})",
+            "dateFrom": "$1-$2-20$3",
+            "dateTo": "$4-$5-20$6"
+        },
+        {
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\s*(?:bis|-|–)\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

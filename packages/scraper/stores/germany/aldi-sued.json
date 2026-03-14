@@ -1,0 +1,26 @@
+{
+    "name": "aldi-sued",
+    "landingUrl": "https://www.aldi-sued.de/de/angebote/prospekte.html",
+    "waitAfterLoad": 8000,
+    "linkDomain": "prospekt.aldi-sued.de",
+    "resolver": "publitas",
+    "linkPatterns": [
+        {
+            "match": "prospekt\\.aldi-sued\\.de/(kw[^/]+)",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        }
+    ],
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "kw(\\d+)-(\\d{2})",
+            "dateFrom": "KW$1-$2",
+            "dateTo": "KW$1-$2"
+        }
+    ],
+    "catalogTypePattern": {
+        "match": "kw\\d+-\\d+-(.*)",
+        "transform": "lowercase"
+    }
+}

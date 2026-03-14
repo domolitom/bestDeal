@@ -28,7 +28,11 @@ export type {
   StorageAdapter,
 } from "./types/storage";
 
-export { FsReadAdapter } from "./storage/fs-read-adapter";
+// Storage adapters are NOT re-exported here to keep this barrel client-safe
+// (they use node:fs / @aws-sdk which can't be bundled by webpack for the browser).
+// Import them directly:
+//   import { FsReadAdapter } from "@bestdeal/shared/storage/fs";
+//   import { R2ReadAdapter } from "@bestdeal/shared/storage/r2";
 
 export type { Country } from "./types/country";
 export { COUNTRY_META } from "./types/country";

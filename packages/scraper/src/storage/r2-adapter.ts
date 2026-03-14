@@ -66,4 +66,17 @@ export class R2StorageAdapter extends R2ReadAdapter implements StorageAdapter {
       })
     );
   }
+
+  /** Write manifest.json to the bucket root for CDN-based web app. */
+  async writeManifest(json: string): Promise<void> {
+    await this.s3.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: "manifest.json",
+        Body: json,
+        ContentType: "application/json",
+        CacheControl: "public, max-age=60",
+      })
+    );
+  }
 }

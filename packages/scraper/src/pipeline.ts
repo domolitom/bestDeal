@@ -134,6 +134,7 @@ export async function runPipeline(
 
   if (toScrape.length === 0) {
     console.log("\n[pipeline] no catalogs to scrape");
+    await generateManifest(storage);
     return report;
   }
 
@@ -226,5 +227,34 @@ export async function runPipeline(
   console.log(
     `\n=== Pipeline complete: ${report.scraped.length} scraped, ${report.failed.length} failed ===\n`
   );
+
+  // Generate manifest.json for CDN-based web app
+  await generateManifest(storage);
+
   return report;
+}
+
+/**
+ * Write a manifest.json listing all ready catalogs.
+ * The web app reads this via fetch() from the CDN — no S3 SDK needed at runtime.
+ */
+export async function generateManifest(storage: StorageAdapter): Promise<void> {
+  const catalogs = await storage.listCatalogs({ status: "ready" });
+  const manifest = {
+    updatedAt: new Date().toISOString(),
+    catalogs: [] as CatalogMeta[],
+  };
+
+  for (const summary of catalogs) {
+    const catalog = await storage.getCatalog(summary.id);
+    if (!catalog) continue;
+    const { pages, ...meta } = catalog;
+    manifest.catalogs.push(meta);
+  }
+
+  // Use writeManifest if available (R2 adapter), otherwise skip
+  if ("writeManifest" in storage && typeof storage.writeManifest === "function") {
+    await (storage as any).writeManifest(JSON.stringify(manifest, null, 2));
+    console.log(`[pipeline] wrote manifest.json (${manifest.catalogs.length} catalogs)`);
+  }
 }

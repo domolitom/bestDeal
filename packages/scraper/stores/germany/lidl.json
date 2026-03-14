@@ -2,6 +2,7 @@
     "name": "lidl",
     "landingUrl": "https://www.lidl.de/",
     "waitAfterLoad": 8000,
+    "resolver": "leaflets",
     "linkPatterns": [
         {
             "match": "/l/prospekte/([^/]+)/view/flyer/page/\\d+",

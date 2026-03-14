@@ -1,5 +1,6 @@
 import { parseArgs } from "node:util";
 import { join } from "node:path";
+import type { StorageAdapter } from "@bestdeal/shared";
 import { FilesystemAdapter } from "./storage/fs-adapter.ts";
 import { runPipeline } from "./pipeline.ts";
 
@@ -12,6 +13,7 @@ const { values } = parseArgs({
     "auto-discover": { type: "boolean", default: false },
     url: { type: "string" },
     "data-dir": { type: "string", default: "../../data/catalogs" },
+    storage: { type: "string", default: "fs" },
     help: { type: "boolean", short: "h", default: false },
   },
   strict: true,
@@ -38,6 +40,9 @@ Options:
   --auto-discover      Generate a store config from a landing URL
   --url=URL            Landing URL (required with --auto-discover)
   --data-dir=PATH      Data directory (default: ../../data/catalogs)
+  --storage=TYPE       Storage backend: fs (default) or r2
+                       R2 requires env vars: R2_ENDPOINT, R2_BUCKET,
+                       R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_PUBLIC_URL
   -h, --help           Show this help
 `);
   process.exit(0);
@@ -68,10 +73,43 @@ if (values["auto-discover"]) {
   process.exit(0);
 }
 
-const dataDir = join(import.meta.dir, values["data-dir"] ?? "../../data/catalogs");
-const storage = new FilesystemAdapter(dataDir);
+async function createStorage(): Promise<StorageAdapter> {
+  if (values.storage === "r2") {
+    const { R2StorageAdapter } = await import("./storage/r2-adapter.ts");
 
-console.log(`[cli] data directory: ${dataDir}`);
+    const endpoint = process.env.R2_ENDPOINT;
+    const bucket = process.env.R2_BUCKET ?? "bestdeal-catalogs";
+    const accessKeyId = process.env.R2_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+    const publicUrl = process.env.R2_PUBLIC_URL;
+
+    if (!endpoint || !accessKeyId || !secretAccessKey || !publicUrl) {
+      console.error(
+        "[cli] --storage=r2 requires env vars: R2_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_PUBLIC_URL"
+      );
+      process.exit(1);
+    }
+
+    console.log(`[cli] using R2 storage (bucket: ${bucket})`);
+    return new R2StorageAdapter({
+      endpoint,
+      bucket,
+      accessKeyId,
+      secretAccessKey,
+      publicUrl,
+    });
+  }
+
+  const dataDir = join(
+    import.meta.dir,
+    values["data-dir"] ?? "../../data/catalogs"
+  );
+  console.log(`[cli] data directory: ${dataDir}`);
+  return new FilesystemAdapter(dataDir);
+}
+
+const storage = await createStorage();
+
 console.log(
   `[cli] filters: country=${values.country ?? "all"}, store=${values.store ?? "all"}`
 );

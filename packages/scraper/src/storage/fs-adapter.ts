@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { StorageAdapter, CatalogMeta } from "@bestdeal/shared";
-import { FsReadAdapter } from "@bestdeal/shared";
+import { FsReadAdapter } from "@bestdeal/shared/storage/fs";
 
 /**
  * Read-write filesystem storage adapter for the scraper.

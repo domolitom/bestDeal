@@ -51,12 +51,33 @@ function applyGroupRefs(template: string, match: RegExpMatchArray): string {
 
 /**
  * Convert a DD-MM or DD-MM-YYYY date string to ISO 8601 (YYYY-MM-DD).
+ * Also handles KW (calendar week) format: "KW{n}-{yy}" or "KW{n}-{yyyy}".
  * If no year is provided, uses the given fallback year.
  */
 export function toISODate(raw: string, fallbackYear?: number, endOfMonth?: boolean): string {
   // Already ISO format (YYYY-MM-DD)
   if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
     return raw;
+  }
+
+  // KW (calendar week) format: KW{n}-{yy} or KW{n}-{yyyy}
+  // Returns Monday for dateFrom, Saturday for dateTo (endOfMonth=true)
+  const kwMatch = raw.match(/^KW(\d+)-(\d{2,4})$/);
+  if (kwMatch) {
+    const kw = parseInt(kwMatch[1]!);
+    let year = parseInt(kwMatch[2]!);
+    if (year < 100) year += 2000;
+    // ISO 8601 week date: Jan 4 is always in week 1
+    const jan4 = new Date(year, 0, 4);
+    const dayOfWeek = jan4.getDay() || 7; // Mon=1..Sun=7
+    const monday = new Date(year, 0, 4 - dayOfWeek + 1 + (kw - 1) * 7);
+    if (endOfMonth) {
+      // Aldi weeks run Mon–Sat, return Saturday
+      const saturday = new Date(monday);
+      saturday.setDate(saturday.getDate() + 5);
+      return saturday.toISOString().split("T")[0]!;
+    }
+    return monday.toISOString().split("T")[0]!;
   }
 
   // Normalize month names (e.g. "martie" → "03") before splitting

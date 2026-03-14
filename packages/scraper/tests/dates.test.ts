@@ -25,6 +25,20 @@ describe("toISODate", () => {
     expect(toISODate("2026-02-09")).toBe("2026-02-09");
   });
 
+  test("KW format returns Monday (dateFrom)", () => {
+    // KW11 2026 = Mon Mar 9
+    expect(toISODate("KW11-26")).toBe("2026-03-09");
+  });
+
+  test("KW format returns Saturday (dateTo) with endOfMonth", () => {
+    // KW11 2026 = Sat Mar 14
+    expect(toISODate("KW11-26", undefined, true)).toBe("2026-03-14");
+  });
+
+  test("KW format with 4-digit year", () => {
+    expect(toISODate("KW1-2026")).toBe("2025-12-29");
+  });
+
   test("Romanian abbreviated month name", () => {
     expect(toISODate("1-mar", 2026)).toBe("2026-03-01");
   });

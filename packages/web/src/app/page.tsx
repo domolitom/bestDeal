@@ -19,7 +19,7 @@ export default async function HomePage() {
       <main className="container">
         <h1 className="page-title">Which country do you live in?</h1>
         <p className="page-subtitle">
-          Browse the latest weekly catalogs from your favorite stores
+          Browse the latest catalogs from your favorite stores
         </p>
         <CountrySelector countries={countries} />
       </main>

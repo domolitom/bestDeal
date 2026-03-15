@@ -1,0 +1,40 @@
+{
+    "name": "lidl",
+    "landingUrl": "https://www.lidl.pt/l/folhetos",
+    "waitAfterLoad": 8000,
+    "resolver": "leaflets",
+    "linkPatterns": [
+        {
+            "match": "/l/folhetos/([^/]+)/view/flyer/page/\\d+",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" }
+            ]
+        },
+        {
+            "match": "/l/folhetos/([^/]+)/ar/\\d+",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/ar/\\d+", "replacement": "/view/flyer/page/1" }
+            ]
+        }
+    ],
+    "dateSource": "slug_then_text",
+    "datePatterns": [
+        {
+            "match": "(\\d{2}-\\d{2}-\\d{4})-(\\d{2}-\\d{2}-\\d{4})",
+            "dateFrom": "$1",
+            "dateTo": "$2"
+        },
+        {
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\s*-\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "De (\\d{2})/(\\d{2}) a (\\d{2})/(\\d{2})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4"
+        }
+    ]
+}

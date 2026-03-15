@@ -14,6 +14,7 @@ import "./scraping/pdf-resolver.ts";
 import "./scraping/fliphtml5-resolver.ts";
 import "./scraping/flippingbook-resolver.ts";
 import "./scraping/digital-catalogue-resolver.ts";
+import "./scraping/tjek-resolver.ts";
 import "./scraping/resolver.ts";
 
 export interface PipelineOptions {

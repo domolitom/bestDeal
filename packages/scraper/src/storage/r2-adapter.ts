@@ -1,6 +1,8 @@
 import {
   S3Client,
   PutObjectCommand,
+  ListObjectsV2Command,
+  DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
 import type { StorageAdapter, CatalogMeta } from "@bestdeal/shared";
 import { R2ReadAdapter } from "@bestdeal/shared/storage/r2";
@@ -65,6 +67,40 @@ export class R2StorageAdapter extends R2ReadAdapter implements StorageAdapter {
         CacheControl: "public, max-age=604800, immutable",
       })
     );
+  }
+
+  /** Delete all objects for a catalog from R2. */
+  async deleteCatalog(catalogId: string): Promise<void> {
+    const parsed = parseCatalogId(catalogId);
+    if (!parsed) throw new Error(`Invalid catalog ID: ${catalogId}`);
+
+    const prefix = `${parsed.country}/${parsed.store}/${catalogId}/`;
+    let continuationToken: string | undefined;
+
+    do {
+      const resp = await this.s3.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          Prefix: prefix,
+          ContinuationToken: continuationToken,
+        })
+      );
+
+      const keys = (resp.Contents ?? [])
+        .map((obj) => obj.Key!)
+        .filter(Boolean);
+
+      if (keys.length > 0) {
+        await this.s3.send(
+          new DeleteObjectsCommand({
+            Bucket: this.bucket,
+            Delete: { Objects: keys.map((Key) => ({ Key })) },
+          })
+        );
+      }
+
+      continuationToken = resp.NextContinuationToken;
+    } while (continuationToken);
   }
 
   /** Write manifest.json to the bucket root for CDN-based web app. */

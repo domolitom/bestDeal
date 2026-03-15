@@ -27,14 +27,14 @@ async function resolveViaTjek(
 
     // Click the first catalog thumbnail to open the full viewer
     const clicked = await page.evaluate(() => {
-      const imgs = Array.from(document.querySelectorAll("img[src*='tjek.com']"));
-      if (imgs.length > 0) {
-        const parent = imgs[0].closest("button, a, [role='button']");
+      const img = document.querySelector("img[src*='tjek.com']");
+      if (img) {
+        const parent = img.closest("button, a, [role='button']");
         if (parent) {
           (parent as HTMLElement).click();
           return true;
         }
-        (imgs[0] as HTMLElement).click();
+        (img as HTMLElement).click();
         return true;
       }
       return false;

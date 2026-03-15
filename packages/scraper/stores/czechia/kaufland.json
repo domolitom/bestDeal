@@ -1,0 +1,39 @@
+{
+    "name": "kaufland",
+    "landingUrl": "https://prodejny.kaufland.cz/letak.html",
+    "waitAfterLoad": 3000,
+    "linkDomain": "leaflets.kaufland.com",
+    "linkPatterns": [
+        {
+            "match": "leaflets\\.kaufland\\.com",
+            "slugGroup": 0,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/ar/\\d+/?$", "replacement": "" },
+                {
+                    "type": "else",
+                    "condition": "/page/",
+                    "ifTrue": { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" },
+                    "ifFalse": { "type": "replace", "match": "/?$", "replacement": "/view/flyer/page/1" }
+                }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\s*(?:-|–)\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{2})\\.(\\d{2})\\.?\\s*(?:-|–)\\s*(\\d{2})\\.(\\d{2})\\.?",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4"
+        }
+    ],
+    "catalogTypePattern": {
+        "match": "CZ_cs_(\\w+?)[\\d_]",
+        "caseInsensitive": true,
+        "transform": "lowercase"
+    }
+}

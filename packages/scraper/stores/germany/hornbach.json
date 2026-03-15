@@ -1,0 +1,44 @@
+{
+    "name": "hornbach",
+    "landingUrl": "https://www.hornbach.de/aktuelles/prospekte-und-kataloge/",
+    "waitAfterLoad": 10000,
+    "linkDomain": "view.publitas.com",
+    "linkPatterns": [
+        {
+            "match": "view\\.publitas\\.com/hornbach[^/]*/([^/?#]+)/page/\\d+",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        },
+        {
+            "match": "view\\.publitas\\.com/hornbach[^/]*/([^/?#]+)/?$",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/?$", "replacement": "/page/1" }
+            ]
+        }
+    ],
+    "resolver": "publitas",
+    "dateSource": "slug_then_text",
+    "datePatterns": [
+        {
+            "match": "(\\d{2})(\\d{2})(\\d{2})-(\\d{2})(\\d{2})(\\d{2})",
+            "dateFrom": "$1-$2-20$3",
+            "dateTo": "$4-$5-20$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*(?:bis|-|–)\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.?\\s*(?:bis|-|–)\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.?\\s*-\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        }
+    ]
+}

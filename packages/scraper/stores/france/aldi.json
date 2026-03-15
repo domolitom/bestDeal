@@ -1,0 +1,22 @@
+{
+    "name": "aldi",
+    "landingUrl": "https://www.aldi.fr/catalogues.html",
+    "waitAfterLoad": 8000,
+    "linkDomain": "catalogues.aldi.fr",
+    "resolver": "ipaper",
+    "linkPatterns": [
+        {
+            "match": "catalogues\\.aldi\\.fr/(kw\\d+)/",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        }
+    ],
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "kw(\\d+)(\\d{4})",
+            "dateFrom": "KW$1-$2",
+            "dateTo": "KW$1-$2"
+        }
+    ]
+}

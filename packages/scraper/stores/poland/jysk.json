@@ -1,0 +1,28 @@
+{
+    "name": "jysk",
+    "landingUrl": "https://jysk.pl/campaign",
+    "waitAfterLoad": 10000,
+    "linkDomain": "ipapercms.dk",
+    "linkPatterns": [
+        {
+            "match": "ipapercms\\.dk/[Jj][Yy][Ss][Kk]/pl/(?:CampaignPaper|localpapers)/([a-f0-9_-]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "\\?.*$", "replacement": "" }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*-\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\s*-\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        }
+    ]
+}

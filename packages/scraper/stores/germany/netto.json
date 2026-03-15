@@ -1,0 +1,28 @@
+{
+    "name": "netto",
+    "landingUrl": "https://www.netto.de/",
+    "waitAfterLoad": 12000,
+    "resolver": "tjek",
+    "linkSelector": "img[src*='tjek.com']",
+    "linkAttribute": "src",
+    "linkPatterns": [
+        {
+            "match": "image-transformer-api\\.tjek\\.com/.*uploads(?:%2F|/)([^%/]+)(?:%2F|/)p-1",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\.\\s*-\\s*(\\d{1,2})\\.\\s*((?:Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember|Jan|Feb|Mär|Apr|Jun|Jul|Aug|Sep|Okt|Nov|Dez)\\.?)",
+            "dateFrom": "$1-$3",
+            "dateTo": "$2-$3"
+        },
+        {
+            "match": "(\\d{1,2})\\.\\s*((?:Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\\.?)\\s*-\\s*(\\d{1,2})\\.\\s*((?:Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\\.?)",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4"
+        }
+    ]
+}

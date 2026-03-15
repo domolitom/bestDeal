@@ -191,6 +191,10 @@ export async function runPipeline(
         lastPage: scrapingInfo.lastPage,
       });
 
+      if (resolved.pages.length === 0) {
+        throw new Error("resolver returned 0 pages");
+      }
+
       // Download images
       console.log(`[pipeline] downloading ${catalog.catalogId}...`);
       await downloadCatalogImages(resolved, storage);

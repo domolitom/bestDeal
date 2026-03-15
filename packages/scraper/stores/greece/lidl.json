@@ -1,0 +1,40 @@
+{
+    "name": "lidl",
+    "landingUrl": "https://www.lidl-hellas.gr/l/fyladio",
+    "waitAfterLoad": 8000,
+    "resolver": "leaflets",
+    "linkPatterns": [
+        {
+            "match": "/l/fyladio/([^/]+)/view/flyer/page/\\d+",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" }
+            ]
+        },
+        {
+            "match": "/l/fyladio/([^/]+)/ar/\\d+",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/ar/\\d+", "replacement": "/view/flyer/page/1" }
+            ]
+        }
+    ],
+    "dateSource": "slug_then_text",
+    "datePatterns": [
+        {
+            "match": "(\\d{2}-\\d{2}-\\d{4})-(\\d{2}-\\d{2}-\\d{4})",
+            "dateFrom": "$1",
+            "dateTo": "$2"
+        },
+        {
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\s*-\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{2})/(\\d{2})/(\\d{4})\\s*-\\s*(\\d{2})/(\\d{2})/(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

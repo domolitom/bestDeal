@@ -16,12 +16,16 @@ const MONTH_NAMES: Record<string, string> = {
   januar: "01", februar: "02", märz: "03",
   juni: "06", juli: "07",
   september: "09", oktober: "10", november: "11", dezember: "12",
+  // German abbreviations
+  jan: "01", feb: "02", mär: "03", mrz: "03",
+  apr: "04", mai: "05", jun: "06", jul: "07",
+  aug: "08", sep: "09", okt: "10", nov: "11", dez: "12",
 };
 
 /** Replace month name tokens with two-digit month numbers. */
 function normalizeMonthNames(s: string): string {
   return s.replace(
-    /[a-zăâîșțéû]+/gi,
+    /[a-zăâîșțéûäöü]+/gi,
     (word) => MONTH_NAMES[word.toLowerCase()] ?? word,
   );
 }

@@ -20,7 +20,6 @@ export function CatalogViewer({ pages, catalogId }: CatalogViewerProps) {
     setCurrentPage((p) => Math.max(p - 1, 0));
   }, []);
 
-  // Keyboard navigation in single-page mode
   useEffect(() => {
     if (mode !== "single") return;
 
@@ -40,15 +39,7 @@ export function CatalogViewer({ pages, catalogId }: CatalogViewerProps) {
 
   return (
     <div className="viewer-container">
-      {/* Mode toggle */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: 8,
-          marginBottom: 20,
-        }}
-      >
+      <div className="viewer-controls">
         <button
           className={`store-pill ${mode === "scroll" ? "store-pill-active" : ""}`}
           onClick={() => setMode("scroll")}
@@ -64,7 +55,6 @@ export function CatalogViewer({ pages, catalogId }: CatalogViewerProps) {
       </div>
 
       {mode === "scroll" ? (
-        // Scroll mode: show all pages vertically
         pages.map((page, i) => (
           <div key={page.number} className="viewer-page">
             <img
@@ -78,7 +68,6 @@ export function CatalogViewer({ pages, catalogId }: CatalogViewerProps) {
           </div>
         ))
       ) : (
-        // Single page mode
         <div>
           {pages[currentPage] && (
             <div className="viewer-page">
@@ -92,15 +81,7 @@ export function CatalogViewer({ pages, catalogId }: CatalogViewerProps) {
             </div>
           )}
 
-          {/* Navigation */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: 12,
-              marginTop: 16,
-            }}
-          >
+          <div className="viewer-nav">
             <button
               className="store-pill"
               onClick={goPrev}
@@ -117,43 +98,16 @@ export function CatalogViewer({ pages, catalogId }: CatalogViewerProps) {
             </button>
           </div>
 
-          {/* Thumbnail strip */}
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              overflowX: "auto",
-              padding: "16px 0",
-              marginTop: 16,
-            }}
-          >
+          <div className="viewer-thumbstrip">
             {pages.map((page, i) => (
               <button
                 key={page.number}
                 onClick={() => setCurrentPage(i)}
-                style={{
-                  flexShrink: 0,
-                  width: 60,
-                  height: 80,
-                  border:
-                    i === currentPage
-                      ? "2px solid var(--accent)"
-                      : "1px solid var(--border)",
-                  borderRadius: 4,
-                  overflow: "hidden",
-                  cursor: "pointer",
-                  padding: 0,
-                  background: "none",
-                }}
+                className={`viewer-thumb ${i === currentPage ? "viewer-thumb-active" : ""}`}
               >
                 <img
                   src={page.imageUrl}
                   alt={`Page ${page.number}`}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
                   loading="lazy"
                 />
               </button>

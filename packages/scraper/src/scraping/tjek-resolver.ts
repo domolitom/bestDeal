@@ -6,9 +6,8 @@ import { registerResolver } from "./resolver-registry.ts";
 /**
  * Resolve page images for Tjek-hosted catalogs (e.g. Netto).
  *
- * Tjek embeds all catalog page URLs (with pre-signed signatures) directly
- * in the page HTML as part of Next.js RSC payload. We load the page with
- * Playwright and extract all image-transformer-api.tjek.com URLs.
+ * Tjek embeds catalog page URLs in the HTML. On listing pages (e.g. /prospekte/)
+ * we first click the catalog to open the full viewer, then extract all page URLs.
  */
 async function resolveViaTjek(
   input: ResolveInput
@@ -26,6 +25,26 @@ async function resolveViaTjek(
     });
     await page.waitForTimeout(12000);
 
+    // Click the first catalog thumbnail to open the full viewer
+    const clicked = await page.evaluate(() => {
+      const imgs = Array.from(document.querySelectorAll("img[src*='tjek.com']"));
+      if (imgs.length > 0) {
+        const parent = imgs[0].closest("button, a, [role='button']");
+        if (parent) {
+          (parent as HTMLElement).click();
+          return true;
+        }
+        (imgs[0] as HTMLElement).click();
+        return true;
+      }
+      return false;
+    });
+
+    if (clicked) {
+      console.log(`[tjek] clicked catalog thumbnail, waiting for viewer...`);
+      await page.waitForTimeout(8000);
+    }
+
     // Extract all Tjek image URLs from the HTML source
     const html = await page.content();
     const urlMatches = [
@@ -33,22 +52,30 @@ async function resolveViaTjek(
     ];
 
     // Decode and normalize URLs
-    const allUrls = urlMatches
-      .map((m) =>
-        "https://" +
+    const allUrls: string[] = [];
+    for (const m of urlMatches) {
+      const raw = "https://" +
         m[0]
           .replace(/&amp;/g, "&")
           .replace(/\\u0026/g, "&")
-          .replace(/&#x26;/g, "&")
-      )
-      .filter((u) => u.includes("/p-") && u.includes("w=700"));
+          .replace(/&#x26;/g, "&");
+      let decoded: string;
+      try {
+        decoded = decodeURIComponent(raw);
+      } catch {
+        decoded = raw;
+      }
+      if (decoded.includes("/p-") && decoded.includes("w=700")) {
+        allUrls.push(decoded);
+      }
+    }
 
     // Group by catalog ID and deduplicate
     const catalogIds = [
       ...new Set(
         allUrls
           .map((u) => {
-            const m = u.match(/uploads(?:%2F|\/)([^%/]+)(?:%2F|\/)/);
+            const m = u.match(/uploads\/([^/]+)\//);
             return m?.[1] || "";
           })
           .filter(Boolean)
@@ -57,7 +84,7 @@ async function resolveViaTjek(
 
     console.log(`[tjek] found ${catalogIds.length} catalog(s): ${catalogIds.join(", ")}`);
 
-    // Use the first catalog with the most pages (skip dealer logos)
+    // Use the catalog with the most pages (skip dealer logos)
     let bestId = catalogIds[0] || "";
     let bestPages: string[] = [];
     for (const id of catalogIds) {

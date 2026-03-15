@@ -1,0 +1,43 @@
+{
+    "name": "carrefour",
+    "landingUrl": "https://www.carrefour.fr/catalogue",
+    "waitAfterLoad": 10000,
+    "linkDomain": "view.publitas.com",
+    "resolver": "publitas",
+    "linkPatterns": [
+        {
+            "match": "view\\.publitas\\.com/carrefour/([^/]+)(?:/page/\\d+)?",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                {
+                    "type": "replace",
+                    "match": "/page/\\d+",
+                    "replacement": "/page/1"
+                },
+                {
+                    "type": "replace",
+                    "match": "\\?.*$",
+                    "replacement": ""
+                }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "Du (\\d{2})/(\\d{2}) au (\\d{2})/(\\d{2})/(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "Du (\\d{2})/(\\d{2}) au (\\d{2})/(\\d{2})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4"
+        },
+        {
+            "match": "(\\d{2})/(\\d{2})/(\\d{4})\\s*(?:au|-|–)\\s*(\\d{2})/(\\d{2})/(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

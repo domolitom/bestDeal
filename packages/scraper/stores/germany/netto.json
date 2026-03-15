@@ -9,7 +9,13 @@
         {
             "match": "image-transformer-api\\.tjek\\.com/.*uploads(?:%2F|/)([^%/]+)(?:%2F|/)p-1",
             "slugGroup": 1,
-            "normalizeUrl": []
+            "normalizeUrl": [
+                {
+                    "type": "replace",
+                    "match": ".*",
+                    "replacement": "https://www.netto.de/prospekte/"
+                }
+            ]
         }
     ],
     "dateSource": "text",

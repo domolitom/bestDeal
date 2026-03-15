@@ -1,0 +1,43 @@
+{
+    "name": "conforama",
+    "landingUrl": "https://www.conforama.fr/catalogue",
+    "waitAfterLoad": 10000,
+    "linkDomain": "ipaper.io",
+    "resolver": "ipaper",
+    "linkPatterns": [
+        {
+            "match": "viewer\\.ipaper\\.io/conforama/([^/?#]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                {
+                    "type": "replace",
+                    "match": "\\?.*$",
+                    "replacement": ""
+                }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "Du (\\d{2})/(\\d{2}) au (\\d{2})/(\\d{2})/(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "Du (\\d{2})/(\\d{2}) au (\\d{2})/(\\d{2})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*-\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{2})/(\\d{2})/(\\d{4})\\s*(?:au|-|–)\\s*(\\d{2})/(\\d{2})/(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

@@ -4,18 +4,11 @@ import { discoverAll } from "./discovery/discoverer.ts";
 import type { DiscoveryReport } from "./discovery/discoverer.ts";
 import { getResolver } from "./scraping/resolver-registry.ts";
 import { downloadCatalogImages } from "./scraping/downloader.ts";
+import { createLogger } from "./logger.ts";
 
-// Side-effect imports: register resolvers
-import "./scraping/leaflets-api-resolver.ts";
-import "./scraping/publitas-api-resolver.ts";
-import "./scraping/yumpu-api-resolver.ts";
-import "./scraping/ipaper-api-resolver.ts";
-import "./scraping/pdf-resolver.ts";
-import "./scraping/fliphtml5-resolver.ts";
-import "./scraping/flippingbook-resolver.ts";
-import "./scraping/digital-catalogue-resolver.ts";
-import "./scraping/tjek-resolver.ts";
-import "./scraping/resolver.ts";
+const log = createLogger({ module: "pipeline" });
+
+
 
 export interface PipelineOptions {
   storage: StorageAdapter;
@@ -47,7 +40,7 @@ export async function recoverStaleCatalogs(
     const { pages, ...meta } = catalog;
     await storage.writeCatalogMeta({ ...meta, status: "discovered" });
     recovered.push(summary.id);
-    console.log(`[pipeline] recovered stale catalog: ${summary.id}`);
+    log.info(`recovered stale catalog: ${summary.id}`);
   }
 
   return recovered;
@@ -71,7 +64,7 @@ export async function expireOldCatalogs(
     const { pages, ...meta } = catalog;
     await storage.writeCatalogMeta({ ...meta, status: "expired" });
     expired.push(summary.id);
-    console.log(`[pipeline] expired catalog: ${summary.id}`);
+    log.info(`expired catalog: ${summary.id}`);
   }
 
   return expired;
@@ -88,20 +81,18 @@ export async function runPipeline(
   // Phase 0: Housekeeping — recover stale + expire old catalogs
   const recovered = await recoverStaleCatalogs(storage);
   if (recovered.length > 0) {
-    console.log(
-      `[pipeline] recovered ${recovered.length} stale catalog(s)`
-    );
+    log.info(`recovered ${recovered.length} stale catalog(s)`);
   }
 
   const expired = await expireOldCatalogs(storage);
   if (expired.length > 0) {
-    console.log(
-      `[pipeline] expired ${expired.length} old catalog(s)\n`
-    );
+    log.info(`expired ${expired.length} old catalog(s)`);
   }
 
+  const pipelineTimer = log.time();
+
   // Phase 1: Discovery
-  console.log("\n=== Phase 1: Discovery ===\n");
+  log.info("=== Phase 1: Discovery ===");
   const discovery = await discoverAll({
     storage,
     country,
@@ -115,7 +106,7 @@ export async function runPipeline(
   };
 
   if (discoverOnly) {
-    console.log("\n[pipeline] discover-only mode, skipping scraping");
+    log.info("discover-only mode, skipping scraping");
     return report;
   }
 
@@ -134,31 +125,25 @@ export async function runPipeline(
   }
 
   if (toScrape.length === 0) {
-    console.log("\n[pipeline] no catalogs to scrape");
+    log.info("no catalogs to scrape");
     await generateManifest(storage, country);
     return report;
   }
 
-  console.log(
-    `\n=== Phase 2: Scraping ${toScrape.length} catalog(s) ===\n`
-  );
+  log.info(`=== Phase 2: Scraping ${toScrape.length} catalog(s) ===`);
 
   for (const catalog of toScrape) {
     try {
       const fullCatalog = await storage.getCatalog(catalog.catalogId);
       if (!fullCatalog) {
-        console.warn(
-          `[pipeline] catalog ${catalog.catalogId} not found in storage`
-        );
+        log.warn(`catalog not found in storage`, { catalogId: catalog.catalogId });
         report.failed.push(catalog.catalogId);
         continue;
       }
 
       const scrapingInfo = fullCatalog._scraping ?? null;
       if (!scrapingInfo) {
-        console.warn(
-          `[pipeline] no scraping info for ${catalog.catalogId}`
-        );
+        log.warn(`no scraping info`, { catalogId: catalog.catalogId });
         report.failed.push(catalog.catalogId);
         continue;
       }
@@ -179,7 +164,8 @@ export async function runPipeline(
       await storage.writeCatalogMeta(metaUpdate);
 
       // Resolve image URLs via registry-dispatched resolver
-      console.log(`\n[pipeline] resolving ${catalog.catalogId}...`);
+      const catalogTimer = log.time();
+      log.info(`resolving`, { catalogId: catalog.catalogId });
       const resolver = getResolver(
         scrapingInfo.firstPageUrl,
         scrapingInfo.resolver
@@ -196,7 +182,7 @@ export async function runPipeline(
       }
 
       // Download images
-      console.log(`[pipeline] downloading ${catalog.catalogId}...`);
+      log.info(`downloading`, { catalogId: catalog.catalogId });
       await downloadCatalogImages(resolved, storage);
 
       // Update status to ready
@@ -208,12 +194,9 @@ export async function runPipeline(
       });
 
       report.scraped.push(catalog.catalogId);
-      console.log(`[pipeline] completed ${catalog.catalogId}`);
+      log.info(`completed`, { catalogId: catalog.catalogId, durationMs: catalogTimer() });
     } catch (err) {
-      console.error(
-        `[pipeline] failed to scrape ${catalog.catalogId}:`,
-        err
-      );
+      log.error(`failed to scrape`, { catalogId: catalog.catalogId, err: String(err) });
       report.failed.push(catalog.catalogId);
 
       // Mark as failed so it doesn't stay stuck in "scraping"
@@ -229,9 +212,11 @@ export async function runPipeline(
     }
   }
 
-  console.log(
-    `\n=== Pipeline complete: ${report.scraped.length} scraped, ${report.failed.length} failed ===\n`
-  );
+  log.info(`pipeline complete`, {
+    scraped: report.scraped.length,
+    failed: report.failed.length,
+    durationMs: pipelineTimer(),
+  });
 
   // Generate per-country manifest.json for CDN-based web app
   await generateManifest(storage, country);
@@ -248,7 +233,7 @@ export async function generateManifest(
   storage: StorageAdapter,
   country?: string
 ): Promise<void> {
-  if (!("writeManifest" in storage && typeof storage.writeManifest === "function")) {
+  if (!storage.writeManifest) {
     return;
   }
 
@@ -274,12 +259,10 @@ export async function generateManifest(
       updatedAt: new Date().toISOString(),
       catalogs: countryCatalogs,
     };
-    await (storage as any).writeManifest(
+    await storage.writeManifest!(
       JSON.stringify(manifest, null, 2),
       c
     );
-    console.log(
-      `[pipeline] wrote ${c}/manifest.json (${countryCatalogs.length} catalogs)`
-    );
+    log.info(`wrote ${c}/manifest.json`, { catalogs: countryCatalogs.length });
   }
 }

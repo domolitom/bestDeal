@@ -3,6 +3,9 @@ import { join } from "node:path";
 import type { StorageAdapter } from "@bestdeal/shared";
 import { FilesystemAdapter } from "./storage/fs-adapter.ts";
 import { runPipeline } from "./pipeline.ts";
+import { createLogger } from "./logger.ts";
+
+const log = createLogger({ module: "cli" });
 
 const { values } = parseArgs({
   args: process.argv.slice(2),
@@ -54,9 +57,7 @@ if (values["auto-discover"]) {
   const country = values.country;
 
   if (!url || !store || !country) {
-    console.error(
-      "[cli] --auto-discover requires --url, --store, and --country"
-    );
+    log.error("--auto-discover requires --url, --store, and --country");
     process.exit(1);
   }
 
@@ -64,9 +65,9 @@ if (values["auto-discover"]) {
 
   try {
     const configPath = await runAutoDiscover({ url, store, country });
-    console.log(`\nConfig written to: ${configPath}`);
+    log.info(`config written to: ${configPath}`);
   } catch (err) {
-    console.error("[cli] auto-discover failed:", err);
+    log.error("auto-discover failed", { err: String(err) });
     process.exit(1);
   }
 
@@ -84,13 +85,11 @@ async function createStorage(): Promise<StorageAdapter> {
     const publicUrl = process.env.R2_PUBLIC_URL;
 
     if (!endpoint || !accessKeyId || !secretAccessKey || !publicUrl) {
-      console.error(
-        "[cli] --storage=r2 requires env vars: R2_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_PUBLIC_URL"
-      );
+      log.error("--storage=r2 requires env vars: R2_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_PUBLIC_URL");
       process.exit(1);
     }
 
-    console.log(`[cli] using R2 storage (bucket: ${bucket})`);
+    log.info(`using R2 storage`, { bucket });
     return new R2StorageAdapter({
       endpoint,
       bucket,
@@ -104,18 +103,17 @@ async function createStorage(): Promise<StorageAdapter> {
     import.meta.dir,
     values["data-dir"] ?? "../../data/catalogs"
   );
-  console.log(`[cli] data directory: ${dataDir}`);
+  log.info(`data directory: ${dataDir}`);
   return new FilesystemAdapter(dataDir);
 }
 
 const storage = await createStorage();
 
-console.log(
-  `[cli] filters: country=${values.country ?? "all"}, store=${values.store ?? "all"}`
-);
-console.log(
-  `[cli] mode: ${values["discover-only"] ? "discover-only" : "full pipeline"}`
-);
+log.info("starting pipeline", {
+  country: values.country ?? "all",
+  store: values.store ?? "all",
+  mode: values["discover-only"] ? "discover-only" : "full pipeline",
+});
 
 try {
   const report = await runPipeline({
@@ -127,6 +125,6 @@ try {
 
   console.log("\n" + JSON.stringify(report, null, 2));
 } catch (err) {
-  console.error("[cli] fatal:", err);
+  log.error("fatal", { err: String(err) });
   process.exit(1);
 }

@@ -7,6 +7,9 @@ import { discoverStore, discoverStoreViaApi } from "./discovery-engine.ts";
 import type { DiscoveredCatalog } from "./discovery-engine.ts";
 import { toISODate } from "@bestdeal/shared";
 import { detectResolverName } from "../scraping/resolver-registry.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "discovery" });
 
 // --- Types ---
 
@@ -65,7 +68,7 @@ export async function findLastPage(
 
   for (const probe of probes) {
     const url = buildPageURL(firstPageUrl, probe);
-    console.log(`[discovery] probing page ${probe}...`);
+    log.info(`probing page ${probe}...`);
     const valid = await isPageValid(page, url);
     if (valid) {
       lastValid = probe;
@@ -85,7 +88,7 @@ export async function findLastPage(
   while (lo + 1 < hi) {
     const mid = Math.floor((lo + hi) / 2);
     const url = buildPageURL(firstPageUrl, mid);
-    console.log(`[discovery] binary search page ${mid}...`);
+    log.info(`binary search page ${mid}...`);
     const valid = await isPageValid(page, url);
     if (valid) {
       lo = mid;
@@ -130,7 +133,7 @@ export async function discoverAll(
   }
 
   if (storeDefinitions.length === 0) {
-    console.log("[discovery] no matching store definitions found");
+    log.info("no matching store definitions found");
     return report;
   }
 
@@ -163,10 +166,7 @@ export async function discoverAll(
           ? await discoverStoreViaApi(page, storeDef)
           : await discoverStore(page, storeDef);
       } catch (err) {
-        console.error(
-          `[discovery] failed to discover ${storeDef.name}:`,
-          err
-        );
+        log.error(`failed to discover ${storeDef.name}`, { err: String(err) });
         report.stores.push(storeResult);
         continue;
       }
@@ -182,7 +182,7 @@ export async function discoverAll(
         report.summary.total++;
 
         if (existingIds.has(catalogId) || seenIds.has(catalogId)) {
-          console.log(`[discovery] existing: ${catalogId}`);
+          log.info(`existing: ${catalogId}`);
           storeResult.catalogs.push({ catalogId, status: "existing" });
           report.summary.existing++;
           continue;
@@ -198,14 +198,10 @@ export async function discoverAll(
 
           let lastPage: number | undefined;
           if (needsLastPage) {
-            console.log(
-              `[discovery] new catalog: ${catalogId} — probing pages...`
-            );
+            log.info(`new catalog: ${catalogId} — probing pages...`);
             lastPage = await findLastPage(page, catalog.firstPageUrl);
           } else {
-            console.log(
-              `[discovery] new catalog: ${catalogId} — resolver "${resolverName}" (skipping page probe)`
-            );
+            log.info(`new catalog: ${catalogId} — resolver "${resolverName}" (skipping page probe)`);
           }
 
           // Write catalog meta through storage adapter
@@ -240,10 +236,7 @@ export async function discoverAll(
           });
           report.summary.new++;
         } catch (err) {
-          console.error(
-            `[discovery] failed to probe ${catalogId}:`,
-            err
-          );
+          log.error(`failed to probe ${catalogId}`, { err: String(err) });
         }
       }
 
@@ -253,9 +246,11 @@ export async function discoverAll(
     await browser.close();
   }
 
-  console.log(
-    `[discovery] done — ${report.summary.total} catalogs found (${report.summary.new} new, ${report.summary.existing} existing)`
-  );
+  log.info(`done`, {
+    total: report.summary.total,
+    new: report.summary.new,
+    existing: report.summary.existing,
+  });
   return report;
 }
 

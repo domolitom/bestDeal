@@ -1,4 +1,7 @@
 import { chromium } from "../browser.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "link-discovery" });
 
 export interface ExtractedLink {
   href: string;
@@ -17,7 +20,7 @@ export interface LinkDiscoveryResult {
  * Standalone Playwright service — no LLM or store config knowledge.
  */
 export async function discoverLinks(url: string): Promise<LinkDiscoveryResult> {
-  console.log(`[link-discovery] navigating to ${url}`);
+  log.info(`navigating to ${url}`);
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
@@ -89,7 +92,7 @@ export async function discoverLinks(url: string): Promise<LinkDiscoveryResult> {
       return results;
     });
 
-    console.log(`[link-discovery] extracted ${rawLinks.length} links`);
+    log.info(`extracted ${rawLinks.length} links`);
 
     return { url, pageTitle, links: rawLinks };
   } finally {

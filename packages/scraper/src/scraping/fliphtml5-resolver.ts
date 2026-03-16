@@ -1,7 +1,9 @@
 import { chromium } from "../browser.ts";
 import type { ResolveResult, ResolvedPage } from "./resolver-types.ts";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
-import { registerResolver } from "./resolver-registry.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "fliphtml5" });
 
 /**
  * Extract the base URL for a FlipHTML5 book from its viewer URL.
@@ -37,7 +39,7 @@ async function resolveViaFlipHtml5(
   const { firstPageUrl, catalogId } = input;
   const baseUrl = normalizeFlipHtml5Url(firstPageUrl);
 
-  console.log(`[fliphtml5] loading ${baseUrl}`);
+  log.info(`loading ${baseUrl}`);
 
   const browser = await chromium.launch({ headless: true });
   try {
@@ -66,9 +68,7 @@ async function resolveViaFlipHtml5(
       throw new Error(`FlipHTML5 decoded no pages: ${baseUrl}`);
     }
 
-    console.log(
-      `[fliphtml5] got ${pageData.length} pages for ${catalogId}`
-    );
+    log.info(`got ${pageData.length} pages`, { catalogId });
 
     const pages: ResolvedPage[] = pageData.map((p, i) => ({
       number: i + 1,
@@ -87,10 +87,9 @@ async function resolveViaFlipHtml5(
 
 // --- CatalogResolver implementation ---
 
-const flipHtml5Resolver: CatalogResolver = {
+export const flipHtml5Resolver: CatalogResolver = {
   name: "fliphtml5",
   needsLastPage: false,
   resolve: resolveViaFlipHtml5,
 };
 
-registerResolver(flipHtml5Resolver);

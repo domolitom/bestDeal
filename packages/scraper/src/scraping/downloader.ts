@@ -1,5 +1,8 @@
 import type { StorageAdapter } from "@bestdeal/shared";
 import type { ResolveResult } from "./resolver-types.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "downloader" });
 
 /**
  * Download all images from a resolve result and write them through the storage adapter.
@@ -14,14 +17,14 @@ export async function downloadCatalogImages(
   const coverData = pages[0]?.imageData;
   if (coverData) {
     await storage.writeImage(catalogId, "cover.jpg", coverData);
-    console.log(`[downloader] wrote cover image from page data for ${catalogId}`);
+    log.info(`wrote cover image from page data`, { catalogId });
   } else if (coverImageUrl) {
     try {
       const data = await downloadImage(coverImageUrl);
       await storage.writeImage(catalogId, "cover.jpg", data);
-      console.log(`[downloader] downloaded cover image for ${catalogId}`);
+      log.info(`downloaded cover image`, { catalogId });
     } catch (err) {
-      console.warn(`[downloader] warning: cover image failed: ${err}`);
+      log.warn(`cover image failed`, { catalogId, err: String(err) });
     }
   }
 
@@ -31,17 +34,13 @@ export async function downloadCatalogImages(
     try {
       const data = page.imageData ?? await downloadImage(page.imageUrl);
       await storage.writeImage(catalogId, filename, data);
-      console.log(`[downloader] downloaded page ${page.number}`);
+      log.info(`downloaded page ${page.number}`);
     } catch (err) {
-      console.warn(
-        `[downloader] warning: page ${page.number} failed: ${err}`
-      );
+      log.warn(`page ${page.number} failed`, { err: String(err) });
     }
   }
 
-  console.log(
-    `[downloader] done — ${pages.length} pages downloaded for ${catalogId}`
-  );
+  log.info(`done`, { catalogId, pages: pages.length });
 }
 
 async function downloadImage(imageURL: string): Promise<Buffer> {

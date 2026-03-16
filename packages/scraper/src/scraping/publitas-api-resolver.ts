@@ -1,6 +1,8 @@
 import type { ResolveResult, ResolvedPage } from "./resolver-types.ts";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
-import { registerResolver } from "./resolver-registry.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "publitas-api" });
 
 interface PublitasSpreadPage {
   images: Record<string, string>;
@@ -47,7 +49,7 @@ async function resolveViaPublitasApi(
   }
 
   const spreadsUrl = `${baseUrl}/spreads.json`;
-  console.log(`[publitas-api] fetching ${spreadsUrl}`);
+  log.info(`fetching ${spreadsUrl}`);
 
   const resp = await fetch(spreadsUrl);
   if (!resp.ok) {
@@ -82,9 +84,7 @@ async function resolveViaPublitasApi(
     }
   }
 
-  console.log(
-    `[publitas-api] got ${pages.length} pages for ${catalogId}`
-  );
+  log.info(`got ${pages.length} pages`, { catalogId });
 
   return {
     catalogId,
@@ -95,10 +95,9 @@ async function resolveViaPublitasApi(
 
 // --- CatalogResolver implementation ---
 
-const publitasResolver: CatalogResolver = {
+export const publitasResolver: CatalogResolver = {
   name: "publitas",
   needsLastPage: false,
   resolve: resolveViaPublitasApi,
 };
 
-registerResolver(publitasResolver);

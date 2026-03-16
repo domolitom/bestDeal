@@ -1,6 +1,8 @@
 import type { ResolveResult, ResolvedPage } from "./resolver-types.ts";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
-import { registerResolver } from "./resolver-registry.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "yumpu-api" });
 
 interface YumpuDocument {
   pages: { nr: number }[];
@@ -44,7 +46,7 @@ async function resolveViaYumpuApi(
 
   const lang = extractLang(firstPageUrl);
   const apiUrl = `https://www.yumpu.com/${lang}/document/json/${docId}`;
-  console.log(`[yumpu-api] fetching ${apiUrl}`);
+  log.info(`fetching ${apiUrl}`);
 
   const resp = await fetch(apiUrl);
   if (!resp.ok) {
@@ -66,9 +68,7 @@ async function resolveViaYumpuApi(
     imageUrl: `${IMG_CDN}/${docId}/${page.nr}/${IMG_SIZE}/${slug}.jpg`,
   }));
 
-  console.log(
-    `[yumpu-api] got ${pages.length} pages for ${catalogId}`
-  );
+  log.info(`got ${pages.length} pages`, { catalogId });
 
   return {
     catalogId,
@@ -79,10 +79,9 @@ async function resolveViaYumpuApi(
 
 // --- CatalogResolver implementation ---
 
-const yumpuResolver: CatalogResolver = {
+export const yumpuResolver: CatalogResolver = {
   name: "yumpu",
   needsLastPage: false,
   resolve: resolveViaYumpuApi,
 };
 
-registerResolver(yumpuResolver);

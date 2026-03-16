@@ -57,56 +57,60 @@ export class R2ReadAdapter implements ReadonlyStorageAdapter {
   }
 
   async listCatalogs(filter?: CatalogFilter): Promise<CatalogSummary[]> {
-    const results: CatalogSummary[] = [];
+    try {
+      const results: CatalogSummary[] = [];
 
-    // Build prefix to narrow the listing
-    let prefix = "";
-    if (filter?.country) {
-      prefix = `${filter.country}/`;
-      if (filter?.store) {
-        prefix = `${filter.country}/${filter.store}/`;
-      }
-    }
-
-    // List all meta.json files under the prefix
-    let continuationToken: string | undefined;
-    do {
-      const resp = await this.s3.send(
-        new ListObjectsV2Command({
-          Bucket: this.bucket,
-          Prefix: prefix,
-          ContinuationToken: continuationToken,
-        })
-      );
-
-      for (const obj of resp.Contents ?? []) {
-        if (!obj.Key?.endsWith("/meta.json")) continue;
-
-        try {
-          const meta = await this.fetchJson<CatalogMeta>(obj.Key);
-          if (filter?.status && meta.status !== filter.status) continue;
-
-          results.push({
-            id: meta.id,
-            store: meta.store,
-            country: meta.country,
-            status: meta.status,
-            dateFrom: meta.dateFrom,
-            dateTo: meta.dateTo,
-            catalogType: meta.catalogType,
-            coverImage: meta.coverImage,
-            pageCount: meta.pageCount,
-          });
-        } catch {
-          // Skip invalid meta.json
+      // Build prefix to narrow the listing
+      let prefix = "";
+      if (filter?.country) {
+        prefix = `${filter.country}/`;
+        if (filter?.store) {
+          prefix = `${filter.country}/${filter.store}/`;
         }
       }
 
-      continuationToken = resp.NextContinuationToken;
-    } while (continuationToken);
+      // List all meta.json files under the prefix
+      let continuationToken: string | undefined;
+      do {
+        const resp = await this.s3.send(
+          new ListObjectsV2Command({
+            Bucket: this.bucket,
+            Prefix: prefix,
+            ContinuationToken: continuationToken,
+          })
+        );
 
-    results.sort((a, b) => b.dateFrom.localeCompare(a.dateFrom));
-    return results;
+        for (const obj of resp.Contents ?? []) {
+          if (!obj.Key?.endsWith("/meta.json")) continue;
+
+          try {
+            const meta = await this.fetchJson<CatalogMeta>(obj.Key);
+            if (filter?.status && meta.status !== filter.status) continue;
+
+            results.push({
+              id: meta.id,
+              store: meta.store,
+              country: meta.country,
+              status: meta.status,
+              dateFrom: meta.dateFrom,
+              dateTo: meta.dateTo,
+              catalogType: meta.catalogType,
+              coverImage: meta.coverImage,
+              pageCount: meta.pageCount,
+            });
+          } catch {
+            // Skip invalid meta.json
+          }
+        }
+
+        continuationToken = resp.NextContinuationToken;
+      } while (continuationToken);
+
+      results.sort((a, b) => b.dateFrom.localeCompare(a.dateFrom));
+      return results;
+    } catch {
+      return [];
+    }
   }
 
   async getCatalog(id: string): Promise<Catalog | null> {
@@ -155,91 +159,99 @@ export class R2ReadAdapter implements ReadonlyStorageAdapter {
   }
 
   async listCountries(): Promise<Country[]> {
-    const countries: Country[] = [];
-    const countryCounts = new Map<
-      string,
-      { stores: Set<string>; catalogs: number }
-    >();
+    try {
+      const countries: Country[] = [];
+      const countryCounts = new Map<
+        string,
+        { stores: Set<string>; catalogs: number }
+      >();
 
-    // List all meta.json to gather country/store info
-    let continuationToken: string | undefined;
-    do {
-      const resp = await this.s3.send(
-        new ListObjectsV2Command({
-          Bucket: this.bucket,
-          Delimiter: "/",
-          ContinuationToken: continuationToken,
-        })
-      );
-
-      // Top-level prefixes are countries
-      for (const prefix of resp.CommonPrefixes ?? []) {
-        const countryName = prefix.Prefix?.replace(/\/$/, "");
-        if (!countryName) continue;
-
-        if (!countryCounts.has(countryName)) {
-          countryCounts.set(countryName, { stores: new Set(), catalogs: 0 });
-        }
-      }
-
-      continuationToken = resp.NextContinuationToken;
-    } while (continuationToken);
-
-    // For each country, list stores and count catalogs
-    for (const [countryName, counts] of countryCounts) {
-      const storeResp = await this.s3.send(
-        new ListObjectsV2Command({
-          Bucket: this.bucket,
-          Prefix: `${countryName}/`,
-          Delimiter: "/",
-        })
-      );
-
-      for (const prefix of storeResp.CommonPrefixes ?? []) {
-        const storeName = prefix.Prefix?.replace(`${countryName}/`, "").replace(
-          /\/$/,
-          ""
-        );
-        if (!storeName) continue;
-        counts.stores.add(storeName);
-
-        // Count catalogs for this store
-        const catalogResp = await this.s3.send(
+      // List all meta.json to gather country/store info
+      let continuationToken: string | undefined;
+      do {
+        const resp = await this.s3.send(
           new ListObjectsV2Command({
             Bucket: this.bucket,
-            Prefix: `${countryName}/${storeName}/`,
+            Delimiter: "/",
+            ContinuationToken: continuationToken,
+          })
+        );
+
+        // Top-level prefixes are countries
+        for (const prefix of resp.CommonPrefixes ?? []) {
+          const countryName = prefix.Prefix?.replace(/\/$/, "");
+          if (!countryName) continue;
+
+          if (!countryCounts.has(countryName)) {
+            countryCounts.set(countryName, { stores: new Set(), catalogs: 0 });
+          }
+        }
+
+        continuationToken = resp.NextContinuationToken;
+      } while (continuationToken);
+
+      // For each country, list stores and count catalogs
+      for (const [countryName, counts] of countryCounts) {
+        const storeResp = await this.s3.send(
+          new ListObjectsV2Command({
+            Bucket: this.bucket,
+            Prefix: `${countryName}/`,
             Delimiter: "/",
           })
         );
-        counts.catalogs += (catalogResp.CommonPrefixes ?? []).length;
+
+        for (const prefix of storeResp.CommonPrefixes ?? []) {
+          const storeName = prefix.Prefix?.replace(`${countryName}/`, "").replace(
+            /\/$/,
+            ""
+          );
+          if (!storeName) continue;
+          counts.stores.add(storeName);
+
+          // Count catalogs for this store
+          const catalogResp = await this.s3.send(
+            new ListObjectsV2Command({
+              Bucket: this.bucket,
+              Prefix: `${countryName}/${storeName}/`,
+              Delimiter: "/",
+            })
+          );
+          counts.catalogs += (catalogResp.CommonPrefixes ?? []).length;
+        }
+
+        const meta = COUNTRY_META[countryName];
+        countries.push({
+          code: countryName,
+          name: meta?.name ?? countryName,
+          flag: meta?.flag ?? "",
+          storeCount: counts.stores.size,
+          catalogCount: counts.catalogs,
+        });
       }
 
-      const meta = COUNTRY_META[countryName];
-      countries.push({
-        code: countryName,
-        name: meta?.name ?? countryName,
-        flag: meta?.flag ?? "",
-        storeCount: counts.stores.size,
-        catalogCount: counts.catalogs,
-      });
+      return countries;
+    } catch {
+      return [];
     }
-
-    return countries;
   }
 
   async listStores(country: string): Promise<string[]> {
-    const resp = await this.s3.send(
-      new ListObjectsV2Command({
-        Bucket: this.bucket,
-        Prefix: `${country}/`,
-        Delimiter: "/",
-      })
-    );
+    try {
+      const resp = await this.s3.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          Prefix: `${country}/`,
+          Delimiter: "/",
+        })
+      );
 
-    return (resp.CommonPrefixes ?? [])
-      .map((p) => p.Prefix?.replace(`${country}/`, "").replace(/\/$/, "") ?? "")
-      .filter(Boolean)
-      .sort();
+      return (resp.CommonPrefixes ?? [])
+        .map((p) => p.Prefix?.replace(`${country}/`, "").replace(/\/$/, "") ?? "")
+        .filter(Boolean)
+        .sort();
+    } catch {
+      return [];
+    }
   }
 
   protected async fetchJson<T>(key: string): Promise<T> {

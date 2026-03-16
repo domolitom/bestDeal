@@ -1,6 +1,8 @@
 import type { ResolveResult, ResolvedPage } from "./resolver-types.ts";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
-import { registerResolver } from "./resolver-registry.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "digital-catalogue" });
 
 /**
  * digital-catalogue.com resolver.
@@ -16,7 +18,7 @@ async function resolveViaDigitalCatalogue(
 ): Promise<ResolveResult> {
   const { firstPageUrl, catalogId } = input;
 
-  console.log(`[digital-catalogue] fetching ${firstPageUrl}`);
+  log.info(`fetching ${firstPageUrl}`);
 
   const resp = await fetch(firstPageUrl, {
     headers: {
@@ -65,9 +67,7 @@ async function resolveViaDigitalCatalogue(
     });
   }
 
-  console.log(
-    `[digital-catalogue] got ${resolvedPages.length} pages for ${catalogId}`
-  );
+  log.info(`got ${resolvedPages.length} pages`, { catalogId });
 
   return {
     catalogId,
@@ -78,10 +78,9 @@ async function resolveViaDigitalCatalogue(
 
 // --- CatalogResolver implementation ---
 
-const digitalCatalogueResolver: CatalogResolver = {
+export const digitalCatalogueResolver: CatalogResolver = {
   name: "digital-catalogue",
   needsLastPage: false,
   resolve: resolveViaDigitalCatalogue,
 };
 
-registerResolver(digitalCatalogueResolver);

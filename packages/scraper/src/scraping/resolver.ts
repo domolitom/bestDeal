@@ -3,7 +3,9 @@ import { chromium } from "../browser.ts";
 import { buildPageURL, extractPageNumber } from "@bestdeal/shared";
 import type { ImageExtraction } from "@bestdeal/shared";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
-import { registerResolver } from "./resolver-registry.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "resolver" });
 
 import type { ResolveResult } from "./resolver-types.ts";
 
@@ -101,7 +103,7 @@ async function resolvePages(
     imageExtraction,
   } = options;
 
-  console.log(`[resolver] starting for ${catalogId}`);
+  log.info(`starting for ${catalogId}`);
 
   const firstPageNum = extractPageNumber(firstPageUrl);
 
@@ -121,7 +123,7 @@ async function resolvePages(
     };
 
     // Resolve cover image
-    console.log(`[resolver] resolving cover image: ${coverImageUrl}`);
+    log.info(`resolving cover image: ${coverImageUrl}`);
     try {
       result.coverImageUrl = await extractImageFromPage(
         page,
@@ -129,18 +131,18 @@ async function resolvePages(
         imageExtraction
       );
     } catch (err) {
-      console.warn(`[resolver] warning: cover image failed: ${err}`);
+      log.warn(`cover image failed`, { err: String(err) });
     }
 
     // Resolve each page
-    console.log(`[resolver] resolving pages ${firstPageNum}-${lastPage}`);
+    log.info(`resolving pages ${firstPageNum}-${lastPage}`);
     let consecutiveFailures = 0;
 
     for (let pageNum = firstPageNum; pageNum <= lastPage; pageNum++) {
       // Refresh browser context periodically to avoid rate-limiting
       const pageIndex = pageNum - firstPageNum;
       if (pageIndex > 0 && pageIndex % REFRESH_EVERY === 0) {
-        console.log(`[resolver] refreshing browser context...`);
+        log.info(`refreshing browser context...`);
         await context.close();
         context = await browser.newContext({
           viewport: { width: 800, height: 1200 },
@@ -150,7 +152,7 @@ async function resolvePages(
       }
 
       const pageURL = buildPageURL(firstPageUrl, pageNum);
-      console.log(`[resolver] page ${pageNum}/${lastPage}: ${pageURL}`);
+      log.info(`page ${pageNum}/${lastPage}: ${pageURL}`);
 
       try {
         const imageURL = await extractImageFromPage(
@@ -161,12 +163,10 @@ async function resolvePages(
         result.pages.push({ number: pageNum, imageUrl: imageURL });
         consecutiveFailures = 0;
       } catch (err) {
-        console.warn(`[resolver] warning: page ${pageNum} failed: ${err}`);
+        log.warn(`page ${pageNum} failed`, { err: String(err) });
         consecutiveFailures++;
         if (consecutiveFailures >= 5) {
-          console.warn(
-            `[resolver] aborting — ${consecutiveFailures} consecutive failures`
-          );
+          log.warn(`aborting — ${consecutiveFailures} consecutive failures`);
           break;
         }
       }
@@ -174,9 +174,7 @@ async function resolvePages(
       await new Promise((r) => setTimeout(r, delayBetweenPages));
     }
 
-    console.log(
-      `[resolver] resolved ${result.pages.length} pages for ${catalogId}`
-    );
+    log.info(`resolved ${result.pages.length} pages`, { catalogId });
     return result;
   } finally {
     await browser.close();
@@ -185,7 +183,7 @@ async function resolvePages(
 
 // --- CatalogResolver implementation ---
 
-const browserResolver: CatalogResolver = {
+export const browserResolver: CatalogResolver = {
   name: "browser",
   needsLastPage: true,
   resolve: async (input: ResolveInput) => {
@@ -200,4 +198,4 @@ const browserResolver: CatalogResolver = {
   },
 };
 
-registerResolver(browserResolver);
+

@@ -1,7 +1,9 @@
 import { chromium } from "../browser.ts";
 import type { ResolveResult, ResolvedPage } from "./resolver-types.ts";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
-import { registerResolver } from "./resolver-registry.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "ipaper-api" });
 
 interface IPaperSettings {
   pages: number[];
@@ -44,7 +46,7 @@ async function resolveViaIPaperApi(
 ): Promise<ResolveResult> {
   const { firstPageUrl, catalogId } = input;
 
-  console.log(`[ipaper-api] fetching ${firstPageUrl} via browser`);
+  log.info(`fetching ${firstPageUrl} via browser`);
 
   const browser = await chromium.launch({ headless: true });
   try {
@@ -70,7 +72,7 @@ async function resolveViaIPaperApi(
     }
 
     const { pages: pageNumbers, aws } = settings;
-    console.log(`[ipaper-api] found ${pageNumbers.length} pages`);
+    log.info(`found ${pageNumbers.length} pages`);
 
     // Build Zoom-quality image URLs — downloaded by the downloader with Referer headers
     const resolvedPages: ResolvedPage[] = pageNumbers.map((nr) => ({
@@ -78,9 +80,7 @@ async function resolveViaIPaperApi(
       imageUrl: `${aws.url}Pages/${nr}/Zoom.jpg?${aws.policy}`,
     }));
 
-    console.log(
-      `[ipaper-api] got ${resolvedPages.length} pages for ${catalogId}`
-    );
+    log.info(`got ${resolvedPages.length} pages`, { catalogId });
 
     return {
       catalogId,
@@ -94,10 +94,9 @@ async function resolveViaIPaperApi(
 
 // --- CatalogResolver implementation ---
 
-const ipaperResolver: CatalogResolver = {
+export const ipaperResolver: CatalogResolver = {
   name: "ipaper",
   needsLastPage: false,
   resolve: resolveViaIPaperApi,
 };
 
-registerResolver(ipaperResolver);

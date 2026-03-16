@@ -1,6 +1,9 @@
 import type { Page } from "playwright";
 import type { StoreDefinition } from "@bestdeal/shared";
 import { applyUrlTransforms, parseDates, extractCatalogType } from "@bestdeal/shared";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "discovery" });
 
 export interface DiscoveredCatalog {
   store: string;
@@ -28,7 +31,7 @@ export async function discoverStore(
   page: Page,
   storeDef: StoreDefinition
 ): Promise<DiscoveredCatalog[]> {
-  console.log(`[discovery] discovering ${storeDef.name} catalogs...`);
+  log.info(`discovering ${storeDef.name} catalogs...`);
   await page.goto(storeDef.landingUrl, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(storeDef.waitAfterLoad);
 
@@ -164,7 +167,7 @@ export async function discoverStore(
           }
         }
       } catch (err) {
-        console.warn(`[discovery] failed to visit ${raw.href}: ${err}`);
+        log.warn(`failed to visit ${raw.href}`, { err: String(err) });
       }
     }
     // Navigate back so the page state is clean
@@ -200,9 +203,7 @@ export async function discoverStore(
     }
 
     if (!dates) {
-      console.log(
-        `[discovery] skipping ${storeDef.name} catalog (no dates): slug=${raw.slug}`
-      );
+      log.info(`skipping ${storeDef.name} catalog (no dates)`, { slug: raw.slug });
       continue;
     }
 
@@ -223,9 +224,7 @@ export async function discoverStore(
     });
   }
 
-  console.log(
-    `[discovery] found ${discovered.length} ${storeDef.name} catalog(s)`
-  );
+  log.info(`found ${discovered.length} ${storeDef.name} catalog(s)`);
   return discovered;
 }
 
@@ -239,7 +238,7 @@ export async function discoverStoreViaApi(
   storeDef: StoreDefinition
 ): Promise<DiscoveredCatalog[]> {
   const api = storeDef.apiDiscovery!;
-  console.log(`[discovery] discovering ${storeDef.name} catalogs via API...`);
+  log.info(`discovering ${storeDef.name} catalogs via API...`);
 
   await page.goto(storeDef.landingUrl, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(storeDef.waitAfterLoad);
@@ -259,13 +258,11 @@ export async function discoverStoreViaApi(
   );
 
   if (catalogIds.length === 0) {
-    console.log(`[discovery] no catalog IDs found for ${storeDef.name}`);
+    log.info(`no catalog IDs found for ${storeDef.name}`);
     return [];
   }
 
-  console.log(
-    `[discovery] found ${catalogIds.length} catalog ID(s) for ${storeDef.name}`
-  );
+  log.info(`found ${catalogIds.length} catalog ID(s) for ${storeDef.name}`);
 
   const discovered: DiscoveredCatalog[] = [];
 
@@ -274,9 +271,7 @@ export async function discoverStoreViaApi(
     try {
       const resp = await fetch(apiUrl);
       if (!resp.ok) {
-        console.log(
-          `[discovery] API ${resp.status} for ${storeDef.name} catalog ${id}`
-        );
+        log.info(`API ${resp.status} for ${storeDef.name} catalog ${id}`);
         continue;
       }
 
@@ -287,9 +282,7 @@ export async function discoverStoreViaApi(
       const rawDateTo = data[api.fieldMap.dateTo];
 
       if (!firstPageUrl || !rawDateFrom || !rawDateTo) {
-        console.log(
-          `[discovery] skipping ${storeDef.name} catalog ${id} (missing fields)`
-        );
+        log.info(`skipping ${storeDef.name} catalog ${id} (missing fields)`);
         continue;
       }
 
@@ -322,14 +315,10 @@ export async function discoverStoreViaApi(
         catalogType: catalogType || undefined,
       });
     } catch (err) {
-      console.log(
-        `[discovery] API error for ${storeDef.name} catalog ${id}: ${err}`
-      );
+      log.warn(`API error for ${storeDef.name} catalog ${id}`, { err: String(err) });
     }
   }
 
-  console.log(
-    `[discovery] found ${discovered.length} ${storeDef.name} catalog(s) via API`
-  );
+  log.info(`found ${discovered.length} ${storeDef.name} catalog(s) via API`);
   return discovered;
 }

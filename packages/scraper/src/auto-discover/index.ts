@@ -3,6 +3,9 @@ import { join } from "node:path";
 import type { StoreDefinition } from "@bestdeal/shared";
 import { discoverLinks } from "./link-discovery-service.ts";
 import { generateStoreConfig } from "./config-generator.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "auto-discover" });
 
 // --- Validation ---
 
@@ -80,19 +83,17 @@ async function verifyConfig(config: StoreDefinition): Promise<void> {
     try {
       const catalogs = await discoverStore(page, config);
       if (catalogs.length === 0) {
-        console.log(
-          "[auto-discover] warning: verification found 0 catalogs — config may need manual tuning"
-        );
+        log.warn("verification found 0 catalogs — config may need manual tuning");
       } else {
         for (const c of catalogs) {
-          console.log(`  - ${c.store} ${c.dateFrom} to ${c.dateTo}`);
+          log.info(`  - ${c.store} ${c.dateFrom} to ${c.dateTo}`);
         }
       }
     } finally {
       await browser.close();
     }
   } catch (err) {
-    console.log(`[auto-discover] warning: verification failed — ${err}`);
+    log.warn(`verification failed`, { err: String(err) });
   }
 }
 
@@ -106,14 +107,14 @@ export async function runAutoDiscover(options: {
   const { url, store, country } = options;
 
   // Step 1: Extract links
-  console.log("\n=== Step 1: Extracting links ===");
+  log.info("=== Step 1: Extracting links ===");
   const linkResult = await discoverLinks(url);
   if (linkResult.links.length === 0) {
     throw new Error(`No links found on ${url}`);
   }
 
   // Step 2: Generate config via LLM
-  console.log("\n=== Step 2: Generating config via LLM ===");
+  log.info("=== Step 2: Generating config via LLM ===");
   const config = await generateStoreConfig({
     storeName: store,
     landingUrl: url,
@@ -124,12 +125,12 @@ export async function runAutoDiscover(options: {
   config.country = country;
 
   // Step 3: Validate
-  console.log("\n=== Step 3: Validating config ===");
+  log.info("=== Step 3: Validating config ===");
   validateConfig(config);
-  console.log("[auto-discover] validation passed");
+  log.info("validation passed");
 
   // Step 4: Write config file (strip country field — injected at load time)
-  console.log("\n=== Step 4: Writing config ===");
+  log.info("=== Step 4: Writing config ===");
   const storesDir = join(import.meta.dir, "../../stores", country);
   await mkdir(storesDir, { recursive: true });
   const configPath = join(storesDir, `${store}.json`);
@@ -139,10 +140,10 @@ export async function runAutoDiscover(options: {
     configPath,
     JSON.stringify(configWithoutCountry, null, 4) + "\n"
   );
-  console.log(`[auto-discover] wrote ${configPath}`);
+  log.info(`wrote ${configPath}`);
 
   // Step 5: Verify (best-effort)
-  console.log("\n=== Step 5: Verification ===");
+  log.info("=== Step 5: Verification ===");
   await verifyConfig(config);
 
   return configPath;

@@ -1,6 +1,17 @@
 import type { ImageExtraction } from "@bestdeal/shared";
 import type { ResolveResult } from "./resolver-types.ts";
 
+import { leafletsResolver } from "./leaflets-api-resolver.ts";
+import { publitasResolver } from "./publitas-api-resolver.ts";
+import { yumpuResolver } from "./yumpu-api-resolver.ts";
+import { ipaperResolver } from "./ipaper-api-resolver.ts";
+import { pdfResolver } from "./pdf-resolver.ts";
+import { flipHtml5Resolver } from "./fliphtml5-resolver.ts";
+import { flippingbookResolver } from "./flippingbook-resolver.ts";
+import { digitalCatalogueResolver } from "./digital-catalogue-resolver.ts";
+import { tjekResolver } from "./tjek-resolver.ts";
+import { browserResolver } from "./resolver.ts";
+
 export interface ResolveInput {
   catalogId: string;
   firstPageUrl: string;
@@ -15,6 +26,8 @@ export interface CatalogResolver {
   needsLastPage: boolean;
   resolve(input: ResolveInput): Promise<ResolveResult>;
 }
+
+export type ResolverName = typeof resolvers extends Record<infer K, unknown> ? K : never;
 
 // --- URL-based auto-detection rules ---
 
@@ -61,13 +74,20 @@ const detectionRules: DetectionRule[] = [
   },
 ];
 
-// --- Registry ---
+// --- Explicit resolver registry ---
 
-const resolvers = new Map<string, CatalogResolver>();
-
-export function registerResolver(resolver: CatalogResolver): void {
-  resolvers.set(resolver.name, resolver);
-}
+const resolvers: Record<string, CatalogResolver> = {
+  leaflets: leafletsResolver,
+  publitas: publitasResolver,
+  yumpu: yumpuResolver,
+  ipaper: ipaperResolver,
+  pdf: pdfResolver,
+  fliphtml5: flipHtml5Resolver,
+  flippingbook: flippingbookResolver,
+  "digital-catalogue": digitalCatalogueResolver,
+  tjek: tjekResolver,
+  browser: browserResolver,
+};
 
 /**
  * Detect which resolver name matches a URL. Pure function — does not import
@@ -93,11 +113,9 @@ export function getResolver(
   overrideName?: string
 ): CatalogResolver {
   const name = detectResolverName(url, overrideName);
-  const resolver = resolvers.get(name);
+  const resolver = resolvers[name];
   if (!resolver) {
-    throw new Error(
-      `No resolver registered for "${name}". Did you import the resolver module?`
-    );
+    throw new Error(`No resolver registered for "${name}".`);
   }
   return resolver;
 }

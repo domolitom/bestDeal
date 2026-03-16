@@ -2,6 +2,9 @@ import OpenAI from "openai";
 import type { StoreDefinition } from "@bestdeal/shared";
 import type { ExtractedLink } from "./link-discovery-service.ts";
 import { buildSystemPrompt, buildUserPrompt } from "./prompt.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "config-generator" });
 
 /**
  * Call OpenAI to generate a StoreDefinition from extracted links.
@@ -20,9 +23,7 @@ export async function generateStoreConfig(options: {
 
   const client = new OpenAI({ apiKey });
 
-  console.log(
-    `[config-generator] calling OpenAI (${options.links.length} links)...`
-  );
+  log.info(`calling OpenAI`, { links: options.links.length });
 
   const response = await client.chat.completions.create({
     model: "gpt-4o",

@@ -2,13 +2,8 @@ import { describe, expect, test } from "bun:test";
 import {
   detectResolverName,
   getResolver,
-  registerResolver,
 } from "../src/scraping/resolver-registry.ts";
 import { extractFlyerSlug } from "../src/scraping/leaflets-api-resolver.ts";
-
-// Import resolvers for side-effect registration
-import "../src/scraping/leaflets-api-resolver.ts";
-import "../src/scraping/resolver.ts";
 
 describe("detectResolverName", () => {
   test("leaflets.schwarz URL → leaflets", () => {

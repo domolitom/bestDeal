@@ -21,6 +21,30 @@ export interface CdnManifest {
   catalogs: CatalogMeta[];
 }
 
+/** Validate that a parsed JSON value is a well-formed CdnManifest. */
+export function isCdnManifest(value: unknown): value is CdnManifest {
+  if (!value || typeof value !== "object") return false;
+  const obj = value as Record<string, unknown>;
+  if (typeof obj.updatedAt !== "string") return false;
+  if (!Array.isArray(obj.catalogs)) return false;
+  // Spot-check first entry if present
+  if (obj.catalogs.length > 0 && !isCatalogMeta(obj.catalogs[0])) return false;
+  return true;
+}
+
+/** Validate that a parsed JSON value looks like a CatalogMeta. */
+export function isCatalogMeta(value: unknown): value is CatalogMeta {
+  if (!value || typeof value !== "object") return false;
+  const obj = value as Record<string, unknown>;
+  return (
+    typeof obj.id === "string" &&
+    typeof obj.store === "string" &&
+    typeof obj.country === "string" &&
+    typeof obj.status === "string" &&
+    typeof obj.pageCount === "number"
+  );
+}
+
 /**
  * CDN-based read adapter that fetches data via HTTP from a public CDN URL.
  * No AWS SDK needed — works on any runtime including Cloudflare Edge.
@@ -51,7 +75,9 @@ export class CdnReadAdapter implements ReadonlyStorageAdapter {
       countries.map(async (c) => {
         const resp = await fetch(`${this.cdnUrl}/${c}/manifest.json`);
         if (!resp.ok) return null;
-        return (await resp.json()) as CdnManifest;
+        const data: unknown = await resp.json();
+        if (!isCdnManifest(data)) return null;
+        return data;
       })
     );
 
@@ -107,7 +133,9 @@ export class CdnReadAdapter implements ReadonlyStorageAdapter {
     const resp = await fetch(metaUrl);
     if (!resp.ok) return null;
 
-    const meta = (await resp.json()) as CatalogMeta;
+    const data: unknown = await resp.json();
+    if (!isCatalogMeta(data)) return null;
+    const meta = data;
 
     // Build pages array from pageCount
     const pages: CatalogPage[] = [];

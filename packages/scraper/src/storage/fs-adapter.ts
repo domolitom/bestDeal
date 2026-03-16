@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import type { StorageAdapter, CatalogMeta } from "@bestdeal/shared";
 import { FsReadAdapter } from "@bestdeal/shared/storage/fs";
@@ -30,5 +30,18 @@ export class FilesystemAdapter extends FsReadAdapter implements StorageAdapter {
       await mkdir(catalogPath, { recursive: true });
     }
     await writeFile(filePath, data);
+  }
+
+  async deleteCatalog(catalogId: string): Promise<void> {
+    const catalogPath = this.getCatalogPath(catalogId);
+    await rm(catalogPath, { recursive: true, force: true });
+  }
+
+  async writeManifest(json: string, country?: string): Promise<void> {
+    const path = country
+      ? join(this.baseDir, country, "manifest.json")
+      : join(this.baseDir, "manifest.json");
+    await mkdir(join(path, ".."), { recursive: true });
+    await writeFile(path, json);
   }
 }

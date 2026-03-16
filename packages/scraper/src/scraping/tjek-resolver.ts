@@ -1,7 +1,9 @@
 import { chromium } from "../browser.ts";
 import type { ResolveResult, ResolvedPage } from "./resolver-types.ts";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
-import { registerResolver } from "./resolver-registry.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "tjek" });
 
 /**
  * Resolve page images for Tjek-hosted catalogs (e.g. Netto).
@@ -14,7 +16,7 @@ async function resolveViaTjek(
 ): Promise<ResolveResult> {
   const { firstPageUrl, catalogId } = input;
 
-  console.log(`[tjek] loading ${firstPageUrl}`);
+  log.info(`loading ${firstPageUrl}`);
 
   const browser = await chromium.launch({ headless: true });
   try {
@@ -41,7 +43,7 @@ async function resolveViaTjek(
     });
 
     if (clicked) {
-      console.log(`[tjek] clicked catalog thumbnail, waiting for viewer...`);
+      log.info(`clicked catalog thumbnail, waiting for viewer...`);
       await page.waitForTimeout(8000);
     }
 
@@ -82,7 +84,7 @@ async function resolveViaTjek(
       ),
     ];
 
-    console.log(`[tjek] found ${catalogIds.length} catalog(s): ${catalogIds.join(", ")}`);
+    log.info(`found ${catalogIds.length} catalog(s): ${catalogIds.join(", ")}`);
 
     // Use the catalog with the most pages (skip dealer logos)
     let bestId = catalogIds[0] || "";
@@ -106,9 +108,7 @@ async function resolveViaTjek(
 
     const sortedPages = [...pageMap.entries()].sort((a, b) => a[0] - b[0]);
 
-    console.log(
-      `[tjek] got ${sortedPages.length} pages for ${catalogId} (tjek catalog: ${bestId})`
-    );
+    log.info(`got ${sortedPages.length} pages`, { catalogId, tjekCatalog: bestId });
 
     const pages: ResolvedPage[] = sortedPages.map(([num, url]) => ({
       number: num,
@@ -125,10 +125,9 @@ async function resolveViaTjek(
   }
 }
 
-const tjekResolver: CatalogResolver = {
+export const tjekResolver: CatalogResolver = {
   name: "tjek",
   needsLastPage: false,
   resolve: resolveViaTjek,
 };
 
-registerResolver(tjekResolver);

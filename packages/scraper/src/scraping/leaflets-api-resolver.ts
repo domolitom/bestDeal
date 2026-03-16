@@ -1,6 +1,8 @@
 import type { ResolveResult } from "./resolver-types.ts";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
-import { registerResolver } from "./resolver-registry.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "leaflets-api" });
 
 interface LeafletsPage {
   number: number;
@@ -48,7 +50,7 @@ async function resolveViaLeafletsApi(
 
   const apiHost = deriveApiHost(firstPageUrl);
   const apiUrl = `https://${apiHost}/v4/flyer?flyer_identifier=${encodeURIComponent(slug)}`;
-  console.log(`[leaflets-api] fetching ${apiUrl}`);
+  log.info(`fetching ${apiUrl}`);
 
   const resp = await fetch(apiUrl);
   if (!resp.ok) {
@@ -64,9 +66,7 @@ async function resolveViaLeafletsApi(
     throw new Error(`Leaflets API returned no pages for slug: ${slug}`);
   }
 
-  console.log(
-    `[leaflets-api] got ${flyer.pages.length} pages for ${catalogId}`
-  );
+  log.info(`got ${flyer.pages.length} pages`, { catalogId });
 
   return {
     catalogId,
@@ -80,10 +80,9 @@ async function resolveViaLeafletsApi(
 
 // --- CatalogResolver implementation ---
 
-const leafletsResolver: CatalogResolver = {
+export const leafletsResolver: CatalogResolver = {
   name: "leaflets",
   needsLastPage: false,
   resolve: resolveViaLeafletsApi,
 };
 
-registerResolver(leafletsResolver);

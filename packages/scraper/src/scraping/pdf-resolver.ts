@@ -1,7 +1,9 @@
 import { chromium } from "../browser.ts";
 import type { ResolveResult, ResolvedPage } from "./resolver-types.ts";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
-import { registerResolver } from "./resolver-registry.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "pdf" });
 
 const PDFJS_VERSION = "4.7.76";
 const PDFJS_CDN = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}`;
@@ -12,7 +14,7 @@ const PDFJS_CDN = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION
  */
 async function renderPdfPages(pdfUrl: string): Promise<Buffer[]> {
   // Download PDF server-side
-  console.log(`[pdf] downloading ${pdfUrl}`);
+  log.info(`downloading ${pdfUrl}`);
   const resp = await fetch(pdfUrl);
   if (!resp.ok) {
     throw new Error(`PDF download failed: ${resp.status} ${resp.statusText}`);
@@ -86,7 +88,7 @@ async function renderPdfPages(pdfUrl: string): Promise<Buffer[]> {
 async function resolveViaPdf(input: ResolveInput): Promise<ResolveResult> {
   const { firstPageUrl, catalogId } = input;
 
-  console.log(`[pdf] rendering ${firstPageUrl}`);
+  log.info(`rendering ${firstPageUrl}`);
 
   const imageBuffers = await renderPdfPages(firstPageUrl);
 
@@ -94,7 +96,7 @@ async function resolveViaPdf(input: ResolveInput): Promise<ResolveResult> {
     throw new Error(`PDF rendered no pages: ${firstPageUrl}`);
   }
 
-  console.log(`[pdf] rendered ${imageBuffers.length} pages for ${catalogId}`);
+  log.info(`rendered ${imageBuffers.length} pages`, { catalogId });
 
   const pages: ResolvedPage[] = imageBuffers.map((data, i) => ({
     number: i + 1,
@@ -111,10 +113,9 @@ async function resolveViaPdf(input: ResolveInput): Promise<ResolveResult> {
 
 // --- CatalogResolver implementation ---
 
-const pdfResolver: CatalogResolver = {
+export const pdfResolver: CatalogResolver = {
   name: "pdf",
   needsLastPage: false,
   resolve: resolveViaPdf,
 };
 
-registerResolver(pdfResolver);

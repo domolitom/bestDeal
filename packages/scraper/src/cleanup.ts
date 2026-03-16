@@ -46,3 +46,12 @@ for (const catalog of toDelete) {
 }
 
 console.log(`[cleanup] done: ${deleted}/${toDelete.length} deleted`);
+
+// Regenerate per-country manifests for affected countries
+if (deleted > 0) {
+  const { generateManifest } = await import("./pipeline.ts");
+  const affectedCountries = new Set(toDelete.map((c) => c.country));
+  for (const country of affectedCountries) {
+    await generateManifest(storage, country);
+  }
+}

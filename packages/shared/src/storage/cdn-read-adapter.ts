@@ -46,13 +46,28 @@ export class CdnReadAdapter implements ReadonlyStorageAdapter {
       return this.manifestCache;
     }
 
-    const resp = await fetch(`${this.cdnUrl}/manifest.json`);
-    if (!resp.ok) {
-      return { updatedAt: "", catalogs: [] };
+    const countries = Object.keys(COUNTRY_META);
+    const results = await Promise.allSettled(
+      countries.map(async (c) => {
+        const resp = await fetch(`${this.cdnUrl}/${c}/manifest.json`);
+        if (!resp.ok) return null;
+        return (await resp.json()) as CdnManifest;
+      })
+    );
+
+    let latestUpdatedAt = "";
+    const allCatalogs: CatalogMeta[] = [];
+
+    for (const result of results) {
+      if (result.status !== "fulfilled" || !result.value) continue;
+      const m = result.value;
+      if (m.updatedAt > latestUpdatedAt) latestUpdatedAt = m.updatedAt;
+      allCatalogs.push(...m.catalogs);
     }
-    this.manifestCache = await resp.json() as CdnManifest;
+
+    this.manifestCache = { updatedAt: latestUpdatedAt, catalogs: allCatalogs };
     this.manifestFetchedAt = now;
-    return this.manifestCache!;
+    return this.manifestCache;
   }
 
   async listCatalogs(filter?: CatalogFilter): Promise<CatalogSummary[]> {

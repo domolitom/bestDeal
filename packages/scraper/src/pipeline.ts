@@ -135,7 +135,7 @@ export async function runPipeline(
 
   if (toScrape.length === 0) {
     console.log("\n[pipeline] no catalogs to scrape");
-    await generateManifest(storage);
+    await generateManifest(storage, country);
     return report;
   }
 
@@ -233,33 +233,53 @@ export async function runPipeline(
     `\n=== Pipeline complete: ${report.scraped.length} scraped, ${report.failed.length} failed ===\n`
   );
 
-  // Generate manifest.json for CDN-based web app
-  await generateManifest(storage);
+  // Generate per-country manifest.json for CDN-based web app
+  await generateManifest(storage, country);
 
   return report;
 }
 
 /**
- * Write a manifest.json listing all ready catalogs.
- * The web app reads this via fetch() from the CDN — no S3 SDK needed at runtime.
+ * Write per-country manifest.json files listing all ready catalogs.
+ * When `country` is set, writes only that country's manifest.
+ * When no country, writes a manifest for every country that has ready catalogs.
  */
-export async function generateManifest(storage: StorageAdapter): Promise<void> {
-  const catalogs = await storage.listCatalogs({ status: "ready" });
-  const manifest = {
-    updatedAt: new Date().toISOString(),
-    catalogs: [] as CatalogMeta[],
-  };
+export async function generateManifest(
+  storage: StorageAdapter,
+  country?: string
+): Promise<void> {
+  if (!("writeManifest" in storage && typeof storage.writeManifest === "function")) {
+    return;
+  }
 
+  const catalogs = await storage.listCatalogs({ status: "ready" });
+
+  // Group catalogs by country
+  const byCountry = new Map<string, CatalogMeta[]>();
   for (const summary of catalogs) {
     const catalog = await storage.getCatalog(summary.id);
     if (!catalog) continue;
     const { pages, ...meta } = catalog;
-    manifest.catalogs.push(meta);
+    const arr = byCountry.get(meta.country) ?? [];
+    arr.push(meta);
+    byCountry.set(meta.country, arr);
   }
 
-  // Use writeManifest if available (R2 adapter), otherwise skip
-  if ("writeManifest" in storage && typeof storage.writeManifest === "function") {
-    await (storage as any).writeManifest(JSON.stringify(manifest, null, 2));
-    console.log(`[pipeline] wrote manifest.json (${manifest.catalogs.length} catalogs)`);
+  // Determine which countries to write
+  const countries = country ? [country] : [...byCountry.keys()];
+
+  for (const c of countries) {
+    const countryCatalogs = byCountry.get(c) ?? [];
+    const manifest = {
+      updatedAt: new Date().toISOString(),
+      catalogs: countryCatalogs,
+    };
+    await (storage as any).writeManifest(
+      JSON.stringify(manifest, null, 2),
+      c
+    );
+    console.log(
+      `[pipeline] wrote ${c}/manifest.json (${countryCatalogs.length} catalogs)`
+    );
   }
 }

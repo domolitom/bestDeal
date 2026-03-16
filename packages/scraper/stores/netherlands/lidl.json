@@ -1,35 +1,28 @@
 {
     "name": "lidl",
-    "landingUrl": "https://www.lidl.nl/l/folders",
-    "waitAfterLoad": 8000,
+    "landingUrl": "https://www.lidl.nl/c/service-contact-folders/s10008124",
+    "waitAfterLoad": 10000,
     "resolver": "leaflets",
     "linkPatterns": [
-        {
-            "match": "/l/folders/([^/]+)/view/flyer/page/\\d+",
-            "slugGroup": 1,
-            "normalizeUrl": [
-                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" }
-            ]
-        },
         {
             "match": "/l/folders/([^/]+)/ar/\\d+",
             "slugGroup": 1,
             "normalizeUrl": [
-                { "type": "replace", "match": "/ar/\\d+", "replacement": "/view/flyer/page/1" }
+                { "type": "replace", "match": "/ar/\\d+.*$", "replacement": "/view/flyer/page/1" }
             ]
         }
     ],
     "dateSource": "slug_then_text",
     "datePatterns": [
         {
-            "match": "(\\d{2}-\\d{2}-\\d{4})-(\\d{2}-\\d{2}-\\d{4})",
-            "dateFrom": "$1",
-            "dateTo": "$2"
+            "match": "wk(\\d+)-(\\d{4})",
+            "dateFrom": "KW$1-$2",
+            "dateTo": "KW$1-$2"
         },
         {
-            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\s*-\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
-            "dateFrom": "$1-$2-$3",
-            "dateTo": "$4-$5-$6"
+            "match": "(\\d{1,2})-(\\d{1,2})-(\\d{1,2})-(\\d{1,2})-(\\d{2,4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
         },
         {
             "match": "Van (\\d{2})/(\\d{2}) tot (\\d{2})/(\\d{2})",

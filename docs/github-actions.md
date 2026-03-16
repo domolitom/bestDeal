@@ -215,8 +215,8 @@ To rotate R2 API tokens:
 ### Checking Workflow Status
 
 - Go to the GitHub Actions tab to see all workflow runs
-- Each matrix job shows its own logs with `[discovery]`, `[pipeline]`, `[resolver]`, and `[downloader]` prefixed messages
-- The pipeline summary at the end of each run shows total scraped/failed counts
+- Each matrix job shows its own structured logs. In CI (`CI=true`), logs are JSON lines with `level`, `msg`, `module`, `catalogId`, and timing fields. Locally, the same logs appear as human-readable `[module] message` format.
+- The pipeline summary at the end of each run shows total scraped/failed counts with duration
 
 ### Common Issues
 

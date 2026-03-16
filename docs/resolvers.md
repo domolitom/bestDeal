@@ -98,22 +98,26 @@ interface ResolvedPage {
 
 ## The Resolver Registry
 
-The registry (`packages/scraper/src/scraping/resolver-registry.ts`) is a `Map<string, CatalogResolver>`. Each resolver file registers itself via a side-effect import:
+The registry (`packages/scraper/src/scraping/resolver-registry.ts`) is an explicit `Record<string, CatalogResolver>` that imports all resolvers directly:
 
 ```typescript
-// In each resolver file:
-const myResolver: CatalogResolver = {
+// In each resolver file — export the resolver object:
+export const myResolver: CatalogResolver = {
   name: "my-resolver",
   needsLastPage: false,
   resolve: resolveViaMyPlatform,
 };
-registerResolver(myResolver);
 
-// In pipeline.ts — side-effect imports that trigger registration:
-import "./scraping/leaflets-api-resolver.ts";
-import "./scraping/publitas-api-resolver.ts";
-// ... etc.
+// In resolver-registry.ts — explicit imports and map:
+import { myResolver } from "./my-resolver.ts";
+
+const resolvers: Record<string, CatalogResolver> = {
+  "my-resolver": myResolver,
+  // ... all 10 resolvers
+};
 ```
+
+This design means forgetting to add a resolver to the registry is a compile-time error (unused export), not a silent runtime failure. No side-effect imports or `registerResolver()` calls are needed.
 
 ## How a Resolver Gets Selected
 
@@ -423,12 +427,17 @@ Before writing code, understand how the platform serves page images:
 
 Create `packages/scraper/src/scraping/my-platform-resolver.ts`:
 
-### Step 3: Register in Pipeline
+### Step 3: Register in the Registry
 
-Add the side-effect import in `packages/scraper/src/pipeline.ts`:
+Add the import and entry in `packages/scraper/src/scraping/resolver-registry.ts`:
 
 ```typescript
-import "./scraping/my-platform-resolver.ts";
+import { myPlatformResolver } from "./my-platform-resolver.ts";
+
+const resolvers: Record<string, CatalogResolver> = {
+  // ... existing resolvers ...
+  "my-platform": myPlatformResolver,
+};
 ```
 
 ### Step 4: Add Auto-Detection Rule (Optional)
@@ -452,7 +461,9 @@ For platforms with a predictable API or URL pattern:
 ```typescript
 import type { ResolveResult, ResolvedPage } from "./resolver-types.ts";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
-import { registerResolver } from "./resolver-registry.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "my-platform" });
 
 async function resolveViaMyPlatform(
   input: ResolveInput
@@ -466,7 +477,7 @@ async function resolveViaMyPlatform(
 
   // 2. Fetch API/data
   const apiUrl = `https://api.my-platform.com/catalogs/${id}/pages`;
-  console.log(`[my-platform] fetching ${apiUrl}`);
+  log.info(`fetching ${apiUrl}`);
   const resp = await fetch(apiUrl);
   if (!resp.ok) throw new Error(`API returned ${resp.status}`);
   const data = await resp.json();
@@ -477,7 +488,7 @@ async function resolveViaMyPlatform(
     imageUrl: p.imageUrl,
   }));
 
-  console.log(`[my-platform] got ${pages.length} pages for ${catalogId}`);
+  log.info(`got ${pages.length} pages`, { catalogId });
 
   return {
     catalogId,
@@ -486,13 +497,11 @@ async function resolveViaMyPlatform(
   };
 }
 
-const myPlatformResolver: CatalogResolver = {
+export const myPlatformResolver: CatalogResolver = {
   name: "my-platform",
   needsLastPage: false,
   resolve: resolveViaMyPlatform,
 };
-
-registerResolver(myPlatformResolver);
 ```
 
 ### Template: Browser-Based Resolver
@@ -503,14 +512,16 @@ For platforms that require JavaScript execution:
 import { chromium } from "../browser.ts";
 import type { ResolveResult, ResolvedPage } from "./resolver-types.ts";
 import type { CatalogResolver, ResolveInput } from "./resolver-registry.ts";
-import { registerResolver } from "./resolver-registry.ts";
+import { createLogger } from "../logger.ts";
+
+const log = createLogger({ module: "my-platform" });
 
 async function resolveViaMyPlatform(
   input: ResolveInput
 ): Promise<ResolveResult> {
   const { firstPageUrl, catalogId } = input;
 
-  console.log(`[my-platform] loading ${firstPageUrl}`);
+  log.info(`loading ${firstPageUrl}`);
 
   const browser = await chromium.launch({ headless: true });
   try {
@@ -533,7 +544,7 @@ async function resolveViaMyPlatform(
       imageUrl: url,
     }));
 
-    console.log(`[my-platform] got ${pages.length} pages for ${catalogId}`);
+    log.info(`got ${pages.length} pages`, { catalogId });
 
     return {
       catalogId,
@@ -545,13 +556,11 @@ async function resolveViaMyPlatform(
   }
 }
 
-const myPlatformResolver: CatalogResolver = {
+export const myPlatformResolver: CatalogResolver = {
   name: "my-platform",
   needsLastPage: false,
   resolve: resolveViaMyPlatform,
 };
-
-registerResolver(myPlatformResolver);
 ```
 
 ## Resolver Decision Matrix

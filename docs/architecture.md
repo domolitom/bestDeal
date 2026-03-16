@@ -79,6 +79,7 @@ bestdeal/
 │   │   ├── src/
 │   │   │   ├── cli.ts            # CLI entry point (arg parsing, storage setup)
 │   │   │   ├── pipeline.ts       # Main pipeline orchestration
+│   │   │   ├── logger.ts         # Structured logger (JSON in CI, pretty locally)
 │   │   │   ├── browser.ts        # Playwright + Stealth plugin setup
 │   │   │   ├── cleanup.ts        # Cleanup expired/failed catalogs from R2
 │   │   │   ├── config/
@@ -181,8 +182,8 @@ Storage adapters are NOT exported from the barrel `index.ts` to keep it client-s
 - `ApiDiscoveryConfig`: Configuration for API-based catalog discovery (alternative to link-based)
 
 **`storage.ts`** — Storage adapter interfaces:
-- `ReadonlyStorageAdapter`: `listCatalogs()`, `getCatalog()`, `getImageUrl()`, `listCountries()`, `listStores()`
-- `StorageAdapter`: extends ReadonlyStorageAdapter + `writeCatalogMeta()`, `writeImage()`
+- `ReadonlyStorageAdapter`: `listCatalogs()`, `getCatalog()`, `getImageUrl()`, `listCountries()`, `listStores()`. Contract: list methods never throw (return `[]`), `getCatalog` returns `null` on missing.
+- `StorageAdapter`: extends ReadonlyStorageAdapter + `writeCatalogMeta()`, `writeImage()`, and optional `writeManifest?()`, `deleteCatalog?()`
 
 **`country.ts`** — Country metadata:
 - `Country` interface with code, display name, flag emoji, store/catalog counts
@@ -302,8 +303,10 @@ The storage system uses a layered adapter pattern:
 - `CdnReadAdapter` — Reads from CDN via HTTP `fetch()`. Used by the web app on Cloudflare Edge runtime. **This is the only adapter that works on Edge** because it doesn't need AWS SDK or Node.js filesystem APIs.
 
 **Read-write adapters** (in `@bestdeal/scraper`):
-- `FilesystemAdapter` — Extends `FsReadAdapter`, adds `writeCatalogMeta()` and `writeImage()`.
-- `R2StorageAdapter` — Extends `R2ReadAdapter`, adds write methods + `writeManifest()` + `deleteCatalog()`.
+- `FilesystemAdapter` — Extends `FsReadAdapter`, adds `writeCatalogMeta()`, `writeImage()`, `writeManifest()`, and `deleteCatalog()`.
+- `R2StorageAdapter` — Extends `R2ReadAdapter`, adds the same write methods with R2-specific implementation.
+
+Both adapters implement the optional `writeManifest?()` and `deleteCatalog?()` methods from the `StorageAdapter` interface, so the pipeline uses them without unsafe casts.
 
 ### Manifest System
 
@@ -327,7 +330,7 @@ The manifest is a JSON index file written per-country after each scraper run:
 }
 ```
 
-The web app's `CdnReadAdapter` fetches all per-country manifests in parallel on each request (with 1-minute TTL cache). This avoids expensive S3 `ListObjects` calls and works on any runtime.
+The web app's `CdnReadAdapter` fetches all per-country manifests in parallel on each request (with 1-minute TTL cache). Each manifest is validated at runtime using `isCdnManifest()` and `isCatalogMeta()` type guards — malformed JSON is silently dropped rather than crashing the app. This avoids expensive S3 `ListObjects` calls and works on any runtime.
 
 ## Deployment Architecture
 

@@ -89,9 +89,9 @@ The proxy ensures `createStorage()` is only called when a method is actually inv
 
 ### CdnReadAdapter Data Flow
 
-1. **List countries/catalogs:** The adapter fetches `{cdnUrl}/{country}/manifest.json` for every country in `COUNTRY_META` (28 countries) using `Promise.allSettled`. Failed fetches (no catalogs for that country) are silently ignored. Results are cached for 1 minute.
+1. **List countries/catalogs:** The adapter fetches `{cdnUrl}/{country}/manifest.json` for every country in `COUNTRY_META` (28 countries) using `Promise.allSettled`. Each response is validated at runtime using `isCdnManifest()` and `isCatalogMeta()` type guards — malformed or invalid JSON is silently dropped. Results are cached for 1 minute.
 
-2. **Get single catalog:** The adapter fetches `{cdnUrl}/{country}/{store}/{catalogId}/meta.json` and constructs the pages array from the `pageCount` field.
+2. **Get single catalog:** The adapter fetches `{cdnUrl}/{country}/{store}/{catalogId}/meta.json`, validates it with `isCatalogMeta()`, and constructs the pages array from the `pageCount` field. Returns `null` if validation fails.
 
 3. **Image URLs:** Constructed as `{cdnUrl}/{country}/{store}/{catalogId}/pages/page-001.jpg`. These are direct CDN URLs — no proxy or API route needed.
 

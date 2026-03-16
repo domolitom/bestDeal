@@ -156,7 +156,7 @@ After scraping completes, the pipeline generates per-country `manifest.json` fil
 
 If `--country` was specified, only that country's manifest is regenerated. Otherwise, manifests for all countries with ready catalogs are written.
 
-Manifest generation only happens if the storage backend supports it (`writeManifest()` method exists on the adapter — R2 does, filesystem does not).
+Manifest generation only happens if the storage backend supports it (the optional `writeManifest()` method on the `StorageAdapter` interface). Both `R2StorageAdapter` and `FilesystemAdapter` implement it.
 
 ## Store Config Files
 
@@ -510,14 +510,22 @@ Most resolvers (`needsLastPage: false`) determine the page count themselves from
 
 ### Resolver Registry
 
-The resolver registry (`packages/scraper/src/scraping/resolver-registry.ts`) is a central map from resolver names to resolver instances. Each resolver file registers itself as a side-effect import:
+The resolver registry (`packages/scraper/src/scraping/resolver-registry.ts`) is an explicit `Record<string, CatalogResolver>` that imports all resolver objects directly. Each resolver file exports its resolver const, and the registry imports them all into a single map:
 
 ```typescript
-// In pipeline.ts:
-import "./scraping/leaflets-api-resolver.ts";  // registers "leaflets"
-import "./scraping/publitas-api-resolver.ts";  // registers "publitas"
+// In resolver-registry.ts:
+import { leafletsResolver } from "./leaflets-api-resolver.ts";
+import { publitasResolver } from "./publitas-api-resolver.ts";
 // ... etc.
+
+const resolvers: Record<string, CatalogResolver> = {
+  leaflets: leafletsResolver,
+  publitas: publitasResolver,
+  // ... all 10 resolvers
+};
 ```
+
+This means a missing import is a compile-time error, not a silent runtime failure. No side-effect imports or `registerResolver()` calls are needed.
 
 The registry provides two functions:
 - `detectResolverName(url, overrideName?)` — Pure function that determines which resolver to use. If `overrideName` is set (from `StoreDefinition.resolver`), it's used directly. Otherwise, the URL is tested against auto-detection rules.
@@ -719,7 +727,7 @@ HTTP downloads include a `Referer` header (set to the image URL's origin) and a 
 
 Writes to `{data-dir}/{country}/{store}/{catalogId}/`. Default data directory is `../../data/catalogs` relative to the scraper source.
 
-Used for local development and testing. Does not support manifest generation.
+Used for local development and testing. Supports manifest generation (`writeManifest()`) and catalog deletion (`deleteCatalog()`).
 
 ### R2 (`--storage=r2`)
 
@@ -760,6 +768,33 @@ The Stealth plugin patches various browser fingerprinting vectors to avoid bot d
 - Permission API responses
 
 Browser is launched with `headless: true` and a viewport of 800x1200 (portrait orientation, suitable for catalog pages).
+
+## Structured Logging
+
+All scraper modules use a structured logger (`packages/scraper/src/logger.ts`) instead of raw `console.log` calls.
+
+**API:**
+```typescript
+import { createLogger } from "./logger.ts";
+const log = createLogger({ module: "pipeline" });
+
+log.info("resolving", { catalogId });
+log.warn("page failed", { page: 3, err: "timeout" });
+log.error("fatal", { err: String(err) });
+
+const child = log.child({ catalogId: "romania-lidl-..." });
+child.info("downloading");  // includes catalogId in context
+
+const elapsed = log.time();
+// ... do work ...
+log.info("done", { durationMs: elapsed() });
+```
+
+**Output modes** (auto-detected):
+- **CI** (`CI=true` or `LOG_FORMAT=json`): JSON lines to stderr — structured, machine-parseable
+- **Local** (default): Pretty `[module] message` format — human-readable
+
+Each module creates its own logger with a `module` context field. Data fields like `catalogId`, `durationMs`, and error details are passed as structured data rather than interpolated into the message string.
 
 ## Error Handling and Recovery
 

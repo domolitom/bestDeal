@@ -210,7 +210,7 @@ bun run scraper -- --discover-only --country=germany --store=my-store
 ```
 
 **What to look for:**
-- `[discovery] found N my-store catalog(s)` — Did it find catalogs?
+- `[discovery] found N my-store catalog(s)` in the log output — Did it find catalogs?
 - Are the catalog IDs correct? (correct country, store, dates)
 - Are the dates in ISO format? (YYYY-MM-DD)
 - Is the resolver correctly detected?

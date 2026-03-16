@@ -25,5 +25,8 @@ dist/
 # English corrections log
 english-corrections.md
 
+# Wrangler local dev state
+.wrangler/
+
 # OS
 .DS_Store

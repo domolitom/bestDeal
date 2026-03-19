@@ -1,6 +1,6 @@
 {
     "name": "lidl",
-    "landingUrl": "https://www.lidl.de/",
+    "landingUrl": "https://www.lidl.de/c/online-prospekte/s10019227",
     "waitAfterLoad": 8000,
     "resolver": "leaflets",
     "linkPatterns": [

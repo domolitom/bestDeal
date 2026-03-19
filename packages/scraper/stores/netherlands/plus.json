@@ -1,0 +1,24 @@
+{
+    "name": "plus",
+    "landingUrl": "https://view.publitas.com/plus-folder-nl/",
+    "waitAfterLoad": 10000,
+    "linkDomain": "publitas.com",
+    "linkPatterns": [
+        {
+            "match": "view\\.publitas\\.com/plus-folder-nl/(plus-week-[^/?#]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "append", "suffix": "/page/1" }
+            ]
+        }
+    ],
+    "resolver": "publitas",
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "plus-week-(\\d+)-(\\d{4})",
+            "dateFrom": "KW$1-$2",
+            "dateTo": "KW$1-$2"
+        }
+    ]
+}

@@ -159,6 +159,7 @@ export class CdnReadAdapter implements ReadonlyStorageAdapter {
 
   async listCountries(): Promise<Country[]> {
     const manifest = await this.getManifest();
+    const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
     const countryMap = new Map<string, { stores: Set<string>; catalogs: number }>();
 
     for (const cat of manifest.catalogs) {
@@ -167,7 +168,10 @@ export class CdnReadAdapter implements ReadonlyStorageAdapter {
       }
       const entry = countryMap.get(cat.country)!;
       entry.stores.add(cat.store);
-      entry.catalogs++;
+      // Only count catalogs that are ready and not yet expired
+      if (cat.status === "ready" && cat.dateTo >= today) {
+        entry.catalogs++;
+      }
     }
 
     const countries: Country[] = [];

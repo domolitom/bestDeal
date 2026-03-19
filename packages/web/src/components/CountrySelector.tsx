@@ -15,7 +15,7 @@ export function CountrySelector({ countries }: { countries: Country[] }) {
     <div className="grid-countries">
       {countries.map((country) => (
         <Link key={country.code} href={`/${country.code}`}>
-          <div className="card country-card">
+          <div className={`card country-card${country.catalogCount === 0 ? " country-card--inactive" : ""}`}>
             <div className="country-flag">{country.flag}</div>
             <div className="country-info">
               <h3>{country.name}</h3>

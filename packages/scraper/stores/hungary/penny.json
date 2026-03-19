@@ -1,0 +1,25 @@
+{
+    "name": "penny",
+    "country": "hungary",
+    "landingUrl": "https://www.penny.hu/reklamujsag",
+    "waitAfterLoad": 10000,
+    "linkDomain": "files.rewe.co.at",
+    "resolver": "flippingbook",
+    "linkPatterns": [
+        {
+            "match": "files\\.rewe\\.co\\.at/PennyIntLeaflet/HU/([^/?#]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/$", "replacement": "" }
+            ]
+        }
+    ],
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "^(\\d{4})(\\d{2})$",
+            "dateFrom": "KW$2-$1",
+            "dateTo": "KW$2-$1"
+        }
+    ]
+}

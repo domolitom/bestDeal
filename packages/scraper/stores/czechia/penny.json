@@ -1,0 +1,30 @@
+{
+    "name": "penny",
+    "country": "czechia",
+    "landingUrl": "https://www.penny.cz/nabidky/letaky",
+    "waitAfterLoad": 10000,
+    "linkDomain": "files.rewe.co.at",
+    "resolver": "flippingbook",
+    "linkPatterns": [
+        {
+            "match": "files\\.rewe\\.co\\.at/PennyIntLeaflet/CZ/([^/]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/$", "replacement": "" }
+            ]
+        }
+    ],
+    "dateSource": "slug_then_text",
+    "datePatterns": [
+        {
+            "match": "^(\\d{2})_(\\d{2})_(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$1-$2-$3"
+        },
+        {
+            "match": "(\\d{1,2})\\. (\\d{1,2})\\. - (\\d{1,2})\\. (\\d{1,2})\\.",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4"
+        }
+    ]
+}

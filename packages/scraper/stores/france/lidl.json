@@ -2,6 +2,7 @@
     "name": "lidl",
     "landingUrl": "https://www.lidl.fr/",
     "waitAfterLoad": 8000,
+    "resolver": "leaflets",
     "linkPatterns": [
         {
             "match": "/l/catalogue-de-la-semaine/([^/]+)/ar/\\d+",

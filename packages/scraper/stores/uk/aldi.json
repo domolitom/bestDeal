@@ -1,0 +1,34 @@
+{
+    "name": "aldi",
+    "landingUrl": "https://www.aldi.co.uk/specialbuys/leaflet",
+    "waitAfterLoad": 8000,
+    "linkDomain": "leaflet.aldi.co.uk",
+    "linkPatterns": [
+        {
+            "match": "leaflet\\.aldi\\.co\\.uk/([^/?#]+?)(?:/page/\\d+)?/?$",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "(?:/page/\\d+)?/?$", "replacement": "/page/1" }
+            ]
+        }
+    ],
+    "resolver": "publitas",
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(?:THUR?|MON|TUE|WED|FRI|SAT)\\s+(\\d{1,2})\\s+(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC).*?(?:SUN|THUR?|WED|MON|TUE|FRI|SAT)\\s+(\\d{1,2})\\s+(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4"
+        },
+        {
+            "match": "(?:THUR?|MON|TUE|WED|FRI|SAT|SUN)\\s+(\\d{1,2})\\s+(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)",
+            "dateFrom": "$1-$2",
+            "dateTo": "$1-$2"
+        },
+        {
+            "match": "(\\d{1,2})\\s+(January|February|March|April|May|June|July|August|September|October|November|December)",
+            "dateFrom": "$1-$2",
+            "dateTo": "$1-$2"
+        }
+    ]
+}

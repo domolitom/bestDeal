@@ -1,0 +1,29 @@
+{
+    "name": "aldi",
+    "country": "italy",
+    "landingUrl": "https://www.aldi.it/it/volantino-online.html",
+    "waitAfterLoad": 8000,
+    "linkDomain": "volantino.aldi.it",
+    "resolver": "publitas",
+    "linkPatterns": [
+        {
+            "match": "volantino\\.aldi\\.it/([^/?#]+)(?:/page/\\d+)?",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                {
+                    "type": "replace",
+                    "match": "/page/\\d+.*$",
+                    "replacement": "/page/1"
+                }
+            ]
+        }
+    ],
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "da_\\w+_(\\d{1,2})_(\\w+)",
+            "dateFrom": "$1-$2",
+            "dateTo": "$1-$2"
+        }
+    ]
+}

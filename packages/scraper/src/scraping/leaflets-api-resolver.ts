@@ -28,8 +28,9 @@ export function extractFlyerSlug(url: string): string | null {
  * Derive the API endpoint host from the viewer URL.
  * "leaflets.schwarz" → "endpoints.leaflets.schwarz"
  * "leaflets.kaufland.com" → "endpoints.leaflets.kaufland.com"
+ * Falls back to the Schwarz host when no leaflets domain is in the URL.
  */
-function deriveApiHost(url: string): string {
+export function deriveLeafletsApiHost(url: string): string {
   const match = url.match(/https?:\/\/([^/]*leaflets\.[^/]+)/);
   if (!match) return "endpoints.leaflets.schwarz";
   const host = match[1]!;
@@ -48,7 +49,7 @@ async function resolveViaLeafletsApi(
     );
   }
 
-  const apiHost = deriveApiHost(firstPageUrl);
+  const apiHost = deriveLeafletsApiHost(firstPageUrl);
   const apiUrl = `https://${apiHost}/v4/flyer?flyer_identifier=${encodeURIComponent(slug)}`;
   log.info(`fetching ${apiUrl}`);
 

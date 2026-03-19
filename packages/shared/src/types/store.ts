@@ -94,7 +94,7 @@ export interface StoreDefinition {
   /** DOM attribute to read the URL from (default: href/src depending on element) */
   linkAttribute?: string;
   linkPatterns: LinkPattern[];
-  dateSource: "slug" | "text" | "slug_then_text";
+  dateSource: "slug" | "text" | "slug_then_text" | "leaflets_api";
   datePatterns: DatePattern[];
   catalogTypePattern?: CatalogTypePattern;
   imageExtraction?: ImageExtraction;

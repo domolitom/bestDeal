@@ -61,7 +61,8 @@ function validateStoreDefinition(def: StoreDefinition, file: string): void {
         `Store definition ${file} missing required field: dateSource`
       );
     }
-    if (!def.datePatterns?.length) {
+    // leaflets_api stores fetch dates from the Leaflets API — datePatterns not required
+    if (def.dateSource !== "leaflets_api" && !def.datePatterns?.length) {
       throw new Error(
         `Store definition ${file} must have at least one datePattern`
       );

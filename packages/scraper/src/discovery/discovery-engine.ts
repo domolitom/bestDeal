@@ -2,6 +2,7 @@ import type { Page } from "playwright";
 import type { StoreDefinition } from "@bestdeal/shared";
 import { applyUrlTransforms, parseDates, extractCatalogType } from "@bestdeal/shared";
 import { createLogger } from "../logger.ts";
+import { extractFlyerSlug, deriveLeafletsApiHost } from "../scraping/leaflets-api-resolver.ts";
 
 const log = createLogger({ module: "discovery" });
 
@@ -22,6 +23,44 @@ interface RawLink {
   dateText: string;
   /** Overridden firstPageUrl extracted from an iframe on the linked page */
   iframeUrl?: string;
+}
+
+interface LeafletsApiFlyer {
+  offerStartDate?: string;
+  offerEndDate?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+/**
+ * Fetch date information for a single flyer slug from the Leaflets API.
+ * Uses offerStartDate/offerEndDate when available, falls back to startDate/endDate.
+ * Returns ISO-formatted dates or null if the API call fails.
+ */
+async function fetchLeafletsApiDates(
+  slug: string,
+  apiHost: string
+): Promise<{ dateFrom: string; dateTo: string } | null> {
+  const apiUrl = `https://${apiHost}/v4/flyer?flyer_identifier=${encodeURIComponent(slug)}`;
+  try {
+    const resp = await fetch(apiUrl);
+    if (!resp.ok) {
+      log.warn(`Leaflets API ${resp.status} for slug: ${slug}`);
+      return null;
+    }
+    const data = await resp.json();
+    const flyer: LeafletsApiFlyer = data.flyer;
+    if (!flyer) return null;
+
+    const dateFrom = flyer.offerStartDate || flyer.startDate;
+    const dateTo = flyer.offerEndDate || flyer.endDate;
+    if (!dateFrom || !dateTo) return null;
+
+    return { dateFrom, dateTo };
+  } catch (err) {
+    log.warn(`Leaflets API error for slug: ${slug}`, { err: String(err) });
+    return null;
+  }
 }
 
 /**
@@ -175,6 +214,12 @@ export async function discoverStore(
     await page.waitForTimeout(storeDef.waitAfterLoad);
   }
 
+  // For leaflets_api dateSource, derive the API host from the landing URL
+  const leafletsApiHost =
+    storeDef.dateSource === "leaflets_api"
+      ? deriveLeafletsApiHost(storeDef.landingUrl)
+      : null;
+
   const discovered: DiscoveredCatalog[] = [];
   for (const raw of rawLinks) {
     let firstPageUrl = raw.iframeUrl || raw.href;
@@ -200,6 +245,11 @@ export async function discoverStore(
         storeDef.dateSource === "slug_then_text")
     ) {
       dates = parseDates(raw.dateText, storeDef.datePatterns);
+    }
+    if (!dates && storeDef.dateSource === "leaflets_api" && leafletsApiHost) {
+      // Use the slug as the flyer identifier to fetch dates from the Leaflets API.
+      // The slug is extracted from the link pattern (slugGroup) — it is the flyer identifier.
+      dates = await fetchLeafletsApiDates(raw.slug, leafletsApiHost);
     }
 
     if (!dates) {

@@ -1,0 +1,24 @@
+{
+    "name": "hofer",
+    "landingUrl": "https://www.hofer.at/de/angebote/aktuelle-flugblaetter-und-broschuren.html",
+    "waitAfterLoad": 8000,
+    "linkDomain": "katalog.hofer.at",
+    "linkPatterns": [
+        {
+            "match": "katalog\\.hofer\\.at/(flipbook_[^/?#]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "append", "suffix": "/page/1" }
+            ]
+        }
+    ],
+    "resolver": "publitas",
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "flipbook_kw(\\d+)_(\\d{2})_",
+            "dateFrom": "KW$1-$2",
+            "dateTo": "KW$1-$2"
+        }
+    ]
+}

@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "bestDeal",
+  "project_id": "248af959-82c3-4225-b163-459a95b8ab1e"
+}

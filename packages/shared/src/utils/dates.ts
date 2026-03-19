@@ -42,12 +42,28 @@ const MONTH_NAMES: Record<string, string> = {
   settembre: "09", ottobre: "10",
   // Italian abbreviations
   gen: "01", mag: "05", giu: "06", lug: "07", ott: "10",
+  // Polish full names
+  styczeń: "01", luty: "02", marzec: "03", kwiecień: "04",
+  czerwiec: "06", lipiec: "07", sierpień: "08",
+  wrzesień: "09", październik: "10", listopad: "11", grudzień: "12",
+  // Polish abbreviations
+  sty: "01", lut: "02", kwi: "04",
+  cze: "06", lip: "07", sie: "08",
+  wrz: "09", paź: "10", lis: "11", gru: "12",
+  // Czech/Slovak full names
+  leden: "01", únor: "02", březen: "03", duben: "04",
+  červen: "06", červenec: "07", srpen: "08",
+  září: "09", říjen: "10", prosinec: "12",
+  // Hungarian full names
+  január: "01", február: "02", március: "03", április: "04",
+  június: "06", július: "07", augusztus: "08",
+  szeptember: "09", október: "10",
 };
 
 /** Replace month name tokens with two-digit month numbers. */
 function normalizeMonthNames(s: string): string {
   return s.replace(
-    /[a-zăâîșțéûäöü]+/gi,
+    /[a-zăâîșțéûäöüąćęłńóśźżáčďěíňřšůýžàèùœ]+/gi,
     (word) => MONTH_NAMES[word.toLowerCase()] ?? word,
   );
 }

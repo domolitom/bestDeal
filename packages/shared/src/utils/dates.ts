@@ -19,6 +19,13 @@ const MONTH_NAMES: Record<string, string> = {
   // German abbreviations
   mär: "03", mrz: "03",
   okt: "10", dez: "12",
+  // English full names
+  january: "01", february: "02", march: "03", april: "04",
+  may: "05", june: "06", july: "07",
+  // august already covered by Romanian; september/october/november covered by French
+  december: "12",
+  // English abbreviations not yet covered by Romanian (ian/feb/mar/apr/aug/sep/oct/dec)
+  jan: "01", jun: "06", jul: "07", nov: "11",
 };
 
 /** Replace month name tokens with two-digit month numbers. */

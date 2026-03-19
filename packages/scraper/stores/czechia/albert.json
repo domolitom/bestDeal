@@ -1,0 +1,36 @@
+{
+    "name": "albert",
+    "country": "czechia",
+    "landingUrl": "https://www.albert.cz/aktualni-letaky",
+    "waitAfterLoad": 12000,
+    "linkDomain": "letaky.albert.cz",
+    "linkSelector": "div[src*='letaky.albert.cz']",
+    "linkAttribute": "src",
+    "linkPatterns": [
+        {
+            "match": "letaky\\.albert\\.cz/([^/?#]+)/cover_page",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                {
+                    "type": "replace",
+                    "match": "/cover_page\\.jpg.*$",
+                    "replacement": "/page/1"
+                }
+            ]
+        }
+    ],
+    "resolver": "publitas",
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "Od (\\d{2})\\.(\\d{2})\\.(\\d{4}) do (\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

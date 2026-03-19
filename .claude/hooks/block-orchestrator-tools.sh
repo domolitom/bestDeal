@@ -45,6 +45,9 @@ if [[ "$TOOL_NAME" == "Edit" ]] || [[ "$TOOL_NAME" == "Write" ]]; then
   # Allow agent definitions and hook scripts
   [[ "$FILE_PATH" == *"/.claude/agents/"* ]] && exit 0
   [[ "$FILE_PATH" == *"/.claude/hooks/"* ]] && exit 0
+  # Allow store configs and workflow files (agents need these)
+  [[ "$FILE_PATH" == *"/stores/"*".json" ]] && exit 0
+  [[ "$FILE_PATH" == *"/.github/"* ]] && exit 0
 
   # Allow edits in worktrees
   [[ "$FILE_PATH" == *"/.worktrees/"* ]] && exit 0

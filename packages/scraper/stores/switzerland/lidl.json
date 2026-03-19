@@ -1,6 +1,6 @@
 {
     "name": "lidl",
-    "landingUrl": "https://www.lidl.ch/l/prospekte",
+    "landingUrl": "https://www.lidl.ch/c/prospekte-und-angebote/s10008174",
     "waitAfterLoad": 8000,
     "resolver": "leaflets",
     "linkPatterns": [

@@ -26,6 +26,22 @@ const MONTH_NAMES: Record<string, string> = {
   december: "12",
   // English abbreviations not yet covered by Romanian (ian/feb/mar/apr/aug/sep/oct/dec)
   jan: "01", jun: "06", jul: "07", nov: "11",
+  // Portuguese full names (maio = mai already covered; dezembro = dec covered)
+  janeiro: "01", fevereiro: "02", março: "03", abril: "04",
+  junho: "06", julho: "07", agosto: "08",
+  setembro: "09", outubro: "10", novembro: "11",
+  // Spanish full names (mayo = mai; junio conflicts with juin but same value "06")
+  enero: "01", febrero: "02", marzo: "03",
+  mayo: "05", junio: "06", julio: "07",
+  septiembre: "09", octubre: "10", noviembre: "11", diciembre: "12",
+  // Spanish abbreviations
+  ene: "01", dic: "12",
+  // Italian full names (maggio = mai; agosto already in map; novembre = novembre FR same value)
+  gennaio: "01", febbraio: "02",
+  maggio: "05", giugno: "06", luglio: "07",
+  settembre: "09", ottobre: "10",
+  // Italian abbreviations
+  gen: "01", mag: "05", giu: "06", lug: "07", ott: "10",
 };
 
 /** Replace month name tokens with two-digit month numbers. */

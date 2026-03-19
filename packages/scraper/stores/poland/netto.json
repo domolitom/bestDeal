@@ -1,0 +1,35 @@
+{
+    "name": "netto",
+    "country": "poland",
+    "landingUrl": "https://netto.pl/gazetka-netto/",
+    "waitAfterLoad": 12000,
+    "resolver": "tjek",
+    "linkSelector": "img[src*='tjek.com']",
+    "linkAttribute": "src",
+    "linkPatterns": [
+        {
+            "match": "image-transformer-api\\.tjek\\.com/.*uploads(?:%2F|/)([^%/]+)(?:%2F|/)p-1",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                {
+                    "type": "replace",
+                    "match": ".*",
+                    "replacement": "https://netto.pl/gazetka-netto/"
+                }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\. - (\\d{1,2})\\. (styczeń|luty|marzec|kwiecień|maj|czerwiec|lipiec|sierpień|wrzesień|październik|listopad|grudzień)",
+            "dateFrom": "$1-$3",
+            "dateTo": "$2-$3"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*(?:do|-)\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

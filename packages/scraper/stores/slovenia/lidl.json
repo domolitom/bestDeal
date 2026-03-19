@@ -15,9 +15,9 @@
     "dateSource": "slug_then_text",
     "datePatterns": [
         {
-            "match": "kw(\\d+)",
-            "dateFrom": "KW$1-2026",
-            "dateTo": "KW$1-2026"
+            "match": "kw(\\d+)-(\\d{2,4})",
+            "dateFrom": "KW$1-$2",
+            "dateTo": "KW$1-$2"
         },
         {
             "match": "(\\d{1,2})-(\\d{1,2})-(\\d{1,2})-(\\d{1,2})-(\\d{4})",

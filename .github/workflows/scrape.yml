@@ -13,8 +13,34 @@ jobs:
     timeout-minutes: 30
     strategy:
       fail-fast: false
+      max-parallel: 10
       matrix:
-        country: [romania, germany, france]
+        country:
+          - austria
+          - belgium
+          - bulgaria
+          - croatia
+          - czechia
+          - denmark
+          - estonia
+          - finland
+          - france
+          - germany
+          - hungary
+          - ireland
+          - italy
+          - netherlands
+          - norway
+          - poland
+          - portugal
+          - romania
+          - serbia
+          - slovakia
+          - slovenia
+          - spain
+          - sweden
+          - switzerland
+          - uk
 
     steps:
       - uses: actions/checkout@v4

@@ -1,0 +1,24 @@
+{
+    "name": "aldi-suisse",
+    "landingUrl": "https://www.aldi-suisse.ch/de/aktionen-und-angebote/aktuelle-flugblaetter-und-broschuren.html",
+    "waitAfterLoad": 8000,
+    "linkDomain": "catalog.aldi-suisse.ch",
+    "linkPatterns": [
+        {
+            "match": "catalog\\.aldi-suisse\\.ch/(aldiwoche_kw[^/?#]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "append", "suffix": "/page/1" }
+            ]
+        }
+    ],
+    "resolver": "publitas",
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "aldiwoche_kw(\\d+)-(\\d{4})",
+            "dateFrom": "KW$1-$2",
+            "dateTo": "KW$1-$2"
+        }
+    ]
+}

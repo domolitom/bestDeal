@@ -15,6 +15,11 @@
     "dateSource": "text",
     "datePatterns": [
         {
+            "match": "W(\\d+)\\.(\\d{2})",
+            "dateFrom": "KW$1-$2",
+            "dateTo": "KW$1-$2"
+        },
+        {
             "match": "(\\d{4})\\.(\\d{2})\\.(\\d{2})\\s*-\\s*(\\d{4})\\.(\\d{2})\\.(\\d{2})",
             "dateFrom": "$3-$2-$1",
             "dateTo": "$6-$5-$4"

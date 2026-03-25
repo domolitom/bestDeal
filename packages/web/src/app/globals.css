@@ -151,10 +151,6 @@ a {
   border-color: var(--accent);
 }
 
-.country-card--inactive {
-  opacity: 0.5;
-}
-
 .country-flag {
   font-size: 52px;
   line-height: 1;

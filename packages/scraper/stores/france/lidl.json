@@ -1,6 +1,6 @@
 {
     "name": "lidl",
-    "landingUrl": "https://www.lidl.fr/",
+    "landingUrl": "https://www.lidl.fr/c/catalogues-en-ligne/s10017753",
     "waitAfterLoad": 8000,
     "resolver": "leaflets",
     "linkPatterns": [
@@ -16,12 +16,6 @@
             ]
         }
     ],
-    "dateSource": "text",
-    "datePatterns": [
-        {
-            "match": "Du (\\d{2})/(\\d{2}) au (\\d{2})/(\\d{2})",
-            "dateFrom": "$1-$2",
-            "dateTo": "$3-$4"
-        }
-    ]
+    "dateSource": "leaflets_api",
+    "datePatterns": []
 }

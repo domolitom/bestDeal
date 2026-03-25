@@ -2,30 +2,24 @@
     "name": "lidl",
     "landingUrl": "https://www.lidl.be/c/nl-BE/folders-magazines/s10008101",
     "waitAfterLoad": 10000,
-    "resolver": "leaflets",
+    "resolver": "publitas",
+    "linkDomain": "folder-nl.lidl.be",
     "linkPatterns": [
         {
-            "match": "/l/(?:nl-BE/|fr/)?folders/([^/]+)/ar/\\d+",
+            "match": "folder-nl\\.lidl\\.be/([^/?#]+)$",
             "slugGroup": 1,
             "normalizeUrl": [
-                { "type": "replace", "match": "/ar/\\d+.*$", "replacement": "/view/flyer/page/1" }
+                {
+                    "type": "append",
+                    "suffix": "/page/1"
+                }
             ]
         }
     ],
-    "dateSource": "slug_then_text",
+    "dateSource": "slug",
     "datePatterns": [
         {
-            "match": "(\\d{1,2})-(\\d{1,2})-(\\d{1,2})-(\\d{1,2})-(\\d{4})",
-            "dateFrom": "$1-$2",
-            "dateTo": "$3-$4-$5"
-        },
-        {
-            "match": "Van (\\d{2})/(\\d{2}) tot (\\d{2})/(\\d{2})",
-            "dateFrom": "$1-$2",
-            "dateTo": "$3-$4"
-        },
-        {
-            "match": "Du (\\d{2})/(\\d{2}) au (\\d{2})/(\\d{2})",
+            "match": "(\\d{2})-(\\d{2})-(\\d{2})-(\\d{2})$",
             "dateFrom": "$1-$2",
             "dateTo": "$3-$4"
         }

@@ -56,6 +56,48 @@ async function isPageValid(page: Page, url: string): Promise<boolean> {
   }
 }
 
+// --- Date sanity validation ---
+
+const MAX_DATE_TO_FUTURE_DAYS = 365;
+const MAX_DATE_SPAN_DAYS = 365;
+
+/**
+ * Validate that a catalog's ISO dates are sane:
+ * - dateTo must not be more than 1 year in the future from today
+ * - the span (dateTo - dateFrom) must not exceed 365 days
+ *
+ * Returns null when valid, or a human-readable rejection reason string.
+ */
+export function validateCatalogDates(
+  dateFrom: string,
+  dateTo: string
+): string | null {
+  const from = new Date(dateFrom);
+  const to = new Date(dateTo);
+
+  if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+    return `unparseable dates: dateFrom="${dateFrom}" dateTo="${dateTo}"`;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const maxDateTo = new Date(today);
+  maxDateTo.setDate(maxDateTo.getDate() + MAX_DATE_TO_FUTURE_DAYS);
+
+  if (to > maxDateTo) {
+    const daysAhead = Math.round((to.getTime() - today.getTime()) / 86400000);
+    return `dateTo "${dateTo}" is ${daysAhead} days in the future (max ${MAX_DATE_TO_FUTURE_DAYS})`;
+  }
+
+  const spanDays = Math.round((to.getTime() - from.getTime()) / 86400000);
+  if (spanDays > MAX_DATE_SPAN_DAYS) {
+    return `date span is ${spanDays} days (max ${MAX_DATE_SPAN_DAYS})`;
+  }
+
+  return null;
+}
+
 // --- Last page detection ---
 
 export async function findLastPage(
@@ -204,17 +246,27 @@ export async function discoverAll(
             log.info(`new catalog: ${catalogId} — resolver "${resolverName}" (skipping page probe)`);
           }
 
+          // Resolve ISO dates and validate before persisting
+          const isoDateFrom = toISODate(
+            catalog.dateFrom,
+            extractYear(catalog.dateTo)
+          );
+          const isoDateTo = toISODate(catalog.dateTo, undefined, true);
+
+          const dateError = validateCatalogDates(isoDateFrom, isoDateTo);
+          if (dateError) {
+            log.warn(`skipping bogus catalog: ${catalogId} — ${dateError}`);
+            continue;
+          }
+
           // Write catalog meta through storage adapter
           const meta: CatalogMeta = {
             id: catalogId,
             store: catalog.store,
             country: catalog.country,
             status: "discovered",
-            dateFrom: toISODate(
-              catalog.dateFrom,
-              extractYear(catalog.dateTo)
-            ),
-            dateTo: toISODate(catalog.dateTo, undefined, true),
+            dateFrom: isoDateFrom,
+            dateTo: isoDateTo,
             catalogType: catalog.catalogType,
             coverImage: "cover.jpg",
             pageCount: lastPage ?? 0,

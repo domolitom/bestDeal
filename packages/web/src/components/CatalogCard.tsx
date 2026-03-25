@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { CatalogSummary } from "@bestdeal/shared";
 import { formatDate } from "@bestdeal/shared";
-import { StatusBadge, FreshnessIndicator } from "./FreshnessIndicator";
+import { FreshnessIndicator } from "./FreshnessIndicator";
 import { getCoverUrl } from "@/lib/image-url";
 
 export function CatalogCard({ catalog }: { catalog: CatalogSummary }) {
@@ -32,8 +32,7 @@ export function CatalogCard({ catalog }: { catalog: CatalogSummary }) {
           <div className="catalog-card-dates">
             {formatDate(catalog.dateFrom)} - {formatDate(catalog.dateTo)}
           </div>
-          <div style={{ marginTop: 6, display: "flex", gap: 8, alignItems: "center" }}>
-            <StatusBadge dateTo={catalog.dateTo} />
+          <div style={{ marginTop: 6 }}>
             <FreshnessIndicator dateTo={catalog.dateTo} />
           </div>
         </div>

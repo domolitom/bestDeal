@@ -224,10 +224,60 @@ export async function runPipeline(
   return report;
 }
 
+/** Maximum days past dateTo before a catalog is excluded from the manifest. */
+const MANIFEST_EXPIRY_DAYS = 30;
+
+/** Maximum days dateTo may be in the future before a catalog is excluded from the manifest. */
+const MANIFEST_MAX_FUTURE_DAYS = 365;
+
+/**
+ * Return true when a catalog's dates are sane enough to include in the manifest:
+ * - dateFrom and dateTo must be parseable
+ * - dateTo must not be before dateFrom (inverted)
+ * - dateTo must not be more than 1 year ahead of today
+ * - dateTo must not be more than 30 days in the past
+ */
+function isManifestEligible(meta: CatalogMeta): boolean {
+  const from = new Date(meta.dateFrom);
+  const to = new Date(meta.dateTo);
+
+  if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+    log.warn(`manifest: skipping ${meta.id} — unparseable dates`);
+    return false;
+  }
+
+  if (to < from) {
+    log.warn(`manifest: skipping ${meta.id} — inverted dates (dateTo before dateFrom)`);
+    return false;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const maxFuture = new Date(today);
+  maxFuture.setDate(maxFuture.getDate() + MANIFEST_MAX_FUTURE_DAYS);
+  if (to > maxFuture) {
+    const daysAhead = Math.round((to.getTime() - today.getTime()) / 86400000);
+    log.warn(`manifest: skipping ${meta.id} — dateTo ${meta.dateTo} is ${daysAhead} days ahead`);
+    return false;
+  }
+
+  const cutoff = new Date(today);
+  cutoff.setDate(cutoff.getDate() - MANIFEST_EXPIRY_DAYS);
+  if (to < cutoff) {
+    const daysAgo = Math.round((today.getTime() - to.getTime()) / 86400000);
+    log.warn(`manifest: skipping ${meta.id} — expired ${daysAgo} days ago`);
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * Write per-country manifest.json files listing all ready catalogs.
  * When `country` is set, writes only that country's manifest.
  * When no country, writes a manifest for every country that has ready catalogs.
+ * Catalogs with bogus or stale dates are silently excluded from the manifest.
  */
 export async function generateManifest(
   storage: StorageAdapter,
@@ -239,12 +289,13 @@ export async function generateManifest(
 
   const catalogs = await storage.listCatalogs({ status: "ready" });
 
-  // Group catalogs by country
+  // Group catalogs by country, filtering out any with bogus dates
   const byCountry = new Map<string, CatalogMeta[]>();
   for (const summary of catalogs) {
     const catalog = await storage.getCatalog(summary.id);
     if (!catalog) continue;
     const { pages, ...meta } = catalog;
+    if (!isManifestEligible(meta)) continue;
     const arr = byCountry.get(meta.country) ?? [];
     arr.push(meta);
     byCountry.set(meta.country, arr);

@@ -7,6 +7,16 @@ import Link from "next/link";
 export const runtime = "edge";
 export const revalidate = 300;
 
+// Keep catalogs that expired within the last 2 days (grace period), hide older ones.
+function isRecentEnough(dateTo: string): boolean {
+  const end = new Date(dateTo);
+  if (isNaN(end.getTime())) return false;
+  const cutoff = new Date();
+  cutoff.setHours(0, 0, 0, 0);
+  cutoff.setDate(cutoff.getDate() - 2);
+  return end >= cutoff;
+}
+
 export default async function StorePage({
   params,
 }: {
@@ -14,10 +24,11 @@ export default async function StorePage({
 }) {
   const { country, store } = await params;
 
-  const catalogs = await storage.listCatalogs({
+  const allCatalogs = await storage.listCatalogs({
     country,
     store,
   });
+  const catalogs = allCatalogs.filter((c) => isRecentEnough(c.dateTo));
 
   if (catalogs.length === 0) {
     // Check if the store actually exists (might just have no ready catalogs)

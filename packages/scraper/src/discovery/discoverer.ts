@@ -63,6 +63,7 @@ const MAX_DATE_SPAN_DAYS = 365;
 
 /**
  * Validate that a catalog's ISO dates are sane:
+ * - dateTo must not be before dateFrom (inverted dates)
  * - dateTo must not be more than 1 year in the future from today
  * - the span (dateTo - dateFrom) must not exceed 365 days
  *
@@ -77,6 +78,10 @@ export function validateCatalogDates(
 
   if (isNaN(from.getTime()) || isNaN(to.getTime())) {
     return `unparseable dates: dateFrom="${dateFrom}" dateTo="${dateTo}"`;
+  }
+
+  if (to < from) {
+    return `dateTo "${dateTo}" is before dateFrom "${dateFrom}" (inverted dates)`;
   }
 
   const today = new Date();

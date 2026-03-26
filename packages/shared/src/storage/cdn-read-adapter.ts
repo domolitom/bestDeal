@@ -9,7 +9,7 @@ import type {
   CatalogPage,
 } from "../types/catalog";
 import type { Country } from "../types/country";
-import { COUNTRY_META } from "../types/country";
+import { COUNTRY_META, COUNTRY_CODE_ALIASES } from "../types/country";
 import { parseCatalogId } from "../utils/config-id";
 
 /**
@@ -30,6 +30,14 @@ export function isCdnManifest(value: unknown): value is CdnManifest {
   // Spot-check first entry if present
   if (obj.catalogs.length > 0 && !isCatalogMeta(obj.catalogs[0])) return false;
   return true;
+}
+
+/**
+ * Normalise a country string from manifest data to a canonical COUNTRY_META key.
+ * Handles legacy data stored under incorrect country names (e.g. "united-kingdom" → "uk").
+ */
+export function normaliseCountryCode(raw: string): string {
+  return COUNTRY_CODE_ALIASES[raw] ?? raw;
 }
 
 /** Validate that a parsed JSON value looks like a CatalogMeta. */
@@ -88,7 +96,13 @@ export class CdnReadAdapter implements ReadonlyStorageAdapter {
       if (result.status !== "fulfilled" || !result.value) continue;
       const m = result.value;
       if (m.updatedAt > latestUpdatedAt) latestUpdatedAt = m.updatedAt;
-      allCatalogs.push(...m.catalogs);
+      // Normalise country codes in case legacy data uses a different form (e.g. "united-kingdom")
+      allCatalogs.push(
+        ...m.catalogs.map((cat) => ({
+          ...cat,
+          country: normaliseCountryCode(cat.country),
+        }))
+      );
     }
 
     this.manifestCache = { updatedAt: latestUpdatedAt, catalogs: allCatalogs };

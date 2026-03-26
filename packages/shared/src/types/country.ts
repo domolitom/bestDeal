@@ -6,6 +6,17 @@ export interface Country {
   catalogCount: number;
 }
 
+/**
+ * Maps legacy or incorrectly-stored country strings to their canonical COUNTRY_META keys.
+ * Used to repair data already in R2 that was written under a wrong country name.
+ * Example: catalogs stored with country "united-kingdom" are normalised to "uk".
+ */
+export const COUNTRY_CODE_ALIASES: Record<string, string> = {
+  "united-kingdom": "uk",
+  "great-britain": "uk",
+  "czech-republic": "czechia",
+};
+
 export const COUNTRY_META: Record<string, { name: string; flag: string }> = {
   romania: { name: "Romania", flag: "\u{1F1F7}\u{1F1F4}" },
   germany: { name: "Germany", flag: "\u{1F1E9}\u{1F1EA}" },

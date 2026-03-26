@@ -35,7 +35,7 @@ export type {
 //   import { R2ReadAdapter } from "@bestdeal/shared/storage/r2";
 
 export type { Country } from "./types/country";
-export { COUNTRY_META } from "./types/country";
+export { COUNTRY_META, COUNTRY_CODE_ALIASES } from "./types/country";
 
 // Utilities
 export {

@@ -78,34 +78,31 @@ export class CdnReadAdapter implements ReadonlyStorageAdapter {
       return this.manifestCache;
     }
 
-    const countries = Object.keys(COUNTRY_META);
-    const results = await Promise.allSettled(
-      countries.map(async (c) => {
-        const resp = await fetch(`${this.cdnUrl}/${c}/manifest.json`);
-        if (!resp.ok) return null;
-        const data: unknown = await resp.json();
-        if (!isCdnManifest(data)) return null;
-        return data;
-      })
-    );
-
-    let latestUpdatedAt = "";
-    const allCatalogs: CatalogMeta[] = [];
-
-    for (const result of results) {
-      if (result.status !== "fulfilled" || !result.value) continue;
-      const m = result.value;
-      if (m.updatedAt > latestUpdatedAt) latestUpdatedAt = m.updatedAt;
-      // Normalise country codes in case legacy data uses a different form (e.g. "united-kingdom")
-      allCatalogs.push(
-        ...m.catalogs.map((cat) => ({
-          ...cat,
-          country: normaliseCountryCode(cat.country),
-        }))
-      );
+    // Fetch a single root manifest.json written by the scraper after each run.
+    // This replaces the previous strategy of fetching one manifest per country
+    // (29 parallel requests, 27 of which returned 404).
+    const resp = await fetch(`${this.cdnUrl}/manifest.json`);
+    if (resp.ok) {
+      const data: unknown = await resp.json();
+      if (isCdnManifest(data)) {
+        // Normalise country codes in case legacy data uses a different form
+        // (e.g. "united-kingdom" → "uk").
+        const normalised: CdnManifest = {
+          updatedAt: data.updatedAt,
+          catalogs: data.catalogs.map((cat) => ({
+            ...cat,
+            country: normaliseCountryCode(cat.country),
+          })),
+        };
+        this.manifestCache = normalised;
+        this.manifestFetchedAt = now;
+        return this.manifestCache;
+      }
     }
 
-    this.manifestCache = { updatedAt: latestUpdatedAt, catalogs: allCatalogs };
+    // Root manifest missing or malformed — return an empty manifest rather than
+    // throwing so callers always get a usable result.
+    this.manifestCache = { updatedAt: "", catalogs: [] };
     this.manifestFetchedAt = now;
     return this.manifestCache;
   }

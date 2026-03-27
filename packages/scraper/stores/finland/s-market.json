@@ -1,0 +1,45 @@
+{
+    "name": "s-market",
+    "country": "finland",
+    "landingUrl": "https://etarjouslehdet.fi/S-market",
+    "waitAfterLoad": 12000,
+    "resolver": "tjek",
+    "linkSelector": "img[src*='tjek.com']",
+    "linkAttribute": "src",
+    "linkPatterns": [
+        {
+            "match": "image-transformer-api\\.tjek\\.com/.*uploads(?:%2F|/)([^%/]+)(?:%2F|/)p-1",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                {
+                    "type": "replace",
+                    "match": ".*",
+                    "replacement": "https://etarjouslehdet.fi/S-market"
+                }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "\"validFrom\"\\s*:\\s*\"(\\d{4}-\\d{2}-\\d{2})[^\"]*\"[^}]*\"validUntil\"\\s*:\\s*\"(\\d{4}-\\d{2}-\\d{2})",
+            "dateFrom": "$1",
+            "dateTo": "$2"
+        },
+        {
+            "match": "\"run_from\"\\s*:\\s*\"(\\d{4}-\\d{2}-\\d{2})[^\"]*\"[^}]*\"run_till\"\\s*:\\s*\"(\\d{4}-\\d{2}-\\d{2})",
+            "dateFrom": "$1",
+            "dateTo": "$2"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{1,2})\\.\\s*[-–]\\s*(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        }
+    ]
+}

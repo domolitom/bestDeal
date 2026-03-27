@@ -2,15 +2,15 @@
     "name": "hornbach",
     "landingUrl": "https://www.hornbach.de/aktuelles/prospekte-und-kataloge/",
     "waitAfterLoad": 10000,
-    "linkDomain": "view.publitas.com",
+    "linkDomain": "publications.hornbach.de",
     "linkPatterns": [
         {
-            "match": "view\\.publitas\\.com/hornbach[^/]*/([^/?#]+)/page/\\d+",
+            "match": "(?:hb\\.)?publications\\.hornbach\\.de/([^/?#]+)/page/\\d+",
             "slugGroup": 1,
             "normalizeUrl": []
         },
         {
-            "match": "view\\.publitas\\.com/hornbach[^/]*/([^/?#]+)/?$",
+            "match": "(?:hb\\.)?publications\\.hornbach\\.de/([^/?#]+)/?$",
             "slugGroup": 1,
             "normalizeUrl": [
                 { "type": "replace", "match": "/?$", "replacement": "/page/1" }
@@ -18,27 +18,72 @@
         }
     ],
     "resolver": "publitas",
-    "dateSource": "slug_then_text",
+    "dateSource": "slug",
     "datePatterns": [
         {
-            "match": "(\\d{2})(\\d{2})(\\d{2})-(\\d{2})(\\d{2})(\\d{2})",
-            "dateFrom": "$1-$2-20$3",
-            "dateTo": "$4-$5-20$6"
+            "match": "prospekt-januar-(\\d{4})",
+            "dateFrom": "01-01-$1",
+            "dateTo": "31-01-$1"
         },
         {
-            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*(?:bis|-|–)\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
-            "dateFrom": "$1-$2-$3",
-            "dateTo": "$4-$5-$6"
+            "match": "prospekt-februar-(\\d{4})",
+            "dateFrom": "01-02-$1",
+            "dateTo": "28-02-$1"
         },
         {
-            "match": "(\\d{1,2})\\.(\\d{2})\\.?\\s*(?:bis|-|–)\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
-            "dateFrom": "$1-$2",
-            "dateTo": "$3-$4-$5"
+            "match": "prospekt-m.rz-(\\d{4})",
+            "dateFrom": "01-03-$1",
+            "dateTo": "31-03-$1"
         },
         {
-            "match": "(\\d{1,2})\\.(\\d{2})\\.?\\s*-\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
-            "dateFrom": "$1-$2",
-            "dateTo": "$3-$4-$5"
+            "match": "prospekt-april-(\\d{4})",
+            "dateFrom": "01-04-$1",
+            "dateTo": "30-04-$1"
+        },
+        {
+            "match": "prospekt-mai-(\\d{4})",
+            "dateFrom": "01-05-$1",
+            "dateTo": "31-05-$1"
+        },
+        {
+            "match": "prospekt-juni-(\\d{4})",
+            "dateFrom": "01-06-$1",
+            "dateTo": "30-06-$1"
+        },
+        {
+            "match": "prospekt-juli-(\\d{4})",
+            "dateFrom": "01-07-$1",
+            "dateTo": "31-07-$1"
+        },
+        {
+            "match": "prospekt-august-(\\d{4})",
+            "dateFrom": "01-08-$1",
+            "dateTo": "31-08-$1"
+        },
+        {
+            "match": "prospekt-september-(\\d{4})",
+            "dateFrom": "01-09-$1",
+            "dateTo": "30-09-$1"
+        },
+        {
+            "match": "prospekt-oktober-(\\d{4})",
+            "dateFrom": "01-10-$1",
+            "dateTo": "31-10-$1"
+        },
+        {
+            "match": "prospekt-november-(\\d{4})",
+            "dateFrom": "01-11-$1",
+            "dateTo": "30-11-$1"
+        },
+        {
+            "match": "prospekt-dezember-(\\d{4})",
+            "dateFrom": "01-12-$1",
+            "dateTo": "31-12-$1"
+        },
+        {
+            "match": "[-_](\\d{4})(?:[-_]|$)",
+            "dateFrom": "01-01-$1",
+            "dateTo": "31-12-$1"
         }
     ]
 }

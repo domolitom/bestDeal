@@ -8,7 +8,9 @@
         {
             "match": "prospekt\\.aldi-sued\\.de/(kw[^/]+)",
             "slugGroup": 1,
-            "normalizeUrl": []
+            "normalizeUrl": [
+                { "type": "replace", "match": "/?$", "replacement": "/page/1" }
+            ]
         }
     ],
     "dateSource": "slug",

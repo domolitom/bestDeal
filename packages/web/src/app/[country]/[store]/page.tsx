@@ -1,11 +1,34 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { storage } from "@/lib/storage";
 import { Header, getCountryName } from "@/components/Header";
 import { CatalogGrid } from "@/components/CatalogGrid";
+import { toDisplayName } from "@/lib/display-name";
 import Link from "next/link";
 
 export const runtime = "edge";
 export const revalidate = 300;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ country: string; store: string }>;
+}): Promise<Metadata> {
+  const { country, store } = await params;
+  const countryName = getCountryName(country);
+  const storeName = toDisplayName(store);
+  const title = `${storeName} ${countryName} Catalogs — BestDeal`;
+  const description = `Browse ${storeName} catalogs in ${countryName}.`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+    },
+  };
+}
 
 // Keep catalogs that expired within the last 2 days (grace period), hide older ones.
 function isRecentEnough(dateTo: string): boolean {
@@ -46,12 +69,12 @@ export default async function StorePage({
       <Header
         crumbs={[
           { label: countryName, href: `/${country}` },
-          { label: store },
+          { label: toDisplayName(store) },
         ]}
       />
       <main className="container">
-        <h1 className="page-title" style={{ textTransform: "capitalize" }}>
-          {store}
+        <h1 className="page-title">
+          {toDisplayName(store)}
         </h1>
         <p className="page-subtitle">
           {catalogs.length} catalog{catalogs.length !== 1 ? "s" : ""} in{" "}
@@ -68,7 +91,7 @@ export default async function StorePage({
               <span
                 className={`store-pill ${s === store ? "store-pill-active" : ""}`}
               >
-                {s}
+                {toDisplayName(s)}
               </span>
             </Link>
           ))}

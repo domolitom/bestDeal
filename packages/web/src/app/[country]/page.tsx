@@ -1,11 +1,33 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { storage } from "@/lib/storage";
 import { Header, getCountryName } from "@/components/Header";
 import { CatalogGrid } from "@/components/CatalogGrid";
+import { toDisplayName } from "@/lib/display-name";
 import Link from "next/link";
 
 export const runtime = "edge";
 export const revalidate = 300;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ country: string }>;
+}): Promise<Metadata> {
+  const { country } = await params;
+  const countryName = getCountryName(country);
+  const title = `${countryName} Catalogs — BestDeal`;
+  const description = `Browse weekly retail catalogs from stores in ${countryName}.`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+    },
+  };
+}
 
 // Keep catalogs that expired within the last 2 days (grace period), hide older ones.
 function isRecentEnough(dateTo: string): boolean {
@@ -56,7 +78,7 @@ export default async function CountryPage({
           </Link>
           {stores.map((store) => (
             <Link key={store} href={`/${country}/${store}`}>
-              <span className="store-pill">{store}</span>
+              <span className="store-pill">{toDisplayName(store)}</span>
             </Link>
           ))}
         </div>

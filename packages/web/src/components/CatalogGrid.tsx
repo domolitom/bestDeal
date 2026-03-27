@@ -6,7 +6,7 @@ export function CatalogGrid({ catalogs }: { catalogs: CatalogSummary[] }) {
     return (
       <div className="empty-state">
         <h3>No catalogs found</h3>
-        <p>Run the scraper to discover and download catalogs.</p>
+        <p>No catalogs available right now. Check back soon!</p>
       </div>
     );
   }

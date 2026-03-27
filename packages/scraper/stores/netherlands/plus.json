@@ -1,15 +1,13 @@
 {
     "name": "plus",
     "landingUrl": "https://view.publitas.com/plus-folder-nl/",
-    "waitAfterLoad": 10000,
-    "linkDomain": "publitas.com",
+    "waitAfterLoad": 8000,
+    "linkDomain": "folders.plus.nl",
     "linkPatterns": [
         {
-            "match": "view\\.publitas\\.com/plus-folder-nl/(plus-week-[^/?#]+)",
+            "match": "folders\\.plus\\.nl/(plus-week-[^/?#]+)",
             "slugGroup": 1,
-            "normalizeUrl": [
-                { "type": "append", "suffix": "/page/1" }
-            ]
+            "normalizeUrl": []
         }
     ],
     "resolver": "publitas",

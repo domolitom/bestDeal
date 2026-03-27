@@ -1,25 +1,20 @@
 {
     "name": "kruidvat",
     "landingUrl": "https://folder.kruidvat.nl/",
-    "waitAfterLoad": 10000,
-    "linkDomain": "publitas.com",
+    "waitAfterLoad": 8000,
+    "linkDomain": "folder.kruidvat.nl",
     "linkPatterns": [
         {
-            "match": "view\\.publitas\\.com/[^/]+/([^/?#]+)",
+            "match": "folder\\.kruidvat\\.nl/([^/?#]+)",
             "slugGroup": 1,
             "normalizeUrl": []
         }
     ],
     "resolver": "publitas",
-    "dateSource": "text",
+    "dateSource": "slug",
     "datePatterns": [
         {
-            "match": "(\\d{1,2})-(\\d{2})-(\\d{4})\\s*(?:t/m|-)\\s*(\\d{1,2})-(\\d{2})-(\\d{4})",
-            "dateFrom": "$1-$2-$3",
-            "dateTo": "$4-$5-$6"
-        },
-        {
-            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*-\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "match": "(\\d{1,2})-([a-z]{3,})-(\\d{4})-t-m-(\\d{1,2})-([a-z]{3,})-(\\d{4})",
             "dateFrom": "$1-$2-$3",
             "dateTo": "$4-$5-$6"
         }

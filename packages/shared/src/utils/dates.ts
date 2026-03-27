@@ -62,6 +62,8 @@ const MONTH_NAMES: Record<string, string> = {
   marts: "03", maj: "05",
   // Swedish full names (not already covered by German/French above)
   januari: "01", februari: "02", augusti: "08",
+  // Dutch (maart/mei differ from Danish marts/maj and Romanian mai)
+  maart: "03", mei: "05",
   // Finnish full names
   tammikuu: "01", helmikuu: "02", maaliskuu: "03", huhtikuu: "04",
   toukokuu: "05", kesäkuu: "06", heinäkuu: "07", elokuu: "08",

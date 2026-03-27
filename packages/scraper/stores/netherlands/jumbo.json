@@ -1,7 +1,7 @@
 {
     "name": "jumbo",
-    "landingUrl": "https://www.jumbo.com/aanbiedingen/folder",
-    "waitAfterLoad": 10000,
+    "landingUrl": "https://view.publitas.com/jumbo-supermarkten/",
+    "waitAfterLoad": 8000,
     "linkDomain": "publitas.com",
     "linkPatterns": [
         {
@@ -14,9 +14,14 @@
     "dateSource": "text",
     "datePatterns": [
         {
-            "match": "(\\d{1,2})\\s+\\w+\\s+(?:t/m|-)\\s+(\\d{1,2})\\s+\\w+\\s+(\\d{4})",
-            "dateFrom": "$1",
-            "dateTo": "$2"
+            "match": "(\\d{1,2}) (\\w+) t/m (\\d{1,2}) (\\w+) (\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{1,2}) (\\w+) t/m (\\d{1,2}) (\\w+)",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4"
         },
         {
             "match": "(\\d{1,2})-(\\d{2})-(\\d{4})\\s*(?:t/m|-)\\s*(\\d{1,2})-(\\d{2})-(\\d{4})",

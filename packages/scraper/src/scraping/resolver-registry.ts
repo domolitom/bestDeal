@@ -10,6 +10,8 @@ import { flipHtml5Resolver } from "./fliphtml5-resolver.ts";
 import { flippingbookResolver } from "./flippingbook-resolver.ts";
 import { digitalCatalogueResolver } from "./digital-catalogue-resolver.ts";
 import { tjekResolver } from "./tjek-resolver.ts";
+import { issuuResolver } from "./issuu-resolver.ts";
+import { rossmannResolver } from "./rossmann-resolver.ts";
 import { browserResolver } from "./resolver.ts";
 
 export interface ResolveInput {
@@ -43,7 +45,9 @@ const detectionRules: DetectionRule[] = [
   },
   {
     test: (url) =>
-      url.includes("publitas.com") || url.includes("cataloage.carrefour.ro"),
+      url.includes("publitas.com") ||
+      url.includes("cataloage.carrefour.ro") ||
+      url.includes("publikace.rossmann.cz"),
     resolverName: "publitas",
   },
   {
@@ -72,6 +76,14 @@ const detectionRules: DetectionRule[] = [
     test: (url) => url.includes("digital-catalogue.com"),
     resolverName: "digital-catalogue",
   },
+  {
+    test: (url) => url.includes("issuu.com"),
+    resolverName: "issuu",
+  },
+  {
+    test: (url) => url.includes("pro-fra-s3-magazine.rossmann.pl"),
+    resolverName: "rossmann",
+  },
 ];
 
 // --- Explicit resolver registry ---
@@ -86,6 +98,8 @@ const resolvers: Record<string, CatalogResolver> = {
   flippingbook: flippingbookResolver,
   "digital-catalogue": digitalCatalogueResolver,
   tjek: tjekResolver,
+  issuu: issuuResolver,
+  rossmann: rossmannResolver,
   browser: browserResolver,
 };
 

@@ -37,6 +37,14 @@ describe("extractPublitasBaseUrl", () => {
   test("returns null for non-Publitas URL", () => {
     expect(extractPublitasBaseUrl("https://example.com/foo")).toBeNull();
   });
+
+  test("extracts base from embed URL with query params (Rossmann CZ iframe)", () => {
+    expect(
+      extractPublitasBaseUrl(
+        "https://publikace.rossmann.cz/akcni-letak-25-3-7-4-2026/?publitas_embed=maximized"
+      )
+    ).toBe("https://publikace.rossmann.cz/akcni-letak-25-3-7-4-2026");
+  });
 });
 
 describe("Publitas URL detection", () => {
@@ -52,6 +60,14 @@ describe("Publitas URL detection", () => {
     expect(
       detectResolverName(
         "https://cataloage.carrefour.ro/some-catalog/page/1"
+      )
+    ).toBe("publitas");
+  });
+
+  test("detects publikace.rossmann.cz URLs", () => {
+    expect(
+      detectResolverName(
+        "https://publikace.rossmann.cz/akcni-letak-25-3-7-4-2026/?publitas_embed=maximized"
       )
     ).toBe("publitas");
   });

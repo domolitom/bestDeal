@@ -107,7 +107,15 @@ a {
 .page-subtitle {
   font-size: 17px;
   color: var(--text-secondary);
-  margin-bottom: 36px;
+  margin-bottom: 12px;
+}
+
+.page-intro {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-bottom: 28px;
+  max-width: 680px;
+  line-height: 1.6;
 }
 
 /* Grid layouts */

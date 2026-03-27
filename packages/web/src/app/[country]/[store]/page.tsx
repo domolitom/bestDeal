@@ -9,6 +9,8 @@ import Link from "next/link";
 export const runtime = "edge";
 export const revalidate = 300;
 
+const BASE_URL = "https://best-deal-shops.com";
+
 export async function generateMetadata({
   params,
 }: {
@@ -22,6 +24,7 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: { canonical: `${BASE_URL}/${country}/${store}` },
     openGraph: {
       title,
       description,
@@ -62,19 +65,49 @@ export default async function StorePage({
   }
 
   const countryName = getCountryName(country);
+  const storeName = toDisplayName(store);
   const allStores = await storage.listStores(country);
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: BASE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: countryName,
+        item: `${BASE_URL}/${country}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: storeName,
+        item: `${BASE_URL}/${country}/${store}`,
+      },
+    ],
+  };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <Header
         crumbs={[
           { label: countryName, href: `/${country}` },
-          { label: toDisplayName(store) },
+          { label: storeName },
         ]}
       />
       <main className="container">
         <h1 className="page-title">
-          {toDisplayName(store)}
+          {storeName}
         </h1>
         <p className="page-subtitle">
           {catalogs.length} catalog{catalogs.length !== 1 ? "s" : ""} in{" "}

@@ -11,6 +11,8 @@ import { getCoverUrl } from "@/lib/image-url";
 export const runtime = "edge";
 export const revalidate = 300;
 
+const BASE_URL = "https://best-deal-shops.com";
+
 export async function generateMetadata({
   params,
 }: {
@@ -30,6 +32,7 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: { canonical: `${BASE_URL}/${country}/${store}/${catalogId}` },
     openGraph: {
       title,
       description,
@@ -52,13 +55,50 @@ export default async function CatalogPage({
   }
 
   const countryName = getCountryName(country);
+  const storeName = toDisplayName(store);
+  const dateRange = `${formatDate(catalog.dateFrom)} to ${formatDate(catalog.dateTo)}`;
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: BASE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: countryName,
+        item: `${BASE_URL}/${country}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: storeName,
+        item: `${BASE_URL}/${country}/${store}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: dateRange,
+        item: `${BASE_URL}/${country}/${store}/${catalogId}`,
+      },
+    ],
+  };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <Header
         crumbs={[
           { label: countryName, href: `/${country}` },
-          { label: toDisplayName(store), href: `/${country}/${store}` },
+          { label: storeName, href: `/${country}/${store}` },
           {
             label: `${formatDate(catalog.dateFrom)} - ${formatDate(catalog.dateTo)}`,
           },
@@ -78,7 +118,7 @@ export default async function CatalogPage({
               className="page-title"
               style={{ margin: 0 }}
             >
-              {toDisplayName(store)}
+              {storeName}
             </h1>
             {catalog.catalogType && (
               <span style={{ fontSize: 14, color: "var(--text-secondary)" }}>
@@ -106,7 +146,13 @@ export default async function CatalogPage({
           </div>
         </div>
 
-        <CatalogViewer pages={catalog.pages} catalogId={catalog.id} />
+        <CatalogViewer
+          pages={catalog.pages}
+          catalogId={catalog.id}
+          storeName={storeName}
+          dateFrom={catalog.dateFrom}
+          dateTo={catalog.dateTo}
+        />
       </main>
     </>
   );

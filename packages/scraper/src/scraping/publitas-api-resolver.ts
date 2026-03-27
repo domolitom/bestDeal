@@ -17,15 +17,27 @@ const PREFERRED_SIZE = "at1200";
 
 /**
  * Derive the base URL for a Publitas catalog from its firstPageUrl.
- * e.g. "https://cataloage.carrefour.ro/some-slug/page/1" → "https://cataloage.carrefour.ro/some-slug"
- * Also handles view.publitas.com URLs.
+ * Handles two URL forms:
+ *  1. "/page/N" style: "https://cataloage.carrefour.ro/some-slug/page/1"
+ *     → "https://cataloage.carrefour.ro/some-slug"
+ *  2. Embed URL style with query params (e.g. Rossmann CZ iframe):
+ *     "https://publikace.rossmann.cz/some-slug/?publitas_embed=maximized"
+ *     → "https://publikace.rossmann.cz/some-slug"
  */
 export function extractPublitasBaseUrl(url: string): string | null {
-  const match = url.match(/^(https?:\/\/[^/]+\/[^/]+(?:\/[^/]+)*?)\/page\/\d+/);
-  if (!match) return null;
-  // Trim any trailing path segments that aren't part of the slug
-  // The slug is the part right before /page/
-  return match[1] ?? null;
+  // Form 1: URL contains /page/{n}
+  const pageMatch = url.match(/^(https?:\/\/[^/]+\/[^/]+(?:\/[^/]+)*?)\/page\/\d+/);
+  if (pageMatch) return pageMatch[1] ?? null;
+
+  // Form 2: URL has a query string — strip it (and any trailing slash) to get base
+  const queryIdx = url.indexOf("?");
+  if (queryIdx !== -1) {
+    const base = url.slice(0, queryIdx).replace(/\/$/, "");
+    // Must have at least one path segment to be a valid publication URL
+    if (/^https?:\/\/[^/]+\/[^/]+/.test(base)) return base;
+  }
+
+  return null;
 }
 
 /**

@@ -6,7 +6,7 @@ export function CountrySelector({ countries }: { countries: Country[] }) {
     return (
       <div className="empty-state">
         <h3>No countries available</h3>
-        <p>Run the scraper to discover catalogs.</p>
+        <p>No countries available right now. Check back soon!</p>
       </div>
     );
   }

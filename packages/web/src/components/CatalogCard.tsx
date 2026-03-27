@@ -3,6 +3,7 @@ import type { CatalogSummary } from "@bestdeal/shared";
 import { formatDate } from "@bestdeal/shared";
 import { FreshnessIndicator } from "./FreshnessIndicator";
 import { getCoverUrl } from "@/lib/image-url";
+import { toDisplayName } from "@/lib/display-name";
 
 export function CatalogCard({ catalog }: { catalog: CatalogSummary }) {
   const coverUrl = getCoverUrl(catalog);
@@ -13,11 +14,11 @@ export function CatalogCard({ catalog }: { catalog: CatalogSummary }) {
         <img
           className="catalog-card-image"
           src={coverUrl}
-          alt={`${catalog.store} catalog ${catalog.dateFrom} - ${catalog.dateTo}`}
+          alt={`${toDisplayName(catalog.store)} catalog ${catalog.dateFrom} - ${catalog.dateTo}`}
           loading="lazy"
         />
         <div className="catalog-card-info">
-          <span className="catalog-card-store">{catalog.store}</span>
+          <span className="catalog-card-store">{toDisplayName(catalog.store)}</span>
           {catalog.catalogType && (
             <span
               style={{

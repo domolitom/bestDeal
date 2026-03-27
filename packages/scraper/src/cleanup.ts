@@ -1,5 +1,6 @@
 import { R2StorageAdapter } from "./storage/r2-adapter.ts";
 import { createLogger } from "./logger.ts";
+import { hasBogusDate } from "./utils/bogus-date.ts";
 
 const log = createLogger({ module: "cleanup" });
 
@@ -26,40 +27,6 @@ const storage = new R2StorageAdapter({
 // This catches far-future dates, inverted dates, and over-expired entries
 // that slipped through before date validation was enforced. Marking them
 // failed here ensures the regular cleanup loop below deletes them.
-
-const BOGUS_MAX_FUTURE_DAYS = 365;
-const BOGUS_EXPIRY_DAYS = 30;
-
-function hasBogusDate(dateFrom: string, dateTo: string): string | null {
-  const from = new Date(dateFrom);
-  const to = new Date(dateTo);
-
-  if (isNaN(from.getTime()) || isNaN(to.getTime())) {
-    return `unparseable dates`;
-  }
-  if (to < from) {
-    return `inverted dates (dateTo before dateFrom)`;
-  }
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const maxFuture = new Date(today);
-  maxFuture.setDate(maxFuture.getDate() + BOGUS_MAX_FUTURE_DAYS);
-  if (to > maxFuture) {
-    const daysAhead = Math.round((to.getTime() - today.getTime()) / 86400000);
-    return `dateTo is ${daysAhead} days in the future`;
-  }
-
-  const cutoff = new Date(today);
-  cutoff.setDate(cutoff.getDate() - BOGUS_EXPIRY_DAYS);
-  if (to < cutoff) {
-    const daysAgo = Math.round((today.getTime() - to.getTime()) / 86400000);
-    return `expired ${daysAgo} days ago`;
-  }
-
-  return null;
-}
 
 let markedBogus = 0;
 for (const status of ["ready", "discovered", "scraping"] as const) {

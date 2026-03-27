@@ -1,0 +1,40 @@
+{
+    "name": "netto",
+    "country": "denmark",
+    "landingUrl": "https://netto.dk/netto-avisen/",
+    "waitAfterLoad": 12000,
+    "resolver": "tjek",
+    "linkSelector": "img[src*='tjek.com']",
+    "linkAttribute": "src",
+    "linkPatterns": [
+        {
+            "match": "image-transformer-api\\.tjek\\.com/.*uploads(?:%2F|/)([^%/]+)(?:%2F|/)p-1",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                {
+                    "type": "replace",
+                    "match": ".*",
+                    "replacement": "https://netto.dk/netto-avisen/"
+                }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\.\\s*[-–]\\s*(\\d{1,2})\\.\\s*(januar|februar|marts|april|maj|juni|juli|august|september|oktober|november|december)",
+            "dateFrom": "$1-$3",
+            "dateTo": "$2-$3"
+        },
+        {
+            "match": "(\\d{1,2})[\\./-](\\d{1,2})(?:[\\./-](\\d{4}))?\\s*[-–]\\s*(\\d{1,2})[\\./-](\\d{1,2})[\\./-](\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

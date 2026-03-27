@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { appendFileSync } from "node:fs";
 import type { StorageAdapter } from "@bestdeal/shared";
 import { FilesystemAdapter } from "./storage/fs-adapter.ts";
-import { runPipeline } from "./pipeline.ts";
+import { runPipeline, generateManifest } from "./pipeline.ts";
 import type { PipelineReport } from "./pipeline.ts";
 import { createLogger } from "./logger.ts";
 
@@ -15,6 +15,7 @@ const { values } = parseArgs({
     country: { type: "string" },
     store: { type: "string" },
     "discover-only": { type: "boolean", default: false },
+    "manifest-only": { type: "boolean", default: false },
     "auto-discover": { type: "boolean", default: false },
     url: { type: "string" },
     "data-dir": { type: "string", default: "../../data/catalogs" },
@@ -33,6 +34,7 @@ Usage:
   bun run scraper --country=romania        Limit to one country
   bun run scraper --store=lidl --country=romania
   bun run scraper --discover-only          Only discover, don't scrape
+  bun run scraper --manifest-only          Regenerate root manifest.json from all ready catalogs
 
   bun run scraper --auto-discover --url=URL --store=NAME --country=NAME
     Generate a store config from a landing URL using an LLM.
@@ -42,6 +44,7 @@ Options:
   --country=NAME       Filter by country folder name (e.g., romania, germany)
   --store=NAME         Filter by store name (e.g., lidl, kaufland)
   --discover-only      Only run discovery, skip scraping
+  --manifest-only      Regenerate manifest.json only, skip all scraping
   --auto-discover      Generate a store config from a landing URL
   --url=URL            Landing URL (required with --auto-discover)
   --data-dir=PATH      Data directory (default: ../../data/catalogs)
@@ -110,6 +113,20 @@ async function createStorage(): Promise<StorageAdapter> {
 }
 
 const storage = await createStorage();
+
+// --manifest-only: regenerate the root manifest.json from all ready catalogs
+// without running discovery or scraping. Used by the CI finalize job.
+if (values["manifest-only"]) {
+  log.info("manifest-only mode: regenerating manifest.json");
+  try {
+    await generateManifest(storage);
+    log.info("manifest regenerated");
+  } catch (err) {
+    log.error("manifest regeneration failed", { err: String(err) });
+    process.exit(1);
+  }
+  process.exit(0);
+}
 
 log.info("starting pipeline", {
   country: values.country ?? "all",

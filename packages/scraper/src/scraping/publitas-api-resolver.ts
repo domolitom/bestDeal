@@ -15,6 +15,9 @@ interface PublitasSpread {
 /** Preferred image size key (1200px wide ≈ 300KB, good balance). */
 const PREFERRED_SIZE = "at1200";
 
+/** Preferred thumbnail size key (~400px wide, for catalog card display). */
+const THUMB_SIZE = "at400";
+
 /**
  * Derive the base URL for a Publitas catalog from its firstPageUrl.
  * Handles two URL forms:
@@ -98,9 +101,20 @@ async function resolveViaPublitasApi(
 
   log.info(`got ${pages.length} pages`, { catalogId });
 
+  // Build the cover thumbnail URL from the first page's smaller size variant.
+  // Publitas serves multiple widths (at400, at600, at800, at1200, at2400) as
+  // different keys in the images map — prefer at400 for thumbnails.
+  const firstPageImages = spreads[0]?.pages[0]?.images ?? {};
+  const thumbPath =
+    firstPageImages[THUMB_SIZE] ??
+    firstPageImages["at600"] ??
+    null;
+  const coverThumbUrl = thumbPath ? `${origin}${thumbPath}` : undefined;
+
   return {
     catalogId,
     coverImageUrl: pages[0]?.imageUrl ?? "",
+    coverThumbUrl,
     pages,
   };
 }

@@ -6,12 +6,13 @@ const log = createLogger({ module: "downloader" });
 
 /**
  * Download all images from a resolve result and write them through the storage adapter.
+ * Returns the filename of the thumbnail if one was successfully written, otherwise undefined.
  */
 export async function downloadCatalogImages(
   result: ResolveResult,
   storage: StorageAdapter
-): Promise<void> {
-  const { catalogId, coverImageUrl, pages } = result;
+): Promise<{ coverThumb?: string }> {
+  const { catalogId, coverImageUrl, coverThumbUrl, pages } = result;
 
   // Download cover image (use first page's imageData if available)
   const coverData = pages[0]?.imageData;
@@ -28,6 +29,20 @@ export async function downloadCatalogImages(
     }
   }
 
+  // Download cover thumbnail when the resolver provided a smaller image URL.
+  // Thumbnails are written as cover-thumb.jpg alongside cover.jpg.
+  let coverThumb: string | undefined;
+  if (coverThumbUrl) {
+    try {
+      const thumbData = await downloadImage(coverThumbUrl);
+      await storage.writeImage(catalogId, "cover-thumb.jpg", thumbData);
+      coverThumb = "cover-thumb.jpg";
+      log.info(`downloaded cover thumbnail`, { catalogId });
+    } catch (err) {
+      log.warn(`cover thumbnail failed`, { catalogId, err: String(err) });
+    }
+  }
+
   // Download each page
   for (const page of pages) {
     const filename = `page-${String(page.number).padStart(3, "0")}.jpg`;
@@ -41,6 +56,7 @@ export async function downloadCatalogImages(
   }
 
   log.info(`done`, { catalogId, pages: pages.length });
+  return { coverThumb };
 }
 
 async function downloadImage(imageURL: string): Promise<Buffer> {

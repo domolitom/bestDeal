@@ -22,6 +22,7 @@ export interface CatalogMeta {
   dateTo: string; // ISO 8601: "2026-02-15"
   catalogType?: string; // "leaflet", "magazine", "wrapper"
   coverImage: string; // "cover.jpg"
+  coverThumb?: string; // "cover-thumb.jpg" — smaller thumbnail for card display
   pageCount: number;
   discoveredAt: string; // ISO 8601 timestamp
   scrapedAt?: string; // ISO 8601 timestamp
@@ -41,5 +42,6 @@ export interface CatalogSummary {
   dateTo: string;
   catalogType?: string;
   coverImage: string;
+  coverThumb?: string; // "cover-thumb.jpg" — smaller thumbnail for card display
   pageCount: number;
 }

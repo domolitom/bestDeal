@@ -8,5 +8,7 @@ export interface ResolvedPage {
 export interface ResolveResult {
   catalogId: string;
   coverImageUrl: string;
+  /** URL of a smaller thumbnail image for the cover (e.g. 400-600px wide). */
+  coverThumbUrl?: string;
   pages: ResolvedPage[];
 }

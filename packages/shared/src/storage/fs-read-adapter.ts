@@ -80,6 +80,7 @@ export class FsReadAdapter implements ReadonlyStorageAdapter {
               dateTo: meta.dateTo,
               catalogType: meta.catalogType,
               coverImage: meta.coverImage,
+              coverThumb: meta.coverThumb,
               pageCount: meta.pageCount,
             });
           } catch {

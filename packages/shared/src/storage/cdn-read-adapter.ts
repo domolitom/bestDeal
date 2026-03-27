@@ -131,6 +131,7 @@ export class CdnReadAdapter implements ReadonlyStorageAdapter {
         dateTo: c.dateTo,
         catalogType: c.catalogType,
         coverImage: c.coverImage,
+        coverThumb: c.coverThumb,
         pageCount: c.pageCount,
       }))
       .sort((a, b) => b.dateFrom.localeCompare(a.dateFrom));

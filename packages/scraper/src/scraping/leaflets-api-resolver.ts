@@ -69,9 +69,15 @@ async function resolveViaLeafletsApi(
 
   log.info(`got ${flyer.pages.length} pages`, { catalogId });
 
+  // Use the first page's thumbnail URL as the cover thumbnail (typically ~200px wide).
+  // Fall back to the flyer-level thumbnailUrl if the page thumbnail is absent.
+  const coverThumbUrl =
+    flyer.pages[0]?.thumbnail || flyer.thumbnailUrl || undefined;
+
   return {
     catalogId,
     coverImageUrl: flyer.pages[0]!.image,
+    coverThumbUrl,
     pages: flyer.pages.map((p) => ({
       number: p.number,
       imageUrl: p.image,

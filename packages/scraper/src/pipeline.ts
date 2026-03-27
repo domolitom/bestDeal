@@ -186,7 +186,7 @@ export async function runPipeline(
 
       // Download images
       log.info(`downloading`, { catalogId: catalog.catalogId });
-      await downloadCatalogImages(resolved, storage);
+      const { coverThumb } = await downloadCatalogImages(resolved, storage);
 
       // Update status to ready
       await storage.writeCatalogMeta({
@@ -194,6 +194,7 @@ export async function runPipeline(
         status: "ready",
         pageCount: resolved.pages.length,
         scrapedAt: new Date().toISOString(),
+        ...(coverThumb ? { coverThumb } : {}),
       });
 
       report.scraped.push(catalog.catalogId);

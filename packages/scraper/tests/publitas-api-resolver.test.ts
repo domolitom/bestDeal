@@ -157,6 +157,94 @@ describe("resolveViaPublitasApi", () => {
     );
   });
 
+  test("returns coverThumbUrl using at400 size variant", async () => {
+    const { getResolver } = await import(
+      "../src/scraping/resolver-registry.ts"
+    );
+    const resolver = getResolver(
+      "https://cataloage.carrefour.ro/test-catalog/page/1"
+    );
+    const result = await resolver.resolve({
+      catalogId: "romania-carrefour-2026-03-09-2026-03-17",
+      firstPageUrl: "https://cataloage.carrefour.ro/test-catalog/page/1",
+    });
+    // mockSpreads first page has at400 (not present in the current mock)
+    // The mock doesn't have at400/at600, so coverThumbUrl should be undefined
+    expect(result.coverThumbUrl).toBeUndefined();
+  });
+
+  test("returns coverThumbUrl when at400 is available", async () => {
+    // @ts-ignore
+    globalThis.fetch = mock(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve([
+            {
+              pages: [
+                {
+                  images: {
+                    at400: "/1/2/pages/aaa-at400.jpg",
+                    at1200: "/1/2/pages/aaa-at1200.jpg",
+                  },
+                },
+              ],
+            },
+          ]),
+      })
+    );
+
+    const { getResolver } = await import(
+      "../src/scraping/resolver-registry.ts"
+    );
+    const resolver = getResolver(
+      "https://cataloage.carrefour.ro/test-thumb/page/1"
+    );
+    const result = await resolver.resolve({
+      catalogId: "romania-carrefour-2026-03-09-2026-03-17",
+      firstPageUrl: "https://cataloage.carrefour.ro/test-thumb/page/1",
+    });
+    expect(result.coverThumbUrl).toBe(
+      "https://cataloage.carrefour.ro/1/2/pages/aaa-at400.jpg"
+    );
+  });
+
+  test("falls back to at600 when at400 is absent", async () => {
+    // @ts-ignore
+    globalThis.fetch = mock(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve([
+            {
+              pages: [
+                {
+                  images: {
+                    at600: "/1/2/pages/aaa-at600.jpg",
+                    at1200: "/1/2/pages/aaa-at1200.jpg",
+                  },
+                },
+              ],
+            },
+          ]),
+      })
+    );
+
+    const { getResolver } = await import(
+      "../src/scraping/resolver-registry.ts"
+    );
+    const resolver = getResolver(
+      "https://cataloage.carrefour.ro/test-thumb2/page/1"
+    );
+    const result = await resolver.resolve({
+      catalogId: "romania-carrefour-2026-03-09-2026-03-17",
+      firstPageUrl: "https://cataloage.carrefour.ro/test-thumb2/page/1",
+    });
+    expect(result.coverThumbUrl).toBe(
+      "https://cataloage.carrefour.ro/1/2/pages/aaa-at600.jpg"
+    );
+  });
+
   test("falls back to at1000 if at1200 not available", async () => {
     // @ts-ignore
     globalThis.fetch = mock(() =>

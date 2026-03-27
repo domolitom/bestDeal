@@ -1,0 +1,45 @@
+{
+    "name": "coop",
+    "country": "sweden",
+    "landingUrl": "https://ereklamblad.se/Coop",
+    "waitAfterLoad": 12000,
+    "resolver": "tjek",
+    "linkSelector": "img[src*='tjek.com']",
+    "linkAttribute": "src",
+    "linkPatterns": [
+        {
+            "match": "image-transformer-api\\.tjek\\.com/.*uploads(?:%2F|/)([^%/]+)(?:%2F|/)p-1",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                {
+                    "type": "replace",
+                    "match": ".*",
+                    "replacement": "https://ereklamblad.se/Coop"
+                }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "\"validFrom\"\\s*:\\s*\"(\\d{4}-\\d{2}-\\d{2})[^\"]*\"[^}]*\"validUntil\"\\s*:\\s*\"(\\d{4}-\\d{2}-\\d{2})",
+            "dateFrom": "$1",
+            "dateTo": "$2"
+        },
+        {
+            "match": "\"run_from\"\\s*:\\s*\"(\\d{4}-\\d{2}-\\d{2})[^\"]*\"[^}]*\"run_till\"\\s*:\\s*\"(\\d{4}-\\d{2}-\\d{2})",
+            "dateFrom": "$1",
+            "dateTo": "$2"
+        },
+        {
+            "match": "(\\d{1,2})\\s+(januari|februari|mars|april|maj|juni|juli|augusti|september|oktober|november|december)\\s*[-–]\\s*(\\d{1,2})\\s+(januari|februari|mars|april|maj|juni|juli|augusti|september|oktober|november|december)\\s+(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{1,2})\\.?\\s*(jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)\\.?\\s*[-–]\\s*(\\d{1,2})\\.?\\s*(jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)\\.?\\s+(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        }
+    ]
+}

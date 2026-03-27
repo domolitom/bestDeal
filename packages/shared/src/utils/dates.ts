@@ -58,12 +58,20 @@ const MONTH_NAMES: Record<string, string> = {
   január: "01", február: "02", március: "03", április: "04",
   június: "06", július: "07", augusztus: "08",
   szeptember: "09", október: "10",
+  // Danish/Norwegian full names (marts/maj overlap with French mars/mai same value)
+  marts: "03", maj: "05",
+  // Swedish full names (not already covered by German/French above)
+  januari: "01", februari: "02", augusti: "08",
+  // Finnish full names
+  tammikuu: "01", helmikuu: "02", maaliskuu: "03", huhtikuu: "04",
+  toukokuu: "05", kesäkuu: "06", heinäkuu: "07", elokuu: "08",
+  syyskuu: "09", lokakuu: "10", marraskuu: "11", joulukuu: "12",
 };
 
 /** Replace month name tokens with two-digit month numbers. */
 function normalizeMonthNames(s: string): string {
   return s.replace(
-    /[a-zăâîșțéûäöüąćęłńóśźżáčďěíňřšůýžàèùœ]+/gi,
+    /[a-zăâîșțéûäöüąćęłńóśźżáčďěíňřšůýžàèùœå]+/gi,
     (word) => MONTH_NAMES[word.toLowerCase()] ?? word,
   );
 }

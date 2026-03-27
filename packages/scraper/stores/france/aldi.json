@@ -1,13 +1,20 @@
 {
     "name": "aldi",
-    "landingUrl": "https://www.aldi.fr/catalogue/cette-semaine.html",
+    "landingUrl": "https://www.aldi.fr/catalogues/cette-semaine.html",
     "waitAfterLoad": 8000,
+    "resolver": "ipaper",
     "linkDomain": "catalogues.aldi.fr",
     "linkPatterns": [
         {
             "match": "catalogues\\.aldi\\.fr/(kw\\d+)",
             "slugGroup": 1,
-            "normalizeUrl": []
+            "normalizeUrl": [
+                {
+                    "type": "replace",
+                    "match": "\\?.*$",
+                    "replacement": ""
+                }
+            ]
         }
     ],
     "dateSource": "slug",

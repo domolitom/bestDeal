@@ -240,7 +240,7 @@ const MANIFEST_MAX_FUTURE_DAYS = 365;
  * - dateTo must not be more than 1 year ahead of today
  * - dateTo must not be more than 30 days in the past
  */
-function isManifestEligible(meta: Pick<CatalogMeta, "id" | "dateFrom" | "dateTo">): boolean {
+export function isManifestEligible(meta: Pick<CatalogMeta, "id" | "dateFrom" | "dateTo">): boolean {
   const from = new Date(meta.dateFrom);
   const to = new Date(meta.dateTo);
 

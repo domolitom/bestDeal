@@ -21,6 +21,7 @@ export interface PipelineReport {
   discovery: DiscoveryReport;
   scraped: string[];
   failed: string[];
+  recovered: string[];
 }
 
 /**
@@ -40,7 +41,11 @@ export async function recoverStaleCatalogs(
     const { pages, ...meta } = catalog;
     await storage.writeCatalogMeta({ ...meta, status: "discovered" });
     recovered.push(summary.id);
-    log.info(`recovered stale catalog: ${summary.id}`);
+    log.warn(`recovered stale catalog: ${summary.id}`);
+  }
+
+  if (recovered.length > 0) {
+    log.warn(`Recovered ${recovered.length} stale catalog(s)`);
   }
 
   return recovered;
@@ -80,9 +85,6 @@ export async function runPipeline(
 
   // Phase 0: Housekeeping — recover stale + expire old catalogs
   const recovered = await recoverStaleCatalogs(storage);
-  if (recovered.length > 0) {
-    log.info(`recovered ${recovered.length} stale catalog(s)`);
-  }
 
   const expired = await expireOldCatalogs(storage);
   if (expired.length > 0) {
@@ -103,6 +105,7 @@ export async function runPipeline(
     discovery,
     scraped: [],
     failed: [],
+    recovered,
   };
 
   if (discoverOnly) {

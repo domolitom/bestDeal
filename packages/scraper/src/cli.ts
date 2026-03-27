@@ -1,8 +1,10 @@
 import { parseArgs } from "node:util";
 import { join } from "node:path";
+import { appendFileSync } from "node:fs";
 import type { StorageAdapter } from "@bestdeal/shared";
 import { FilesystemAdapter } from "./storage/fs-adapter.ts";
 import { runPipeline } from "./pipeline.ts";
+import type { PipelineReport } from "./pipeline.ts";
 import { createLogger } from "./logger.ts";
 
 const log = createLogger({ module: "cli" });
@@ -115,6 +117,71 @@ log.info("starting pipeline", {
   mode: values["discover-only"] ? "discover-only" : "full pipeline",
 });
 
+/**
+ * Write a Markdown summary to $GITHUB_STEP_SUMMARY so it appears in the
+ * GitHub Actions run UI. Only called when that env var is set (i.e. in CI).
+ */
+function writeStepSummary(report: PipelineReport, country: string): void {
+  const summaryPath = process.env.GITHUB_STEP_SUMMARY;
+  if (!summaryPath) return;
+
+  const { discovery, scraped, failed, recovered } = report;
+  const countryLabel = country.charAt(0).toUpperCase() + country.slice(1);
+  const discovered = discovery.summary.new;
+  const existing = discovery.summary.existing;
+  const total = discovery.summary.total;
+
+  const lines: string[] = [];
+
+  lines.push(`## ${countryLabel} scrape results`);
+  lines.push("");
+  lines.push(
+    `Discovered **${total}** catalog(s) — ${discovered} new, ${existing} existing. ` +
+    `Scraped **${scraped.length}**, failed **${failed.length}**.`
+  );
+  lines.push("");
+
+  // Per-store table
+  lines.push("| Store | Discovered | Scraped | Failed | Status |");
+  lines.push("|-------|-----------|---------|--------|--------|");
+
+  for (const s of discovery.stores) {
+    const storeNew = s.catalogs.filter((c) => c.status === "new").length;
+    const storeCatalogIds = s.catalogs.map((c) => c.catalogId);
+    const storeScraped = scraped.filter((id) => storeCatalogIds.includes(id)).length;
+    const storeFailed = failed.filter((id) => storeCatalogIds.includes(id)).length;
+    const statusIcon =
+      storeFailed > 0 ? "FAIL" : storeScraped > 0 ? "OK" : storeNew === 0 ? "--" : "OK";
+    lines.push(
+      `| ${s.store} | ${storeNew} | ${storeScraped} | ${storeFailed} | ${statusIcon} |`
+    );
+  }
+
+  if (recovered.length > 0) {
+    lines.push("");
+    lines.push(`**Recovered ${recovered.length} stale catalog(s):**`);
+    for (const id of recovered) {
+      lines.push(`- ${id}`);
+    }
+  }
+
+  if (failed.length > 0) {
+    lines.push("");
+    lines.push("**Failed catalogs:**");
+    for (const id of failed) {
+      lines.push(`- ${id}`);
+    }
+  }
+
+  lines.push("");
+
+  try {
+    appendFileSync(summaryPath, lines.join("\n"));
+  } catch (err) {
+    log.warn("could not write step summary", { err: String(err) });
+  }
+}
+
 try {
   const report = await runPipeline({
     storage,
@@ -123,6 +190,7 @@ try {
     discoverOnly: values["discover-only"],
   });
 
+  writeStepSummary(report, values.country ?? "all");
   console.log("\n" + JSON.stringify(report, null, 2));
 } catch (err) {
   log.error("fatal", { err: String(err) });

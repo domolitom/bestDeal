@@ -5,7 +5,7 @@
     "linkDomain": "ipapercms.dk",
     "linkPatterns": [
         {
-            "match": "ipapercms\\.dk/jysk/no/CampaignPaper/([a-f0-9_-]+)",
+            "match": "ipapercms\\.dk/[Jj][Yy][Ss][Kk]/no/(?:CampaignPaper|localpapers)/([a-f0-9_-]+)",
             "slugGroup": 1,
             "normalizeUrl": [
                 { "type": "replace", "match": "\\?.*$", "replacement": "" }

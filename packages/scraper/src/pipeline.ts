@@ -1,4 +1,4 @@
-import type { StorageAdapter, CatalogMeta } from "@bestdeal/shared";
+import type { StorageAdapter, CatalogMeta, CatalogSummary } from "@bestdeal/shared";
 import { isCatalogActive } from "@bestdeal/shared";
 import { discoverAll } from "./discovery/discoverer.ts";
 import type { DiscoveryReport } from "./discovery/discoverer.ts";
@@ -237,7 +237,7 @@ const MANIFEST_MAX_FUTURE_DAYS = 365;
  * - dateTo must not be more than 1 year ahead of today
  * - dateTo must not be more than 30 days in the past
  */
-function isManifestEligible(meta: CatalogMeta): boolean {
+function isManifestEligible(meta: Pick<CatalogMeta, "id" | "dateFrom" | "dateTo">): boolean {
   const from = new Date(meta.dateFrom);
   const to = new Date(meta.dateTo);
 
@@ -274,10 +274,14 @@ function isManifestEligible(meta: CatalogMeta): boolean {
 }
 
 /**
- * Write per-country manifest.json files listing all ready catalogs.
- * When `country` is set, writes only that country's manifest.
- * When no country, writes a manifest for every country that has ready catalogs.
+ * Write per-country and root manifest.json files listing all ready catalogs.
+ * When `country` is set, writes only that country's manifest plus the root.
+ * When no country, writes a manifest for every country that has ready catalogs
+ * and a single root manifest.json containing all catalogs across all countries.
  * Catalogs with bogus or stale dates are silently excluded from the manifest.
+ *
+ * Uses CatalogSummary data from listCatalogs() directly — no per-catalog
+ * getCatalog() calls needed, eliminating the N+1 reads against R2.
  */
 export async function generateManifest(
   storage: StorageAdapter,
@@ -287,33 +291,35 @@ export async function generateManifest(
     return;
   }
 
-  const catalogs = await storage.listCatalogs({ status: "ready" });
+  const summaries = await storage.listCatalogs({ status: "ready" });
 
-  // Group catalogs by country, filtering out any with bogus dates
-  const byCountry = new Map<string, CatalogMeta[]>();
-  for (const summary of catalogs) {
-    const catalog = await storage.getCatalog(summary.id);
-    if (!catalog) continue;
-    const { pages, ...meta } = catalog;
-    if (!isManifestEligible(meta)) continue;
-    const arr = byCountry.get(meta.country) ?? [];
-    arr.push(meta);
-    byCountry.set(meta.country, arr);
+  // Group summaries by country, filtering out any with bogus dates.
+  // CatalogSummary has all fields needed for the manifest and for eligibility
+  // checks — no need to re-fetch each catalog individually.
+  const byCountry = new Map<string, CatalogSummary[]>();
+  for (const summary of summaries) {
+    if (!isManifestEligible(summary)) continue;
+    const arr = byCountry.get(summary.country) ?? [];
+    arr.push(summary);
+    byCountry.set(summary.country, arr);
   }
+
+  const updatedAt = new Date().toISOString();
 
   // Determine which countries to write
   const countries = country ? [country] : [...byCountry.keys()];
 
   for (const c of countries) {
     const countryCatalogs = byCountry.get(c) ?? [];
-    const manifest = {
-      updatedAt: new Date().toISOString(),
-      catalogs: countryCatalogs,
-    };
-    await storage.writeManifest!(
-      JSON.stringify(manifest, null, 2),
-      c
-    );
+    const manifest = { updatedAt, catalogs: countryCatalogs };
+    await storage.writeManifest!(JSON.stringify(manifest, null, 2), c);
     log.info(`wrote ${c}/manifest.json`, { catalogs: countryCatalogs.length });
   }
+
+  // Always write a root manifest.json covering all countries so the web app
+  // can fetch a single file instead of one per country.
+  const allCatalogs = [...byCountry.values()].flat();
+  const rootManifest = { updatedAt, catalogs: allCatalogs };
+  await storage.writeManifest!(JSON.stringify(rootManifest, null, 2));
+  log.info(`wrote manifest.json`, { catalogs: allCatalogs.length });
 }

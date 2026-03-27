@@ -6,9 +6,18 @@ import type { CatalogPage } from "@bestdeal/shared";
 interface CatalogViewerProps {
   pages: CatalogPage[];
   catalogId: string;
+  storeName?: string;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
-export function CatalogViewer({ pages, catalogId }: CatalogViewerProps) {
+export function CatalogViewer({
+  pages,
+  catalogId,
+  storeName,
+  dateFrom,
+  dateTo,
+}: CatalogViewerProps) {
   const [mode, setMode] = useState<"scroll" | "single">("scroll");
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -37,6 +46,13 @@ export function CatalogViewer({ pages, catalogId }: CatalogViewerProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [mode, goNext, goPrev]);
 
+  function pageAlt(pageNumber: number): string {
+    if (storeName && dateFrom && dateTo) {
+      return `${storeName} catalog page ${pageNumber} — ${dateFrom} to ${dateTo}`;
+    }
+    return `Page ${pageNumber}`;
+  }
+
   return (
     <div className="viewer-container">
       <div className="viewer-controls">
@@ -59,7 +75,7 @@ export function CatalogViewer({ pages, catalogId }: CatalogViewerProps) {
           <div key={page.number} className="viewer-page">
             <img
               src={page.imageUrl}
-              alt={`Page ${page.number}`}
+              alt={pageAlt(page.number)}
               loading={i < 3 ? "eager" : "lazy"}
             />
             <div className="viewer-page-number">
@@ -73,7 +89,7 @@ export function CatalogViewer({ pages, catalogId }: CatalogViewerProps) {
             <div className="viewer-page">
               <img
                 src={pages[currentPage].imageUrl}
-                alt={`Page ${pages[currentPage].number}`}
+                alt={pageAlt(pages[currentPage].number)}
               />
               <div className="viewer-page-number">
                 Page {pages[currentPage].number} of {pages.length}
@@ -107,7 +123,7 @@ export function CatalogViewer({ pages, catalogId }: CatalogViewerProps) {
               >
                 <img
                   src={page.imageUrl}
-                  alt={`Page ${page.number}`}
+                  alt={pageAlt(page.number)}
                   loading="lazy"
                 />
               </button>

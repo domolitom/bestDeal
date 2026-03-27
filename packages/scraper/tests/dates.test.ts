@@ -60,6 +60,38 @@ describe("isCatalogActive", () => {
   test("invalid date is not active", () => {
     expect(isCatalogActive("not-a-date")).toBe(false);
   });
+
+  // Boundary tests relative to today
+  test("dateTo = today is active", () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const iso = today.toISOString().split("T")[0]!;
+    expect(isCatalogActive(iso)).toBe(true);
+  });
+
+  test("dateTo = yesterday is not active (no grace period in isCatalogActive)", () => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - 1);
+    const iso = d.toISOString().split("T")[0]!;
+    expect(isCatalogActive(iso)).toBe(false);
+  });
+
+  test("dateTo = 2 days ago is not active", () => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - 2);
+    const iso = d.toISOString().split("T")[0]!;
+    expect(isCatalogActive(iso)).toBe(false);
+  });
+
+  test("dateTo = tomorrow is active", () => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 1);
+    const iso = d.toISOString().split("T")[0]!;
+    expect(isCatalogActive(iso)).toBe(true);
+  });
 });
 
 describe("formatDate", () => {

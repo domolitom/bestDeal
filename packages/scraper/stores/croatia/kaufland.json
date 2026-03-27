@@ -1,12 +1,12 @@
 {
     "name": "kaufland",
     "landingUrl": "https://www.kaufland.hr/aktualni-katalozi.html",
-    "waitAfterLoad": 3000,
+    "waitAfterLoad": 10000,
     "linkDomain": "leaflets.kaufland.com",
     "linkPatterns": [
         {
-            "match": "leaflets\\.kaufland\\.com",
-            "slugGroup": 0,
+            "match": "leaflets\\.kaufland\\.com/[^/]+/([^/]+)/ar/",
+            "slugGroup": 1,
             "normalizeUrl": [
                 { "type": "replace", "match": "/ar/\\d+/?$", "replacement": "" },
                 {
@@ -18,19 +18,8 @@
             ]
         }
     ],
-    "dateSource": "text",
-    "datePatterns": [
-        {
-            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\s*(?:-|–)\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
-            "dateFrom": "$1-$2-$3",
-            "dateTo": "$4-$5-$6"
-        },
-        {
-            "match": "(\\d{2})\\.(\\d{2})\\.?\\s*(?:-|–)\\s*(\\d{2})\\.(\\d{2})\\.?",
-            "dateFrom": "$1-$2",
-            "dateTo": "$3-$4"
-        }
-    ],
+    "dateSource": "leaflets_api",
+    "datePatterns": [],
     "catalogTypePattern": {
         "match": "HR_hr_(\\w+?)[\\d_]",
         "caseInsensitive": true,

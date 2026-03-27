@@ -8,10 +8,12 @@ const MONTH_NAMES: Record<string, string> = {
   ian: "01", feb: "02", mar: "03", apr: "04",
   iun: "06", iul: "07", aug: "08",
   sep: "09", oct: "10", noi: "11", dec: "12",
-  // French
+  // French full names
   janvier: "01", février: "02", mars: "03", avril: "04",
   juin: "06", juillet: "07", août: "08",
   septembre: "09", octobre: "10", novembre: "11", décembre: "12",
+  // French abbreviated (used in carrefour.fr, conforama.fr listings)
+  janv: "01", févr: "02", avr: "04", juil: "07", aoû: "08", déc: "12",
   // German (only those not already covered by French/Romanian above)
   januar: "01", februar: "02", märz: "03",
   juni: "06", juli: "07",
@@ -60,11 +62,15 @@ const MONTH_NAMES: Record<string, string> = {
   szeptember: "09", október: "10",
 };
 
-/** Replace month name tokens with two-digit month numbers. */
+/** Replace month name tokens with two-digit month numbers.
+ * Handles abbreviated months with trailing periods (e.g. "avr." → "04"). */
 function normalizeMonthNames(s: string): string {
   return s.replace(
-    /[a-zăâîșțéûäöüąćęłńóśźżáčďěíňřšůýžàèùœ]+/gi,
-    (word) => MONTH_NAMES[word.toLowerCase()] ?? word,
+    /[a-zăâîșțéûäöüąćęłńóśźżáčďěíňřšůýžàèùœ]+\.?/gi,
+    (word) => {
+      const clean = word.replace(/\.$/, "").toLowerCase();
+      return MONTH_NAMES[clean] ?? word;
+    },
   );
 }
 

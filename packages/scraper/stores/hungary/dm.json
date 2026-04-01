@@ -1,0 +1,36 @@
+{
+    "name": "dm",
+    "country": "hungary",
+    "landingUrl": "https://www.dm.hu/dm-ujsag-1583208",
+    "waitAfterLoad": 10000,
+    "linkDomain": "magazin.dm.hu",
+    "resolver": "publitas",
+    "linkPatterns": [
+        {
+            "match": "magazin\\.dm\\.hu/([^/?#]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" },
+                { "type": "replace", "match": "\\?.*$", "replacement": "" }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{4})\\.(\\d{2})\\.(\\d{2})\\s*[-–]\\s*(\\d{4})\\.(\\d{2})\\.(\\d{2})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.\\s*[-–]\\s*(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$3-$2-$1",
+            "dateTo": "$6-$5-$4"
+        }
+    ]
+}

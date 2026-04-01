@@ -173,20 +173,34 @@ export async function runPipeline(
         scrapingInfo.firstPageUrl,
         scrapingInfo.resolver
       );
-      const resolved = await resolver.resolve({
-        catalogId: catalog.catalogId,
-        firstPageUrl: scrapingInfo.firstPageUrl,
-        coverImageUrl: scrapingInfo.coverImageUrl,
-        lastPage: scrapingInfo.lastPage,
-      });
 
-      if (resolved.pages.length === 0) {
-        throw new Error("resolver returned 0 pages");
-      }
+      const CATALOG_TIMEOUT_MS = 300000; // 5 minutes per catalog
 
-      // Download images
-      log.info(`downloading`, { catalogId: catalog.catalogId });
-      const { coverThumb } = await downloadCatalogImages(resolved, storage);
+      const resolveAndDownload = async () => {
+        const resolved = await resolver.resolve({
+          catalogId: catalog.catalogId,
+          firstPageUrl: scrapingInfo.firstPageUrl,
+          coverImageUrl: scrapingInfo.coverImageUrl,
+          lastPage: scrapingInfo.lastPage,
+        });
+
+        if (resolved.pages.length === 0) {
+          throw new Error("resolver returned 0 pages");
+        }
+
+        // Download images
+        log.info(`downloading`, { catalogId: catalog.catalogId });
+        return downloadCatalogImages(resolved, storage);
+      };
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error(`catalog timed out after ${CATALOG_TIMEOUT_MS}ms`)),
+          CATALOG_TIMEOUT_MS
+        )
+      );
+
+      const { coverThumb } = await Promise.race([resolveAndDownload(), timeoutPromise]);
 
       // Update status to ready
       await storage.writeCatalogMeta({

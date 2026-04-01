@@ -34,8 +34,28 @@ describe("extractPublitasBaseUrl", () => {
     ).toBe("https://cataloage.carrefour.ro/some-catalog");
   });
 
-  test("returns null for non-Publitas URL", () => {
-    expect(extractPublitasBaseUrl("https://example.com/foo")).toBeNull();
+  test("returns null for URL with no path segment", () => {
+    expect(extractPublitasBaseUrl("https://example.com/")).toBeNull();
+  });
+
+  test("handles bare slug URL with no /page/ and no query string (Aldi HU)", () => {
+    expect(
+      extractPublitasBaseUrl(
+        "https://szorolap.aldi.hu/aldi_online_akcios_ujsag_2026_04_02_kw14_k75d7qdv"
+      )
+    ).toBe(
+      "https://szorolap.aldi.hu/aldi_online_akcios_ujsag_2026_04_02_kw14_k75d7qdv"
+    );
+  });
+
+  test("strips trailing slash from bare slug URL", () => {
+    expect(
+      extractPublitasBaseUrl(
+        "https://szorolap.aldi.hu/aldi_online_akcios_ujsag_2026_04_02_kw14_k75d7qdv/"
+      )
+    ).toBe(
+      "https://szorolap.aldi.hu/aldi_online_akcios_ujsag_2026_04_02_kw14_k75d7qdv"
+    );
   });
 
   test("extracts base from embed URL with query params (Rossmann CZ iframe)", () => {

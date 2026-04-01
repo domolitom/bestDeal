@@ -20,12 +20,15 @@ const THUMB_SIZE = "at400";
 
 /**
  * Derive the base URL for a Publitas catalog from its firstPageUrl.
- * Handles two URL forms:
+ * Handles three URL forms:
  *  1. "/page/N" style: "https://cataloage.carrefour.ro/some-slug/page/1"
  *     → "https://cataloage.carrefour.ro/some-slug"
  *  2. Embed URL style with query params (e.g. Rossmann CZ iframe):
  *     "https://publikace.rossmann.cz/some-slug/?publitas_embed=maximized"
  *     → "https://publikace.rossmann.cz/some-slug"
+ *  3. Bare slug URL (e.g. Aldi HU):
+ *     "https://szorolap.aldi.hu/aldi_online_akcios_ujsag_2026_04_02_kw14_k75d7qdv"
+ *     → "https://szorolap.aldi.hu/aldi_online_akcios_ujsag_2026_04_02_kw14_k75d7qdv"
  */
 export function extractPublitasBaseUrl(url: string): string | null {
   // Form 1: URL contains /page/{n}
@@ -39,6 +42,10 @@ export function extractPublitasBaseUrl(url: string): string | null {
     // Must have at least one path segment to be a valid publication URL
     if (/^https?:\/\/[^/]+\/[^/]+/.test(base)) return base;
   }
+
+  // Form 3: Bare slug URL with no /page/ and no query string — use as-is (strip trailing slash)
+  const bare = url.replace(/\/$/, "");
+  if (/^https?:\/\/[^/]+\/[^/]+/.test(bare)) return bare;
 
   return null;
 }

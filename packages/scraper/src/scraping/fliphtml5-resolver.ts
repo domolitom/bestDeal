@@ -46,7 +46,7 @@ async function resolveViaFlipHtml5(
     const page = await browser.newPage();
 
     await page.goto(baseUrl, {
-      waitUntil: "networkidle",
+      waitUntil: "load",
       timeout: 30000,
     });
 

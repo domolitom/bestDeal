@@ -1,6 +1,6 @@
 {
     "name": "mediamarkt",
-    "landingUrl": "https://www.mediamarkt.de/de/prospekt",
+    "landingUrl": "https://www.mediamarkt.de/de/campaign/flyer",
     "waitAfterLoad": 10000,
     "linkDomain": "view.publitas.com",
     "linkPatterns": [

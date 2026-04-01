@@ -190,7 +190,8 @@ export async function runPipeline(
 
         // Download images
         log.info(`downloading`, { catalogId: catalog.catalogId });
-        return downloadCatalogImages(resolved, storage);
+        const downloadResult = await downloadCatalogImages(resolved, storage);
+        return { ...downloadResult, pageCount: resolved.pages.length };
       };
 
       const timeoutPromise = new Promise<never>((_, reject) =>
@@ -200,13 +201,13 @@ export async function runPipeline(
         )
       );
 
-      const { coverThumb } = await Promise.race([resolveAndDownload(), timeoutPromise]);
+      const { coverThumb, pageCount } = await Promise.race([resolveAndDownload(), timeoutPromise]);
 
       // Update status to ready
       await storage.writeCatalogMeta({
         ...metaUpdate,
         status: "ready",
-        pageCount: resolved.pages.length,
+        pageCount: pageCount,
         scrapedAt: new Date().toISOString(),
         ...(coverThumb ? { coverThumb } : {}),
       });

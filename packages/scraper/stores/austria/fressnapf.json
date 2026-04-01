@@ -1,0 +1,33 @@
+{
+    "name": "fressnapf",
+    "country": "austria",
+    "landingUrl": "https://www.fressnapf.at/app/leaflet/",
+    "waitAfterLoad": 5000,
+    "linkDomain": "prospekt.fressnapf.at",
+    "linkPatterns": [
+        {
+            "match": "prospekt\\.fressnapf\\.at/fressnapf/at/([^/?]+/[^/?]+)(?:\\?.*)?$",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                {
+                    "type": "replace",
+                    "match": "\\?.*$",
+                    "replacement": ""
+                }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.?\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        }
+    ]
+}

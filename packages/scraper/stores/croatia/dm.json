@@ -1,0 +1,36 @@
+{
+    "name": "dm",
+    "country": "croatia",
+    "landingUrl": "https://www.dm.hr/dm-katalog-470900",
+    "waitAfterLoad": 10000,
+    "linkDomain": "katalog.dm.hr",
+    "resolver": "publitas",
+    "linkPatterns": [
+        {
+            "match": "katalog\\.dm\\.hr/([^/?#]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" },
+                { "type": "replace", "match": "\\?.*$", "replacement": "" }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{2})\\.(\\d{2})\\.\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})\\.",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\.\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})\\.",
+            "dateFrom": "$3-$2-$1",
+            "dateTo": "$6-$5-$4"
+        },
+        {
+            "match": "(\\d{2})\\.(\\d{2})\\.\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        }
+    ]
+}

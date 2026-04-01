@@ -1,0 +1,35 @@
+{
+    "name": "action",
+    "landingUrl": "https://www.action.com/sk-sk/letak/",
+    "waitAfterLoad": 10000,
+    "linkDomain": "view.publitas.com",
+    "resolver": "publitas",
+    "linkPatterns": [
+        {
+            "match": "view\\.publitas\\.com/action/([^/]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" },
+                { "type": "replace", "match": "\\?.*$", "replacement": "" }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\s*-\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{1,2})/(\\d{2})\\s*-\\s*(\\d{1,2})/(\\d{2})/(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*-\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

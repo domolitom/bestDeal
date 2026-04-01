@@ -48,7 +48,7 @@ async function resolveViaYumpuApi(
   const apiUrl = `https://www.yumpu.com/${lang}/document/json/${docId}`;
   log.info(`fetching ${apiUrl}`);
 
-  const resp = await fetch(apiUrl);
+  const resp = await fetch(apiUrl, { signal: AbortSignal.timeout(30000) });
   if (!resp.ok) {
     throw new Error(
       `Yumpu API returned ${resp.status}: ${resp.statusText}`

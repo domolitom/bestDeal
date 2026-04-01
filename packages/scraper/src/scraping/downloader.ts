@@ -62,6 +62,7 @@ export async function downloadCatalogImages(
 async function downloadImage(imageURL: string): Promise<Buffer> {
   const url = new URL(imageURL);
   const resp = await fetch(imageURL, {
+    signal: AbortSignal.timeout(30000),
     headers: {
       "Referer": `${url.protocol}//${url.host}/`,
       "User-Agent":

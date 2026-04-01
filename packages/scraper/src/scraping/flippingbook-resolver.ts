@@ -38,7 +38,7 @@ async function resolveViaFlippingBook(
 
   log.info(`fetching ${baseUrl}`);
 
-  const resp = await fetch(baseUrl);
+  const resp = await fetch(baseUrl, { signal: AbortSignal.timeout(30000) });
   if (!resp.ok) {
     throw new Error(
       `FlippingBook page returned ${resp.status}: ${resp.statusText}`

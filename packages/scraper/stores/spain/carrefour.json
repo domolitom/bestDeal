@@ -1,0 +1,33 @@
+{
+    "name": "carrefour",
+    "country": "spain",
+    "landingUrl": "https://www.yumpu.com/user/folletos.carrefour.es",
+    "waitAfterLoad": 10000,
+    "resolver": "yumpu",
+    "linkDomain": "www.yumpu.com",
+    "linkPatterns": [
+        {
+            "match": "yumpu\\.com/\\w+/document/read/(\\d+)/([^/?#]+)",
+            "slugGroup": 2,
+            "normalizeUrl": []
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{1,2})\\s+de\\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\\s+(?:de\\s+)?(\\d{4})\\s*[-–al]+\\s*(\\d{1,2})\\s+de\\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\\s+(?:de\\s+)?(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

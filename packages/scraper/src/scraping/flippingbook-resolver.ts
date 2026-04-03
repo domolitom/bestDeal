@@ -33,8 +33,11 @@ async function resolveViaFlippingBook(
 ): Promise<ResolveResult> {
   const { firstPageUrl, catalogId } = input;
 
-  // Ensure base URL ends without trailing slash
-  const baseUrl = firstPageUrl.replace(/\/+$/, "");
+  // Strip query strings and fragments before building image URLs
+  const cleanUrl = new URL(firstPageUrl);
+  cleanUrl.search = "";
+  cleanUrl.hash = "";
+  const baseUrl = cleanUrl.toString().replace(/\/+$/, "");
 
   log.info(`fetching ${baseUrl}`);
 

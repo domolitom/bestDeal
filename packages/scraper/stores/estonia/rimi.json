@@ -1,0 +1,26 @@
+{
+    "name": "rimi",
+    "country": "estonia",
+    "landingUrl": "https://www.rimi.ee/kliendileht",
+    "waitAfterLoad": 5000,
+    "linkDomain": "digikataloogid.rimi.ee",
+    "linkPatterns": [
+        {
+            "match": "digikataloogid\\.rimi\\.ee/(\\d{4}/[^/?#]+)",
+            "slugGroup": 1
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        }
+    ]
+}

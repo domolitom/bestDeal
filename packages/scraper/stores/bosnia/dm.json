@@ -1,8 +1,8 @@
 {
     "name": "dm",
     "country": "bosnia",
-    "landingUrl": "https://www.dm-drogeriemarkt.ba/dm-katalog-1459006",
-    "waitAfterLoad": 10000,
+    "landingUrl": "https://katalog.dm-drogeriemarkt.ba/",
+    "waitAfterLoad": 3000,
     "linkDomain": "katalog.dm-drogeriemarkt.ba",
     "resolver": "publitas",
     "linkPatterns": [
@@ -10,27 +10,27 @@
             "match": "katalog\\.dm-drogeriemarkt\\.ba/([^/?#]+)",
             "slugGroup": 1,
             "normalizeUrl": [
-                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" },
+                { "type": "replace", "match": "/page/\\d+", "replacement": "" },
                 { "type": "replace", "match": "\\?.*$", "replacement": "" }
             ]
         }
     ],
-    "dateSource": "text",
+    "dateSource": "slug",
     "datePatterns": [
         {
-            "match": "(\\d{2})\\.(\\d{2})\\.\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})\\.",
-            "dateFrom": "$1-$2",
+            "match": "kw\\d+_(\\d+)-(\\d+)_(\\d+)-(\\d+)_(\\d{4})",
+            "dateFrom": "$1-$2-$5",
             "dateTo": "$3-$4-$5"
         },
         {
-            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\.\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})\\.",
-            "dateFrom": "$3-$2-$1",
-            "dateTo": "$6-$5-$4"
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})[^0-9]*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
         },
         {
-            "match": "(\\d{2})\\.(\\d{2})\\.\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
-            "dateFrom": "$1-$2",
-            "dateTo": "$3-$4-$5"
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$1-$2-$3"
         }
     ]
 }

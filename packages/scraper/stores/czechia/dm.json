@@ -1,8 +1,8 @@
 {
     "name": "dm",
     "country": "czechia",
-    "landingUrl": "https://www.dm.cz/novy-journal-je-tu-pro-vas-1582852",
-    "waitAfterLoad": 10000,
+    "landingUrl": "https://journal.dm-drogeriemarkt.cz/",
+    "waitAfterLoad": 3000,
     "linkDomain": "journal.dm-drogeriemarkt.cz",
     "resolver": "publitas",
     "linkPatterns": [
@@ -10,27 +10,27 @@
             "match": "journal\\.dm-drogeriemarkt\\.cz/([^/?#]+)",
             "slugGroup": 1,
             "normalizeUrl": [
-                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" },
+                { "type": "replace", "match": "/page/\\d+", "replacement": "" },
                 { "type": "replace", "match": "\\?.*$", "replacement": "" }
             ]
         }
     ],
-    "dateSource": "text",
+    "dateSource": "slug",
     "datePatterns": [
         {
-            "match": "(\\d{2})\\.(\\d{2})\\.\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "match": "_(\\d{2})_(\\d{4})_",
             "dateFrom": "$1-$2",
-            "dateTo": "$3-$4-$5"
+            "dateTo": "$1-$2"
         },
         {
-            "match": "(\\d{2})\\. (\\d{2})\\. [-–] (\\d{2})\\. (\\d{2})\\. (\\d{4})",
-            "dateFrom": "$1-$2",
-            "dateTo": "$3-$4-$5"
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})[^0-9]*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
         },
         {
-            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
-            "dateFrom": "$3-$2-$1",
-            "dateTo": "$6-$5-$4"
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$1-$2-$3"
         }
     ]
 }

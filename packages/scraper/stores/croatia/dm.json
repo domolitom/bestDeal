@@ -1,8 +1,8 @@
 {
     "name": "dm",
     "country": "croatia",
-    "landingUrl": "https://www.dm.hr/dm-katalog-470900",
-    "waitAfterLoad": 10000,
+    "landingUrl": "https://katalog.dm.hr/",
+    "waitAfterLoad": 3000,
     "linkDomain": "katalog.dm.hr",
     "resolver": "publitas",
     "linkPatterns": [
@@ -10,7 +10,7 @@
             "match": "katalog\\.dm\\.hr/([^/?#]+)",
             "slugGroup": 1,
             "normalizeUrl": [
-                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" },
+                { "type": "replace", "match": "/page/\\d+", "replacement": "" },
                 { "type": "replace", "match": "\\?.*$", "replacement": "" }
             ]
         }
@@ -18,19 +18,14 @@
     "dateSource": "text",
     "datePatterns": [
         {
-            "match": "(\\d{2})\\.(\\d{2})\\.\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})\\.",
-            "dateFrom": "$1-$2",
-            "dateTo": "$3-$4-$5"
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})[^0-9]*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
         },
         {
-            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\.\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})\\.",
-            "dateFrom": "$3-$2-$1",
-            "dateTo": "$6-$5-$4"
-        },
-        {
-            "match": "(\\d{2})\\.(\\d{2})\\.\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "match": "(siječanj|veljača|ožujak|travanj|svibanj|lipanj|srpanj|kolovoz|rujan|listopad|studeni|prosinac)\\s+(\\d{4})",
             "dateFrom": "$1-$2",
-            "dateTo": "$3-$4-$5"
+            "dateTo": "$1-$2"
         }
     ]
 }

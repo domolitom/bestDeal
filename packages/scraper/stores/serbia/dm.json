@@ -1,16 +1,16 @@
 {
     "name": "dm",
     "country": "serbia",
-    "landingUrl": "https://www.dm.rs/dm-katalog-1600046",
-    "waitAfterLoad": 10000,
-    "linkDomain": "view.publitas.com",
+    "landingUrl": "https://katalog.dm.rs/",
+    "waitAfterLoad": 3000,
+    "linkDomain": "katalog.dm.rs",
     "resolver": "publitas",
     "linkPatterns": [
         {
-            "match": "view\\.publitas\\.com/dm-drogerie-markt-serbia/([^/?#]+)",
+            "match": "katalog\\.dm\\.rs/([^/?#]+)",
             "slugGroup": 1,
             "normalizeUrl": [
-                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" },
+                { "type": "replace", "match": "/page/\\d+", "replacement": "" },
                 { "type": "replace", "match": "\\?.*$", "replacement": "" }
             ]
         }
@@ -18,19 +18,19 @@
     "dateSource": "text",
     "datePatterns": [
         {
-            "match": "(\\d{2})\\.(\\d{2})\\.\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})\\.",
+            "match": "(\\d{1,2})\\. (\\d{1,2})\\. do (\\d{1,2})\\. (\\d{1,2})\\. (\\d{4})",
             "dateFrom": "$1-$2",
             "dateTo": "$3-$4-$5"
         },
         {
-            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\.\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})\\.",
-            "dateFrom": "$3-$2-$1",
-            "dateTo": "$6-$5-$4"
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})[^0-9]*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
         },
         {
-            "match": "(\\d{2})\\.(\\d{2})\\.\\s*[-–]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "match": "(januar|februar|mart|april|maj|jun|jul|avgust|septembar|oktobar|novembar|decembar)\\s+(\\d{4})",
             "dateFrom": "$1-$2",
-            "dateTo": "$3-$4-$5"
+            "dateTo": "$1-$2"
         }
     ]
 }

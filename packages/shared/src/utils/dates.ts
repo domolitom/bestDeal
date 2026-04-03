@@ -19,8 +19,12 @@ const MONTH_NAMES: Record<string, string> = {
   juni: "06", juli: "07",
   oktober: "10", dezember: "12",
   // German abbreviations
-  mär: "03", mrz: "03",
+  mär: "03", mrz: "03", marz: "03",
   okt: "10", dez: "12",
+  // Croatian full names
+  siječanj: "01", veljača: "02", ožujak: "03", travanj: "04",
+  svibanj: "05", lipanj: "06", srpanj: "07", kolovoz: "08",
+  rujan: "09", listopad: "10", studeni: "11", prosinac: "12",
   // English full names
   january: "01", february: "02", march: "03", april: "04",
   may: "05", june: "06", july: "07",

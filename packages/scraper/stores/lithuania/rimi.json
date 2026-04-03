@@ -1,0 +1,26 @@
+{
+    "name": "rimi",
+    "country": "lithuania",
+    "landingUrl": "https://www.rimi.lt/asortimentas/rimi-savaitinis-leidinys",
+    "waitAfterLoad": 5000,
+    "linkDomain": "leidiniai.rimi.lt",
+    "linkPatterns": [
+        {
+            "match": "leidiniai\\.rimi\\.lt/(\\d{4}/[^/?#]+/[^/?#]+)",
+            "slugGroup": 1
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        }
+    ]
+}

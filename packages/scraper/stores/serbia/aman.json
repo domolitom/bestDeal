@@ -1,0 +1,21 @@
+{
+    "name": "aman",
+    "landingUrl": "https://www2.aman.co.rs/katalog",
+    "waitAfterLoad": 10000,
+    "linkDomain": "online.fliphtml5.com",
+    "linkPatterns": [
+        {
+            "match": "fliphtml5\\.com/([^/]+)/([^/?#]+)",
+            "slugGroup": 2,
+            "normalizeUrl": []
+        }
+    ],
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "([A-Za-z]+)-(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$1-$2"
+        }
+    ]
+}

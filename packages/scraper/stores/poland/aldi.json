@@ -1,0 +1,24 @@
+{
+    "name": "aldi",
+    "country": "poland",
+    "landingUrl": "https://www.aldi.pl/gazetki.html",
+    "waitAfterLoad": 8000,
+    "resolver": "ipaper",
+    "linkDomain": "aldi.pl",
+    "iframeExtract": "gazetki\\.aldi\\.pl",
+    "linkPatterns": [
+        {
+            "match": "/gazetki/(\\d{4}_cw\\d+[^/?#]*)\\.html",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        }
+    ],
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "(\\d{4})_cw(\\d+)",
+            "dateFrom": "KW$2-$1",
+            "dateTo": "KW$2-$1"
+        }
+    ]
+}

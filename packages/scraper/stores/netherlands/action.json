@@ -1,34 +1,24 @@
 {
     "name": "action",
-    "landingUrl": "https://www.action.com/nl-nl/folder/",
-    "waitAfterLoad": 10000,
-    "linkDomain": "folder.action.com",
+    "landingUrl": "https://nl.publications.action.com/",
+    "waitAfterLoad": 5000,
+    "linkDomain": "nl.publications.action.com",
     "resolver": "publitas",
     "linkPatterns": [
         {
-            "match": "folder\\.action\\.com/([^/?#]+)",
+            "match": "nl\\.publications\\.action\\.com/([^/]+)/page/\\d+",
             "slugGroup": 1,
             "normalizeUrl": [
-                { "type": "replace", "match": "https://folder\\.action\\.com/([^/?#]+).*", "replacement": "https://view.publitas.com/action/$1/page/1" }
+                { "type": "replace", "match": "/page/\\d+.*$", "replacement": "/page/1" }
             ]
         }
     ],
     "dateSource": "text",
     "datePatterns": [
         {
-            "match": "(\\d{1,2})\\.(\\d{2})\\s*-\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
-            "dateFrom": "$1-$2",
-            "dateTo": "$3-$4-$5"
-        },
-        {
-            "match": "(\\d{1,2})/(\\d{2})\\s*-\\s*(\\d{1,2})/(\\d{2})/(\\d{4})",
-            "dateFrom": "$1-$2",
-            "dateTo": "$3-$4-$5"
-        },
-        {
-            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*-\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
-            "dateFrom": "$1-$2-$3",
-            "dateTo": "$4-$5-$6"
+            "match": "(\\d{1,2})-(\\d{2})-(\\d{2}).*?T/M.*?(\\d{1,2})-(\\d{2})-(\\d{2})",
+            "dateFrom": "$1-$2-20$3",
+            "dateTo": "$4-$5-20$6"
         }
     ]
 }

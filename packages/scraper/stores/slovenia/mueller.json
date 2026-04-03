@@ -1,0 +1,27 @@
+{
+    "name": "mueller",
+    "landingUrl": "https://www.mueller.si/letaki-in-revije/",
+    "waitAfterLoad": 8000,
+    "linkDomain": "mueller-dam-bucket.s3.eu-central-1.amazonaws.com",
+    "resolver": "pdf",
+    "linkPatterns": [
+        {
+            "match": "mueller-dam-bucket\\.s3\\.eu-central-1\\.amazonaws\\.com/prod/si/letaki-in-revije/([^/]+/[^/]+)\\.pdf",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "Veljavno od (\\d{1,2})\\.(\\d{1,2})\\.\\s*do\\s*(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})\\s*(?:do|-|–)\\s*(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

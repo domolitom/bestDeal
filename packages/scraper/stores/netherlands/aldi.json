@@ -1,0 +1,25 @@
+{
+    "name": "aldi",
+    "country": "netherlands",
+    "landingUrl": "https://www.aldi.nl/folders/folder-van-deze-week.html",
+    "waitAfterLoad": 8000,
+    "resolver": "ipaper",
+    "linkDomain": "folder.aldi.nl",
+    "linkPatterns": [
+        {
+            "match": "folder\\.aldi\\.nl/fixed/(\\d{4}/[^/?#]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "\\?.*$", "replacement": "" }
+            ]
+        }
+    ],
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "(\\d{4})/folder-week-(\\d+)",
+            "dateFrom": "KW$2-$1",
+            "dateTo": "KW$2-$1"
+        }
+    ]
+}

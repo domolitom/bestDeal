@@ -1,0 +1,37 @@
+{
+    "name": "foetex",
+    "country": "denmark",
+    "landingUrl": "https://www.foetex.dk/tilbudsavis/",
+    "waitAfterLoad": 10000,
+    "linkDomain": "avis.foetex.dk",
+    "linkPatterns": [
+        {
+            "match": "avis\\.foetex\\.dk/([^/?#]+/[^/?#]+)/?$",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{1,2})/(\\d{2})/(\\d{4})\\s*[-–]\\s*(\\d{1,2})/(\\d{2})/(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "W(\\d+)\\.(\\d{2})",
+            "dateFrom": "KW$1-$2",
+            "dateTo": "KW$1-$2"
+        }
+    ]
+}

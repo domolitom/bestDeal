@@ -1,0 +1,32 @@
+{
+    "name": "norma",
+    "landingUrl": "https://www.norma-online.de/de/angebote/",
+    "waitAfterLoad": 8000,
+    "linkDomain": "norma-online.de",
+    "resolver": "pdf",
+    "linkPatterns": [
+        {
+            "match": "norma-online\\.de/de/angebote/online-prospekt/(\\d{4}-\\d+_O)/",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        },
+        {
+            "match": "norma-online\\.de/[^/]+/([^/]+\\.pdf)",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        }
+    ]
+}

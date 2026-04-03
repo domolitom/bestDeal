@@ -22,6 +22,7 @@ jobs:
         country:
           - austria
           - belgium
+          - bosnia
           - bulgaria
           - croatia
           - czechia

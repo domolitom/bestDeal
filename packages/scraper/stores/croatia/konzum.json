@@ -1,0 +1,34 @@
+{
+    "name": "konzum",
+    "landingUrl": "https://www.konzum.hr/katalozi",
+    "waitAfterLoad": 8000,
+    "linkDomain": "katalozi.konzum.hr",
+    "linkPatterns": [
+        {
+            "match": "katalozi\\.konzum\\.hr/konzum/\\d{4}/[^/]+/([^/?#]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "//-/.*$", "replacement": "" },
+                { "type": "replace", "match": "\\?.*$", "replacement": "" }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})\\.-v\\d",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$1-$2-$3"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{1,2})-(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{1,2})\\.\\s*(\\d{1,2})\\.\\s*-\\s*(\\d{1,2})\\.\\s*(\\d{1,2})\\.",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4"
+        }
+    ]
+}

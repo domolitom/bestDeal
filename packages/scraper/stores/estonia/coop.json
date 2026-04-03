@@ -1,0 +1,21 @@
+{
+    "name": "coop",
+    "country": "estonia",
+    "landingUrl": "https://kliendileht.coop.ee/",
+    "waitAfterLoad": 8000,
+    "linkDomain": "kliendileht.coop.ee",
+    "linkPatterns": [
+        {
+            "match": "kliendileht\\.coop\\.ee\\/?$",
+            "slugGroup": 0
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "\"url\":\"\\/kliendileht\\/(\\d{4})\\/(\\d+)\\/\"",
+            "dateFrom": "KW$2-$1",
+            "dateTo": "KW$2-$1"
+        }
+    ]
+}

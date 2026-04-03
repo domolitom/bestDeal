@@ -1,0 +1,22 @@
+{
+    "name": "maxima",
+    "country": "lithuania",
+    "landingUrl": "https://www.maxima.lt/leidiniai/",
+    "waitAfterLoad": 5000,
+    "linkDomain": "maxima.lt",
+    "linkPatterns": [
+        {
+            "match": "maxima\\.lt/leidiniai/(\\d{4}kk\\d+)",
+            "slugGroup": 1
+        }
+    ],
+    "iframeExtract": "viewer\\.ipaper\\.io/maxima",
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "(\\d{4})kk(\\d+)",
+            "dateFrom": "KW$2-$1",
+            "dateTo": "KW$2-$1"
+        }
+    ]
+}

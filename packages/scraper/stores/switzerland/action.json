@@ -2,15 +2,14 @@
     "name": "action",
     "landingUrl": "https://www.action.com/de-ch/prospekt/",
     "waitAfterLoad": 10000,
-    "linkDomain": "view.publitas.com",
+    "linkDomain": "folder.action.com",
     "resolver": "publitas",
     "linkPatterns": [
         {
-            "match": "view\\.publitas\\.com/action/([^/]+)",
+            "match": "folder\\.action\\.com/([^/?#]+)",
             "slugGroup": 1,
             "normalizeUrl": [
-                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" },
-                { "type": "replace", "match": "\\?.*$", "replacement": "" }
+                { "type": "replace", "match": "https://folder\\.action\\.com/([^/?#]+).*", "replacement": "https://view.publitas.com/action/$1/page/1" }
             ]
         }
     ],

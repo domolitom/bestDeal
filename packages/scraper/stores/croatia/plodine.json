@@ -1,0 +1,30 @@
+{
+    "name": "plodine",
+    "country": "croatia",
+    "landingUrl": "https://issuu.com/plodinehrvatska",
+    "waitAfterLoad": 8000,
+    "linkDomain": "issuu.com",
+    "resolver": "issuu",
+    "linkPatterns": [
+        {
+            "match": "issuu\\.com/plodinehrvatska/docs/([^/?#]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "\\?.*$", "replacement": "" }
+            ]
+        }
+    ],
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "(\\d{4})(\\d{2})(\\d{2})_(\\d{4})(\\d{2})(\\d{2})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{4})(\\d{2})(\\d{2})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$1-$2-$3"
+        }
+    ]
+}

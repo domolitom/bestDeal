@@ -1,0 +1,37 @@
+{
+    "name": "bauhaus",
+    "country": "denmark",
+    "landingUrl": "https://www.bauhaus.dk/aviser",
+    "waitAfterLoad": 10000,
+    "linkDomain": "avis.bauhaus.dk",
+    "linkPatterns": [
+        {
+            "match": "avis\\.bauhaus\\.dk/([^/?#]+)/?$",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{1,2})/(\\d{2})/(\\d{4})\\s*[-–]\\s*(\\d{1,2})/(\\d{2})/(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "W(\\d+)\\.(\\d{2})",
+            "dateFrom": "KW$1-$2",
+            "dateTo": "KW$1-$2"
+        }
+    ]
+}

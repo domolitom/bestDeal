@@ -1,0 +1,35 @@
+{
+    "name": "billa",
+    "landingUrl": "https://www.billa.sk/letaky-a-akcie/aktualny-letak",
+    "waitAfterLoad": 10000,
+    "linkDomain": "letak.billa.sk",
+    "resolver": "publitas",
+    "linkPatterns": [
+        {
+            "match": "letak\\.billa\\.sk/([^/?#]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" },
+                { "type": "replace", "match": "\\?.*$", "replacement": "" }
+            ]
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{1,2})\\. (\\d{1,2})\\. - (\\d{1,2})\\. (\\d{1,2})\\. (\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{1,2})\\. - (\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4}) - (\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

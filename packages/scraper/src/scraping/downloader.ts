@@ -72,6 +72,10 @@ async function downloadImage(imageURL: string): Promise<Buffer> {
   if (!resp.ok) {
     throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
   }
+  const contentType = resp.headers.get("content-type") ?? "";
+  if (!contentType.startsWith("image/")) {
+    throw new Error(`Expected image content-type, got ${contentType} for ${imageURL}`);
+  }
   const buffer = await resp.arrayBuffer();
   return Buffer.from(buffer);
 }

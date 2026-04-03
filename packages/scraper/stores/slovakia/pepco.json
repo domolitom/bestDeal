@@ -1,0 +1,21 @@
+{
+    "name": "pepco",
+    "landingUrl": "https://pepco.sk/letaky/",
+    "waitAfterLoad": 5000,
+    "linkDomain": "pepco.sk",
+    "linkPatterns": [
+        {
+            "match": "/wp-content/uploads/\\d{4}/\\d{2}/([^/]+\\.pdf)",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(\\d{2})\\.(\\d{2})\\.(\\d{4})\\s*[–-]\\s*(\\d{2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

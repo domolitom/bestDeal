@@ -1,0 +1,40 @@
+{
+    "name": "aldi",
+    "country": "ireland",
+    "landingUrl": "https://www.aldi.ie/leaflet",
+    "waitAfterLoad": 8000,
+    "linkDomain": "leaflets.aldi.ie",
+    "resolver": "publitas",
+    "linkPatterns": [
+        {
+            "match": "leaflets\\.aldi\\.ie/([^/?#]+?)(?:/page/\\d+)?/?$",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "(?:/page/\\d+)?/?$", "replacement": "/page/1" }
+            ]
+        },
+        {
+            "match": "view\\.publitas\\.com/[^/]+/([^/?#]+)",
+            "slugGroup": 1,
+            "normalizeUrl": []
+        }
+    ],
+    "dateSource": "text",
+    "datePatterns": [
+        {
+            "match": "(?:Thu|Mon|Tue|Wed|Fri|Sat|Sun)\\s+(\\d{1,2})\\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*?(?:Sun|Thu|Mon|Tue|Wed|Fri|Sat)\\s+(\\d{1,2})\\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4"
+        },
+        {
+            "match": "(\\d{1,2})\\s+(January|February|March|April|May|June|July|August|September|October|November|December)\\s+(\\d{4})\\s*[-–]\\s*(\\d{1,2})\\s+(January|February|March|April|May|June|July|August|September|October|November|December)\\s+(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        }
+    ]
+}

@@ -1,0 +1,25 @@
+{
+    "name": "hofer",
+    "landingUrl": "https://www.hofer.si/sl/ponudba/aktualni-letaki-in-brosure.html",
+    "waitAfterLoad": 10000,
+    "linkDomain": "letaki.hofer.si",
+    "resolver": "publitas",
+    "linkPatterns": [
+        {
+            "match": "letaki\\.hofer\\.si/(letak_kw\\d+_\\d{4}_[^/?#]+|[^/?#]+)",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" },
+                { "type": "replace", "match": "\\?.*$", "replacement": "" }
+            ]
+        }
+    ],
+    "dateSource": "slug",
+    "datePatterns": [
+        {
+            "match": "letak_kw(\\d+)_(\\d{2})_",
+            "dateFrom": "KW$1-$2",
+            "dateTo": "KW$1-$2"
+        }
+    ]
+}

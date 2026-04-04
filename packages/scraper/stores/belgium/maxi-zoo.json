@@ -3,15 +3,21 @@
     "country": "belgium",
     "landingUrl": "https://www.maxizoo.be/nl/acties-aanbiedingen/folder/",
     "waitAfterLoad": 5000,
+    "resolver": "ipaper",
     "linkDomain": "flyer.maxizoo.be",
     "linkPatterns": [
         {
-            "match": "flyer\\.maxizoo\\.be/flyer/([^/?]+)(?:\\?.*)?$",
+            "match": "flyer\\.maxizoo\\.be/flyer/([^/?]+)/?(?:\\?.*)?$",
             "slugGroup": 1,
             "normalizeUrl": [
                 {
                     "type": "replace",
                     "match": "\\?.*$",
+                    "replacement": ""
+                },
+                {
+                    "type": "replace",
+                    "match": "/$",
                     "replacement": ""
                 }
             ]
@@ -28,6 +34,11 @@
             "match": "(\\d{1,2})\\.(\\d{2})\\.?\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
             "dateFrom": "$1-$2",
             "dateTo": "$3-$4-$5"
+        },
+        {
+            "match": "(\\d{1,2})\\.(\\d{2})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})",
+            "dateFrom": "$1-$2",
+            "dateTo": "$3-$4"
         },
         {
             "match": "(\\d{2})-(\\d{2})-(\\d{4})\\s*[-–]\\s*(\\d{2})-(\\d{2})-(\\d{4})",

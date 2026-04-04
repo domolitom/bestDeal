@@ -2,23 +2,35 @@
     "name": "maxi-zoo",
     "country": "netherlands",
     "landingUrl": "https://www.maxizoo.nl/folder",
-    "waitAfterLoad": 8000,
-    "linkDomain": "flyer.maxizoo.nl",
+    "waitAfterLoad": 5000,
+    "linkDomain": "maxizoo.nl",
     "linkPatterns": [
         {
-            "match": "flyer\\.maxizoo\\.nl/(?:flyer|folder)/([^/?]+)(?:\\?.*)?$",
+            "match": "maxizoo\\.nl/folder/(folder-week-\\d+)/?(?:\\?.*)?$",
             "slugGroup": 1,
             "normalizeUrl": [
                 {
                     "type": "replace",
                     "match": "\\?.*$",
                     "replacement": ""
+                },
+                {
+                    "type": "replace",
+                    "match": "/$",
+                    "replacement": ""
                 }
             ]
         }
     ],
+    "iframeExtract": "heyzine\\.com",
+    "resolver": "browser",
     "dateSource": "text",
     "datePatterns": [
+        {
+            "match": "(\\d{1,2})-(\\d{2})-(\\d{4})\\s*[-–/]\\s*(\\d{1,2})-(\\d{2})-(\\d{4})",
+            "dateFrom": "$1-$2-$3",
+            "dateTo": "$4-$5-$6"
+        },
         {
             "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
             "dateFrom": "$1-$2-$3",
@@ -28,11 +40,6 @@
             "match": "(\\d{1,2})\\.(\\d{2})\\.?\\s*[-–]\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",
             "dateFrom": "$1-$2",
             "dateTo": "$3-$4-$5"
-        },
-        {
-            "match": "(\\d{2})-(\\d{2})-(\\d{4})\\s*[-–]\\s*(\\d{2})-(\\d{2})-(\\d{4})",
-            "dateFrom": "$1-$2-$3",
-            "dateTo": "$4-$5-$6"
         }
     ]
 }

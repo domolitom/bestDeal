@@ -3,10 +3,11 @@
     "country": "poland",
     "landingUrl": "https://www.maxizoo.pl/promocje-oferty/gazetka/",
     "waitAfterLoad": 5000,
+    "resolver": "ipaper",
     "linkDomain": "gazetka.maxizoo.pl",
     "linkPatterns": [
         {
-            "match": "gazetka\\.maxizoo\\.pl/(?:gazetka-maxi-zoo|brochure/[^/?]+|[^/?]+/[^/?]+)(?:\\?.*)?$",
+            "match": "gazetka\\.maxizoo\\.pl/(?:gazetka-maxi-zoo|brochure/[^/?]+|[^/?]+/[^/?]+)/?(?:\\?.*)?$",
             "slugGroup": 0,
             "normalizeUrl": [
                 {

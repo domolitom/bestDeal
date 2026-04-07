@@ -1,6 +1,5 @@
 {
     "name": "netto",
-    "country": "denmark",
     "landingUrl": "https://netto.dk/netto-avisen/",
     "waitAfterLoad": 12000,
     "resolver": "tjek",

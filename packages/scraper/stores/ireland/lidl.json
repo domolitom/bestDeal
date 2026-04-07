@@ -1,6 +1,5 @@
 {
     "name": "lidl",
-    "country": "ireland",
     "landingUrl": "https://www.lidl.ie/c/online-leaflets/s10020358",
     "waitAfterLoad": 8000,
     "resolver": "leaflets",

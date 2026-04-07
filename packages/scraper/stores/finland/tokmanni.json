@@ -1,6 +1,5 @@
 {
     "name": "tokmanni",
-    "country": "finland",
     "landingUrl": "https://etarjouslehdet.fi/Tokmanni",
     "waitAfterLoad": 12000,
     "resolver": "tjek",

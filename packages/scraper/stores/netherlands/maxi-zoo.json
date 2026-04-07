@@ -1,6 +1,5 @@
 {
     "name": "maxi-zoo",
-    "country": "netherlands",
     "landingUrl": "https://www.maxizoo.nl/folder",
     "waitAfterLoad": 5000,
     "linkDomain": "maxizoo.nl",

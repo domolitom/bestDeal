@@ -1,6 +1,5 @@
 {
     "name": "coop",
-    "country": "sweden",
     "landingUrl": "https://ereklamblad.se/Coop",
     "waitAfterLoad": 12000,
     "resolver": "tjek",

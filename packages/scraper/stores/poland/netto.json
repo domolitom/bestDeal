@@ -1,6 +1,5 @@
 {
     "name": "netto",
-    "country": "poland",
     "landingUrl": "https://netto.pl/gazetka-netto/",
     "waitAfterLoad": 12000,
     "resolver": "tjek",

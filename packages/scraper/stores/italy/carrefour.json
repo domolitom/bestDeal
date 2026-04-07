@@ -1,6 +1,5 @@
 {
     "name": "carrefour",
-    "country": "italy",
     "landingUrl": "https://www.carrefour.it/volantino",
     "waitAfterLoad": 10000,
     "linkDomain": "view.publitas.com",

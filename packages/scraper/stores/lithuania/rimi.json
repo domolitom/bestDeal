@@ -1,6 +1,5 @@
 {
     "name": "rimi",
-    "country": "lithuania",
     "landingUrl": "https://www.rimi.lt/asortimentas/rimi-savaitinis-leidinys",
     "waitAfterLoad": 5000,
     "linkDomain": "leidiniai.rimi.lt",

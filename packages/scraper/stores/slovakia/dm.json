@@ -1,6 +1,5 @@
 {
     "name": "dm",
-    "country": "slovakia",
     "landingUrl": "https://journal.mojadm.sk/",
     "waitAfterLoad": 3000,
     "linkDomain": "journal.mojadm.sk",

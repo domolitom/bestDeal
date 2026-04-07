@@ -1,6 +1,5 @@
 {
     "name": "maxi-zoo",
-    "country": "belgium",
     "landingUrl": "https://www.maxizoo.be/nl/acties-aanbiedingen/folder/",
     "waitAfterLoad": 5000,
     "resolver": "ipaper",

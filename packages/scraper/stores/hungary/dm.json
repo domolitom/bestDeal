@@ -1,6 +1,5 @@
 {
     "name": "dm",
-    "country": "hungary",
     "landingUrl": "https://magazin.dm.hu/",
     "waitAfterLoad": 3000,
     "linkDomain": "magazin.dm.hu",

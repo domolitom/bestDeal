@@ -1,6 +1,5 @@
 {
     "name": "rimi",
-    "country": "estonia",
     "landingUrl": "https://www.rimi.ee/kliendileht",
     "waitAfterLoad": 5000,
     "linkDomain": "digikataloogid.rimi.ee",

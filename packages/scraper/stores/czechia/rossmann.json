@@ -1,6 +1,5 @@
 {
     "name": "rossmann",
-    "country": "czechia",
     "landingUrl": "https://www.rossmann.cz/obsah/akce-a-letaky",
     "waitAfterLoad": 8000,
     "resolver": "publitas",

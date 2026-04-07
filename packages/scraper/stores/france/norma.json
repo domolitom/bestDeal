@@ -1,6 +1,5 @@
 {
     "name": "norma",
-    "country": "france",
     "landingUrl": "https://www.norma.fr/fr/bonnes-affaires/catalogues-interactifs/",
     "waitAfterLoad": 8000,
     "linkDomain": "norma.fr",

@@ -1,6 +1,5 @@
 {
     "name": "kiwi",
-    "country": "norway",
     "landingUrl": "https://etilbudsavis.no/KIWI",
     "waitAfterLoad": 12000,
     "resolver": "tjek",

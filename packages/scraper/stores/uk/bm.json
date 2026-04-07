@@ -1,6 +1,5 @@
 {
     "name": "bm",
-    "country": "uk",
     "landingUrl": "https://www.bmstores.co.uk/leaflets",
     "waitAfterLoad": 5000,
     "resolver": "pdf",

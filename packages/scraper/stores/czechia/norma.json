@@ -1,6 +1,5 @@
 {
     "name": "norma",
-    "country": "czechia",
     "landingUrl": "https://www.norma-online.de/cz/angebote/",
     "waitAfterLoad": 8000,
     "linkDomain": "norma-online.de",

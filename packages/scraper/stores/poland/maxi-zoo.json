@@ -1,6 +1,5 @@
 {
     "name": "maxi-zoo",
-    "country": "poland",
     "landingUrl": "https://www.maxizoo.pl/promocje-oferty/gazetka/",
     "waitAfterLoad": 5000,
     "resolver": "ipaper",

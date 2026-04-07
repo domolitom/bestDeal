@@ -1,6 +1,5 @@
 {
     "name": "fressnapf",
-    "country": "hungary",
     "landingUrl": "https://www.fressnapf.hu/akciok",
     "waitAfterLoad": 8000,
     "linkDomain": "prospekt.fressnapf.hu",

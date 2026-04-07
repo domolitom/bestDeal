@@ -1,6 +1,5 @@
 {
     "name": "dm",
-    "country": "serbia",
     "landingUrl": "https://katalog.dm.rs/",
     "waitAfterLoad": 3000,
     "linkDomain": "katalog.dm.rs",

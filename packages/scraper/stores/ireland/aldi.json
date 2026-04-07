@@ -1,6 +1,5 @@
 {
     "name": "aldi",
-    "country": "ireland",
     "landingUrl": "https://www.aldi.ie/leaflet",
     "waitAfterLoad": 8000,
     "linkDomain": "leaflets.aldi.ie",

@@ -1,6 +1,5 @@
 {
     "name": "aldi",
-    "country": "belgium",
     "landingUrl": "https://www.aldi.be/nl/onze-folders/folder-van-deze-week.html",
     "waitAfterLoad": 10000,
     "resolver": "ipaper",

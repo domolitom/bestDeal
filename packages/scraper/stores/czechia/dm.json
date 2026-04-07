@@ -1,6 +1,5 @@
 {
     "name": "dm",
-    "country": "czechia",
     "landingUrl": "https://journal.dm-drogeriemarkt.cz/",
     "waitAfterLoad": 3000,
     "linkDomain": "journal.dm-drogeriemarkt.cz",

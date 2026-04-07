@@ -1,6 +1,5 @@
 {
     "name": "aldi",
-    "country": "hungary",
     "landingUrl": "https://www.aldi.hu/hu/ajanlatok/online-akcios-ujsag.html",
     "waitAfterLoad": 8000,
     "linkDomain": "szorolap.aldi.hu",

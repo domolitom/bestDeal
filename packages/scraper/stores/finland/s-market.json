@@ -1,6 +1,5 @@
 {
     "name": "s-market",
-    "country": "finland",
     "landingUrl": "https://etarjouslehdet.fi/S-market",
     "waitAfterLoad": 12000,
     "resolver": "tjek",

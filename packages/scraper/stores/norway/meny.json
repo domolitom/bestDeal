@@ -1,6 +1,5 @@
 {
     "name": "meny",
-    "country": "norway",
     "landingUrl": "https://kundeavis.meny.no",
     "waitAfterLoad": 10000,
     "linkDomain": "kundeavis.meny.no",

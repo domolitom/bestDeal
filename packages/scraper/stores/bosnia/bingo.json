@@ -1,6 +1,5 @@
 {
     "name": "bingo",
-    "country": "bosnia",
     "landingUrl": "https://issuu.com/bingotuzla2",
     "waitAfterLoad": 8000,
     "linkDomain": "issuu.com",

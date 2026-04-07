@@ -1,6 +1,5 @@
 {
     "name": "rimi",
-    "country": "latvia",
     "landingUrl": "https://www.rimi.lv/akcijas-un-bukleti",
     "waitAfterLoad": 5000,
     "linkDomain": "bukleti.rimi.lv",

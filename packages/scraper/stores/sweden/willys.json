@@ -1,6 +1,5 @@
 {
     "name": "willys",
-    "country": "sweden",
     "landingUrl": "https://ereklamblad.se/Willys",
     "waitAfterLoad": 20000,
     "resolver": "tjek",

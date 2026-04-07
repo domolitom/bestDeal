@@ -1,6 +1,5 @@
 {
     "name": "obi",
-    "country": "poland",
     "landingUrl": "https://www.obi.pl/promo/gazetka",
     "waitAfterLoad": 10000,
     "linkDomain": "view.publitas.com",

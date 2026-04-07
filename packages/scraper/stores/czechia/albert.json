@@ -1,6 +1,5 @@
 {
     "name": "albert",
-    "country": "czechia",
     "landingUrl": "https://www.albert.cz/aktualni-letaky",
     "waitAfterLoad": 12000,
     "linkDomain": "letaky.albert.cz",

@@ -1,6 +1,5 @@
 {
     "name": "fressnapf",
-    "country": "switzerland",
     "landingUrl": "https://www.fressnapf.ch/de/app/leaflet/",
     "waitAfterLoad": 10000,
     "resolver": "ipaper",

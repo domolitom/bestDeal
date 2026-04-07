@@ -1,6 +1,5 @@
 {
     "name": "decathlon",
-    "country": "spain",
     "landingUrl": "https://www.decathlon.es/es/ofertas",
     "waitAfterLoad": 10000,
     "linkDomain": "view.publitas.com",

@@ -1,6 +1,5 @@
 {
     "name": "dm",
-    "country": "bosnia",
     "landingUrl": "https://katalog.dm-drogeriemarkt.ba/",
     "waitAfterLoad": 3000,
     "linkDomain": "katalog.dm-drogeriemarkt.ba",

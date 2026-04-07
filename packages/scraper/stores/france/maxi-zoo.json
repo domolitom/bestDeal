@@ -1,6 +1,5 @@
 {
     "name": "maxi-zoo",
-    "country": "france",
     "landingUrl": "https://www.maxizoo.fr/promotions/offres-catalogue/",
     "waitAfterLoad": 10000,
     "resolver": "ipaper",

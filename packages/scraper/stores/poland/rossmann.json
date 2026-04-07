@@ -1,6 +1,5 @@
 {
     "name": "rossmann",
-    "country": "poland",
     "landingUrl": "https://www.rossmann.pl/gazetki",
     "waitAfterLoad": 8000,
     "linkDomain": "pro-fra-s3-magazine.rossmann.pl",

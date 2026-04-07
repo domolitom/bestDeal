@@ -1,6 +1,5 @@
 {
     "name": "foetex",
-    "country": "denmark",
     "landingUrl": "https://www.foetex.dk/tilbudsavis/",
     "waitAfterLoad": 10000,
     "linkDomain": "avis.foetex.dk",

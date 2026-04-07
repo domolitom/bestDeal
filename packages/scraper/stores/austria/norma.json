@@ -1,6 +1,5 @@
 {
     "name": "norma",
-    "country": "austria",
     "landingUrl": "https://www.norma-online.de/at/angebote/",
     "waitAfterLoad": 8000,
     "linkDomain": "norma-online.de",

@@ -1,6 +1,5 @@
 {
     "name": "continente",
-    "country": "portugal",
     "landingUrl": "https://www.continente.pt/folhetos/",
     "waitAfterLoad": 10000,
     "linkDomain": "folhetos.continente.pt",

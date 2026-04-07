@@ -1,6 +1,5 @@
 {
     "name": "aldi",
-    "country": "spain",
     "landingUrl": "https://www.aldi.es/folleto.html",
     "waitAfterLoad": 10000,
     "resolver": "ipaper",

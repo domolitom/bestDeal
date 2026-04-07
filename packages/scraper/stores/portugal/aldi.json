@@ -1,6 +1,5 @@
 {
     "name": "aldi",
-    "country": "portugal",
     "landingUrl": "https://www.aldi.pt/folhetosaldi/1/esta-semana.html",
     "waitAfterLoad": 10000,
     "linkDomain": "folhetos.aldi.pt",

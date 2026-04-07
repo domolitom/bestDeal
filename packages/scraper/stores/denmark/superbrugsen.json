@@ -1,6 +1,5 @@
 {
     "name": "superbrugsen",
-    "country": "denmark",
     "landingUrl": "https://superbrugsen.coop.dk/avis/",
     "waitAfterLoad": 12000,
     "resolver": "tjek",

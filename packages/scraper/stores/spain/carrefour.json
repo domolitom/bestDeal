@@ -1,6 +1,5 @@
 {
     "name": "carrefour",
-    "country": "spain",
     "landingUrl": "https://www.yumpu.com/user/folletos.carrefour.es",
     "waitAfterLoad": 10000,
     "resolver": "yumpu",

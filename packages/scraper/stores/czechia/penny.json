@@ -1,6 +1,5 @@
 {
     "name": "penny",
-    "country": "czechia",
     "landingUrl": "https://www.penny.cz/nabidky/letaky",
     "waitAfterLoad": 10000,
     "linkDomain": "files.rewe.co.at",

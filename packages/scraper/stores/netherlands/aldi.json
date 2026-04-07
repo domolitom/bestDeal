@@ -1,6 +1,5 @@
 {
     "name": "aldi",
-    "country": "netherlands",
     "landingUrl": "https://www.aldi.nl/folders/folder-van-deze-week.html",
     "waitAfterLoad": 8000,
     "resolver": "ipaper",

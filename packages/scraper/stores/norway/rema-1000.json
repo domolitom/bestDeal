@@ -1,6 +1,5 @@
 {
     "name": "rema-1000",
-    "country": "norway",
     "landingUrl": "https://etilbudsavis.no/REMA-1000",
     "waitAfterLoad": 12000,
     "resolver": "tjek",

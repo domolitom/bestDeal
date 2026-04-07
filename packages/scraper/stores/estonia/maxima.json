@@ -1,6 +1,5 @@
 {
     "name": "maxima",
-    "country": "estonia",
     "landingUrl": "https://issuu.com/maxima_eesti",
     "waitAfterLoad": 8000,
     "linkDomain": "issuu.com",

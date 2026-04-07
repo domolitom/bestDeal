@@ -1,6 +1,5 @@
 {
     "name": "fressnapf",
-    "country": "germany",
     "landingUrl": "https://www.fressnapf.de/aktionen-angebote/aus-unserer-werbung/",
     "waitAfterLoad": 5000,
     "resolver": "ipaper",

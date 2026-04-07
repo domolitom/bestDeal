@@ -1,6 +1,5 @@
 {
     "name": "aldi",
-    "country": "poland",
     "landingUrl": "https://www.aldi.pl/gazetki.html",
     "waitAfterLoad": 8000,
     "resolver": "ipaper",

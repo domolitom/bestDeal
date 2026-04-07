@@ -1,6 +1,5 @@
 {
     "name": "intersport",
-    "country": "finland",
     "landingUrl": "https://issuu.com/intersportfinland",
     "waitAfterLoad": 8000,
     "linkDomain": "issuu.com",

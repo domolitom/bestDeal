@@ -1,6 +1,5 @@
 {
     "name": "pingo-doce",
-    "country": "portugal",
     "landingUrl": "https://www.pingodoce.pt/folhetos/",
     "waitAfterLoad": 10000,
     "linkDomain": "folhetos.pingodoce.pt",

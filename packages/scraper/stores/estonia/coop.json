@@ -1,6 +1,5 @@
 {
     "name": "coop",
-    "country": "estonia",
     "landingUrl": "https://kliendileht.coop.ee/",
     "waitAfterLoad": 8000,
     "linkDomain": "kliendileht.coop.ee",

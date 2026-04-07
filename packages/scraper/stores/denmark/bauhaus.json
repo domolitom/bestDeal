@@ -1,6 +1,5 @@
 {
     "name": "bauhaus",
-    "country": "denmark",
     "landingUrl": "https://www.bauhaus.dk/aviser",
     "waitAfterLoad": 10000,
     "linkDomain": "avis.bauhaus.dk",

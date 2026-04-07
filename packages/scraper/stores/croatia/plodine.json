@@ -1,6 +1,5 @@
 {
     "name": "plodine",
-    "country": "croatia",
     "landingUrl": "https://issuu.com/plodinehrvatska",
     "waitAfterLoad": 8000,
     "linkDomain": "issuu.com",

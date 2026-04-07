@@ -1,6 +1,5 @@
 {
     "name": "bilka",
-    "country": "denmark",
     "landingUrl": "https://www.bilka.dk/tilbudsavis/",
     "waitAfterLoad": 10000,
     "linkDomain": "avis.bilka.dk",

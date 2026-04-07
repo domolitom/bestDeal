@@ -1,6 +1,5 @@
 {
     "name": "penny",
-    "country": "hungary",
     "landingUrl": "https://www.penny.hu/reklamujsag",
     "waitAfterLoad": 10000,
     "linkDomain": "files.rewe.co.at",

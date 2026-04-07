@@ -1,6 +1,5 @@
 {
     "name": "maxima",
-    "country": "lithuania",
     "landingUrl": "https://www.maxima.lt/leidiniai/",
     "waitAfterLoad": 5000,
     "linkDomain": "maxima.lt",

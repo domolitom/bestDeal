@@ -1,6 +1,5 @@
 {
     "name": "lidl",
-    "country": "portugal",
     "landingUrl": "https://www.lidl.pt/c/folhetos/s10020672",
     "waitAfterLoad": 10000,
     "resolver": "leaflets",

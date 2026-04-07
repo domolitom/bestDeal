@@ -1,6 +1,5 @@
 {
     "name": "dm",
-    "country": "austria",
     "landingUrl": "https://journal.dm.at/",
     "waitAfterLoad": 3000,
     "linkDomain": "journal.dm.at",

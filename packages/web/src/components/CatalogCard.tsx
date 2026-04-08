@@ -5,6 +5,19 @@ import { FreshnessIndicator } from "./FreshnessIndicator";
 import { getCoverUrl } from "@/lib/image-url";
 import { toDisplayName } from "@/lib/display-name";
 
+function catalogTypeLabel(type: string): string | null {
+  const labels: Record<string, string> = {
+    // Kaufland types
+    kdz: "Weekly Deals",
+    inlet: "Flyer Insert",
+    op: "Special Offers",
+    // Aldi types
+    national: "National Offers",
+    regional: "Regional Offers",
+  };
+  return labels[type.toLowerCase()] ?? type;
+}
+
 export function CatalogCard({ catalog }: { catalog: CatalogSummary }) {
   const coverUrl = getCoverUrl(catalog);
 
@@ -27,7 +40,7 @@ export function CatalogCard({ catalog }: { catalog: CatalogSummary }) {
                 color: "var(--text-secondary)",
               }}
             >
-              {catalog.catalogType}
+              {catalogTypeLabel(catalog.catalogType)}
             </span>
           )}
           <div className="catalog-card-dates">

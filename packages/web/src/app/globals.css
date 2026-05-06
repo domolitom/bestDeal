@@ -363,6 +363,60 @@ a {
   color: var(--warning);
 }
 
+/* Expired catalogs collapsible section */
+.expired-section {
+  margin-top: 40px;
+  opacity: 0.7;
+}
+
+.expired-section[open] {
+  opacity: 1;
+}
+
+.expired-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 10px 0;
+  margin-bottom: 16px;
+  border-top: 1px solid var(--border);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+  transition: color var(--transition);
+}
+
+.expired-section-title::-webkit-details-marker {
+  display: none;
+}
+
+.expired-section-title::before {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid currentColor;
+  transition: transform var(--transition);
+}
+
+.expired-section[open] .expired-section-title::before {
+  transform: rotate(90deg);
+}
+
+.expired-section-title:hover {
+  color: var(--text);
+}
+
+.expired-section .grid-catalogs {
+  opacity: 0.75;
+  filter: grayscale(30%);
+}
+
 /* Empty state */
 .empty-state {
   text-align: center;

@@ -4,6 +4,7 @@ import { storage } from "@/lib/storage";
 import { Header, getCountryName } from "@/components/Header";
 import { CatalogGrid } from "@/components/CatalogGrid";
 import { toDisplayName } from "@/lib/display-name";
+import { isCatalogActive } from "@bestdeal/shared";
 import Link from "next/link";
 
 export const runtime = "edge";
@@ -80,9 +81,11 @@ export default async function CountryPage({
     status: "ready",
   });
   const catalogs = allCatalogs.filter((c) => isRecentEnough(c.dateTo));
+  const activeCatalogs = catalogs.filter((c) => isCatalogActive(c.dateTo));
+  const expiredCatalogs = catalogs.filter((c) => !isCatalogActive(c.dateTo));
 
   const countryName = getCountryName(country);
-  const storesWithCatalogs = [...new Set(catalogs.map((c) => c.store))];
+  const storesWithCatalogs = [...new Set(activeCatalogs.map((c) => c.store))];
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -116,11 +119,11 @@ export default async function CountryPage({
         <h1 className="page-title">{countryName}</h1>
         <p className="page-subtitle">
           {stores.length} store{stores.length !== 1 ? "s" : ""} &middot;{" "}
-          {catalogs.length} catalog{catalogs.length !== 1 ? "s" : ""}
+          {activeCatalogs.length} catalog{activeCatalogs.length !== 1 ? "s" : ""}
         </p>
 
         <p className="page-intro">
-          {buildIntroText(countryName, catalogs.length, storesWithCatalogs)}
+          {buildIntroText(countryName, activeCatalogs.length, storesWithCatalogs)}
         </p>
 
         {/* Store pills */}
@@ -135,7 +138,16 @@ export default async function CountryPage({
           ))}
         </div>
 
-        <CatalogGrid catalogs={catalogs} />
+        <CatalogGrid catalogs={activeCatalogs} />
+
+        {expiredCatalogs.length > 0 && (
+          <details className="expired-section" open>
+            <summary className="expired-section-title">
+              Recently expired ({expiredCatalogs.length})
+            </summary>
+            <CatalogGrid catalogs={expiredCatalogs} />
+          </details>
+        )}
       </main>
     </>
   );

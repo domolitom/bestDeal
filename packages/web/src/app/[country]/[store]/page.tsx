@@ -5,6 +5,7 @@ import { Header, getCountryName } from "@/components/Header";
 import { CatalogGrid } from "@/components/CatalogGrid";
 import { toDisplayName } from "@/lib/display-name";
 import { storeConfigExists, STORE_CONFIGS } from "@/lib/store-configs";
+import { isCatalogActive } from "@bestdeal/shared";
 import Link from "next/link";
 
 export const runtime = "edge";
@@ -64,6 +65,8 @@ export default async function StorePage({
     store,
   });
   const catalogs = allCatalogs.filter((c) => isRecentEnough(c.dateTo));
+  const activeCatalogs = catalogs.filter((c) => isCatalogActive(c.dateTo));
+  const expiredCatalogs = catalogs.filter((c) => !isCatalogActive(c.dateTo));
 
   const countryName = getCountryName(country);
   const storeName = toDisplayName(store);
@@ -118,8 +121,8 @@ export default async function StorePage({
           {storeName}
         </h1>
         <p className="page-subtitle">
-          {catalogs.length > 0
-            ? `${catalogs.length} catalog${catalogs.length !== 1 ? "s" : ""} in ${countryName}`
+          {activeCatalogs.length > 0
+            ? `${activeCatalogs.length} catalog${activeCatalogs.length !== 1 ? "s" : ""} in ${countryName}`
             : countryName}
         </p>
 
@@ -148,7 +151,18 @@ export default async function StorePage({
             </p>
           </div>
         ) : (
-          <CatalogGrid catalogs={catalogs} />
+          <>
+            <CatalogGrid catalogs={activeCatalogs} />
+
+            {expiredCatalogs.length > 0 && (
+              <details className="expired-section" open>
+                <summary className="expired-section-title">
+                  Recently expired ({expiredCatalogs.length})
+                </summary>
+                <CatalogGrid catalogs={expiredCatalogs} />
+              </details>
+            )}
+          </>
         )}
       </main>
     </>

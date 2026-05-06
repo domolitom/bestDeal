@@ -1,19 +1,18 @@
 {
     "name": "norma",
     "landingUrl": "https://www.norma-online.de/cz/angebote/",
-    "waitAfterLoad": 8000,
+    "waitAfterLoad": 5000,
     "linkDomain": "norma-online.de",
     "resolver": "pdf",
     "linkPatterns": [
         {
             "match": "norma-online\\.de/cz/angebote/online-prospekt/(\\d{4}-\\d+_CZ)/",
             "slugGroup": 1,
-            "normalizeUrl": []
-        },
-        {
-            "match": "norma-online\\.de/[^/]+/([^/]+\\.pdf)",
-            "slugGroup": 1,
-            "normalizeUrl": []
+            "normalizeUrl": [
+                { "type": "replace", "match": "\\?.*$", "replacement": "" },
+                { "type": "replace", "match": "/$", "replacement": "" },
+                { "type": "append", "suffix": ".pdf" }
+            ]
         }
     ],
     "dateSource": "slug",

@@ -4,6 +4,7 @@ import { storage } from "@/lib/storage";
 import { Header, getCountryName } from "@/components/Header";
 import { CatalogGrid } from "@/components/CatalogGrid";
 import { toDisplayName } from "@/lib/display-name";
+import { storeConfigExists, STORE_CONFIGS } from "@/lib/store-configs";
 import Link from "next/link";
 
 export const runtime = "edge";
@@ -50,23 +51,30 @@ export default async function StorePage({
 }) {
   const { country, store } = await params;
 
+  // Guard: if no store config exists for this country+store slug, hard 404.
+  // We check the static config lookup first (edge-compatible, no network call)
+  // so pages for configured-but-not-yet-scraped stores render an empty state
+  // instead of returning 404.
+  if (!storeConfigExists(country, store)) {
+    notFound();
+  }
+
   const allCatalogs = await storage.listCatalogs({
     country,
     store,
   });
   const catalogs = allCatalogs.filter((c) => isRecentEnough(c.dateTo));
 
-  if (catalogs.length === 0) {
-    // Check if the store actually exists (might just have no ready catalogs)
-    const stores = await storage.listStores(country);
-    if (!stores.includes(store)) {
-      notFound();
-    }
-  }
-
   const countryName = getCountryName(country);
   const storeName = toDisplayName(store);
-  const allStores = await storage.listStores(country);
+
+  // Build the store pill list from the static config (all configured stores for this
+  // country), merged with any stores that exist in the live manifest but aren't in
+  // the config yet. Sorted alphabetically.
+  const configStores: string[] = [...(STORE_CONFIGS[country] ?? [])];
+  const manifestStores = await storage.listStores(country);
+  const allStoresSet = new Set([...configStores, ...manifestStores]);
+  const allStores = [...allStoresSet].sort();
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -110,8 +118,9 @@ export default async function StorePage({
           {storeName}
         </h1>
         <p className="page-subtitle">
-          {catalogs.length} catalog{catalogs.length !== 1 ? "s" : ""} in{" "}
-          {countryName}
+          {catalogs.length > 0
+            ? `${catalogs.length} catalog${catalogs.length !== 1 ? "s" : ""} in ${countryName}`
+            : countryName}
         </p>
 
         {/* Store pills */}
@@ -130,7 +139,17 @@ export default async function StorePage({
           ))}
         </div>
 
-        <CatalogGrid catalogs={catalogs} />
+        {catalogs.length === 0 ? (
+          <div className="empty-state">
+            <h3>No catalogs yet</h3>
+            <p>
+              We&apos;re working on bringing you the latest deals from{" "}
+              {storeName} in {countryName}. Check back soon!
+            </p>
+          </div>
+        ) : (
+          <CatalogGrid catalogs={catalogs} />
+        )}
       </main>
     </>
   );

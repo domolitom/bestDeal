@@ -12,7 +12,7 @@ export function Colophon() {
           All prices subject to local availability.
         </p>
         <p className="colophon-legal">
-          &copy;&nbsp;{new Date().getFullYear()} &nbsp;&middot;&nbsp; best-deal-shops.com &nbsp;&middot;&nbsp; RSS
+          &copy;&nbsp;{new Date().getFullYear()} &nbsp;&middot;&nbsp; best-deal-shops.com &nbsp;&middot;&nbsp; <a href="/feed.xml" style={{ color: "inherit" }}>RSS</a>
         </p>
       </div>
     </footer>

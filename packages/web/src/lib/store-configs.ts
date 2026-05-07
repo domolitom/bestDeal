@@ -7,9 +7,13 @@
  * empty state rather than a hard 404.
  *
  * To regenerate: list all *.json filenames (sans extension) in each country dir.
+ *
+ * NOTE: this table is hand-maintained and therefore fragile — it must be updated
+ * every time a new scraper store config is added. A build-time codegen step is
+ * tracked as a follow-up to automate this sync.
  */
 export const STORE_CONFIGS: Record<string, readonly string[]> = {
-  austria: ["action", "dm", "fressnapf", "hofer", "jysk", "lidl", "norma"],
+  austria: ["action", "dm", "fressnapf", "hofer", "jysk", "lidl", "norma", "penny"],
   belgium: ["action", "action-fr", "aldi", "carrefour", "delhaize", "jysk", "lidl", "maxi-zoo"],
   bosnia: ["bingo", "dm", "pepco"],
   bulgaria: ["dm", "jysk", "kaufland", "pepco"],

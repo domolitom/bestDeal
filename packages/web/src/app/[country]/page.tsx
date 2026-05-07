@@ -4,6 +4,7 @@ import { storage } from "@/lib/storage";
 import { Header, getCountryName } from "@/components/Header";
 import { CatalogGrid } from "@/components/CatalogGrid";
 import { toDisplayName } from "@/lib/display-name";
+import { STORE_CONFIGS } from "@/lib/store-configs";
 import { isCatalogActive } from "@bestdeal/shared";
 import Link from "next/link";
 
@@ -70,9 +71,17 @@ export default async function CountryPage({
   params: Promise<{ country: string }>;
 }) {
   const { country } = await params;
-  const stores = await storage.listStores(country);
+  const manifestStores = await storage.listStores(country);
 
-  if (stores.length === 0) {
+  // Build the full store list from the static config (all configured stores for
+  // this country) merged with any manifest stores. Mirrors the same approach
+  // used by the store page so both pages stay consistent.
+  const configStores: string[] = [...(STORE_CONFIGS[country] ?? [])];
+  const allStoresSet = new Set([...configStores, ...manifestStores]);
+  const allStores = [...allStoresSet].sort();
+
+  // 404 only when neither the config nor the manifest knows about this country.
+  if (allStores.length === 0) {
     notFound();
   }
 
@@ -118,7 +127,7 @@ export default async function CountryPage({
       <main className="container">
         <h1 className="page-title">{countryName}</h1>
         <p className="page-subtitle">
-          {stores.length} store{stores.length !== 1 ? "s" : ""} &middot;{" "}
+          {allStores.length} store{allStores.length !== 1 ? "s" : ""} &middot;{" "}
           {activeCatalogs.length} catalog{activeCatalogs.length !== 1 ? "s" : ""}
         </p>
 
@@ -126,12 +135,12 @@ export default async function CountryPage({
           {buildIntroText(countryName, activeCatalogs.length, storesWithCatalogs)}
         </p>
 
-        {/* Store pills */}
+        {/* Store pills — all configured stores, not just those with live catalogs */}
         <div className="store-list">
           <Link href={`/${country}`}>
             <span className="store-pill store-pill-active">All</span>
           </Link>
-          {stores.map((store) => (
+          {allStores.map((store) => (
             <Link key={store} href={`/${country}/${store}`}>
               <span className="store-pill">{toDisplayName(store)}</span>
             </Link>

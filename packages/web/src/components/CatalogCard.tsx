@@ -7,19 +7,31 @@ import { toDisplayName } from "@/lib/display-name";
 
 function catalogTypeLabel(type: string): string | null {
   const labels: Record<string, string> = {
-    // Kaufland types
+    // Kaufland types (extracted from DE_de_<TYPE> URL segment)
     kdz: "Weekly Deals",
     inlet: "Flyer Insert",
+    hyper: "Hypermarket",
+    // wrapper is a short promotional sleeve bundled with the main flyer —
+    // not independently meaningful, so no badge shown (return null below)
+    // Aldi Sued types (extracted from kw<n>-<yy>-<type> slug)
     op: "Special Offers",
-    // Aldi types
+    vop: "Advance Offers",
+    "op-mp": "Marketplace Offers",
+    // Aldi Sued / Aldi national+regional
     national: "National Offers",
     regional: "Regional Offers",
+    // Generic platform types
+    magazine: "Magazine",
+    leaflet: "Leaflet",
   };
-  return labels[type.toLowerCase()] ?? type;
+  return labels[type.toLowerCase()] ?? null;
 }
 
 export function CatalogCard({ catalog }: { catalog: CatalogSummary }) {
   const coverUrl = getCoverUrl(catalog);
+  const typeLabel = catalog.catalogType
+    ? catalogTypeLabel(catalog.catalogType)
+    : null;
 
   return (
     <Link href={`/${catalog.country}/${catalog.store}/${catalog.id}`}>
@@ -32,7 +44,7 @@ export function CatalogCard({ catalog }: { catalog: CatalogSummary }) {
         />
         <div className="catalog-card-info">
           <span className="catalog-card-store">{toDisplayName(catalog.store)}</span>
-          {catalog.catalogType && (
+          {typeLabel !== null && (
             <span
               style={{
                 marginLeft: 6,
@@ -40,7 +52,7 @@ export function CatalogCard({ catalog }: { catalog: CatalogSummary }) {
                 color: "var(--text-secondary)",
               }}
             >
-              {catalogTypeLabel(catalog.catalogType)}
+              {typeLabel}
             </span>
           )}
           <div className="catalog-card-dates">

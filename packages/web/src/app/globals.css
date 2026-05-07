@@ -563,17 +563,20 @@ a {
 }
 
 /* ============================================================
-   Country selector — magazine issue-card grid
+   Country selector — bento magazine grid
    ============================================================ */
-.grid-countries {
+.bento-countries {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: minmax(180px, auto);
   gap: 1px;
   border: 1px solid var(--border);
   background: var(--border);
+  margin-bottom: clamp(32px, 5vw, 64px);
 }
 
 .country-card {
+  grid-column: span var(--col-span, 2);
   padding: 28px 24px;
   display: flex;
   align-items: flex-start;
@@ -581,6 +584,8 @@ a {
   background: var(--bg-card);
   border: none;
   transition: background var(--transition);
+  text-decoration: none;
+  min-height: 180px;
 }
 
 .country-card:hover {
@@ -598,15 +603,28 @@ a {
   min-width: 0;
 }
 
-.country-info h3 {
+/* Bento size variants */
+.country-name {
   font-family: var(--font-display, serif);
   font-style: italic;
   font-weight: 400;
-  font-size: var(--text-xl);
   color: var(--ink);
   letter-spacing: -0.02em;
   line-height: 1;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  font-feature-settings: "onum" 1, "dlig" 1, "ss01" 1;
+}
+
+.country-name--large {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+}
+
+.country-name--mid {
+  font-size: var(--text-xl);
+}
+
+.country-name--small {
+  font-size: var(--text-lg);
 }
 
 .country-stats {
@@ -615,6 +633,15 @@ a {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--ink-faded);
+}
+
+/* Legacy grid kept for any remaining uses */
+.grid-countries {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1px;
+  border: 1px solid var(--border);
+  background: var(--border);
 }
 
 /* ============================================================
@@ -1120,6 +1147,15 @@ a {
   .page-title {
     font-size: var(--text-2xl);
     margin-top: 24px;
+  }
+
+  .bento-countries {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .country-card {
+    grid-column: span 1 !important;
+    min-height: 140px;
   }
 
   .grid-countries {

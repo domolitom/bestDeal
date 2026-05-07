@@ -473,6 +473,22 @@ a {
 .catalog-card-frame {
   padding: 10px 10px 0;
   background: var(--bg-elevated);
+  position: relative;
+}
+
+.catalog-card-stamp {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 2;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--font-mono, monospace);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  padding: 3px 6px;
+  text-transform: uppercase;
+  pointer-events: none;
 }
 
 .catalog-card-image {

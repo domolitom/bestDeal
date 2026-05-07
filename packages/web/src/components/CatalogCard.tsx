@@ -20,6 +20,15 @@ function catalogTypeLabel(type: string): string | null {
   return labels[type.toLowerCase()] ?? null;
 }
 
+/** Format "FILED ·DD.MM" stamp from an ISO date string */
+function formatFiledStamp(dateFrom: string): string {
+  const d = new Date(dateFrom);
+  if (isNaN(d.getTime())) return "FILED";
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `FILED ·${dd}.${mm}`;
+}
+
 /** Format a date pair as "11 — 17 MAY" in the editorial style */
 function formatCardDateRange(from: string, to: string): string {
   const f = new Date(from);
@@ -43,12 +52,14 @@ export function CatalogCard({ catalog }: { catalog: CatalogSummary }) {
     ? catalogTypeLabel(catalog.catalogType)
     : null;
   const dateRange = formatCardDateRange(catalog.dateFrom, catalog.dateTo);
+  const filedStamp = formatFiledStamp(catalog.dateFrom);
 
   return (
     <Link href={`/${catalog.country}/${catalog.store}/${catalog.id}`}>
       <div className="card">
         {/* Polaroid frame — image sits in a paper-white inset */}
         <div className="catalog-card-frame">
+          <span className="catalog-card-stamp" aria-hidden="true">{filedStamp}</span>
           <img
             className="catalog-card-image"
             src={coverUrl}

@@ -6,6 +6,7 @@ import { CatalogGrid } from "@/components/CatalogGrid";
 import { toDisplayName } from "@/lib/display-name";
 import { storeConfigExists, STORE_CONFIGS } from "@/lib/store-configs";
 import { isCatalogActive } from "@bestdeal/shared";
+import { getCoverUrl } from "@/lib/image-url";
 import Link from "next/link";
 
 export const runtime = "edge";
@@ -28,12 +29,35 @@ export async function generateMetadata({
   });
   const title = `${storeName} ${countryName} Weekly Catalog — ${monthYear} · BestDeal`;
   const description = `Browse current ${storeName} weekly leaflets and special offers in ${countryName}. Updated each Monday and Thursday.`;
+
+  // Pick the freshest active catalog's cover as OG image
+  let coverUrl: string | undefined;
+  try {
+    const storeCatalogs = await storage.listCatalogs({ country, store, status: "ready" });
+    const freshest = storeCatalogs
+      .filter((c) => isCatalogActive(c.dateTo))
+      .sort((a, b) => b.dateFrom.localeCompare(a.dateFrom))[0];
+    if (freshest) coverUrl = getCoverUrl(freshest);
+  } catch {
+    // Non-fatal — skip OG image if fetch fails
+  }
+
   return {
     title,
     description,
     alternates: { canonical: `${BASE_URL}/${country}/${store}` },
-    openGraph: { title, description, type: "website" },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      ...(coverUrl && { images: [{ url: coverUrl }] }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(coverUrl && { images: [coverUrl] }),
+    },
   };
 }
 

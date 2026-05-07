@@ -360,6 +360,23 @@ a {
   flex-shrink: 0;
 }
 
+.store-row-number--display {
+  font-family: var(--font-display, serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-base);
+  letter-spacing: 0;
+  font-feature-settings: "onum" 1, "salt" 1;
+  color: var(--ink-faded);
+}
+
+.store-row-fleuron {
+  color: var(--ink-faded);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
 .store-row-dash {
   display: inline-block;
   width: 2.5em;
@@ -367,6 +384,10 @@ a {
   background: var(--ink-faded);
   margin-bottom: 3px;
   flex-shrink: 0;
+}
+
+.store-row-title--swash {
+  font-feature-settings: "swsh" 1, "salt" 1, "ss01" 1, "onum" 1, "dlig" 1;
 }
 
 .store-row-title {

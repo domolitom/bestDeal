@@ -88,9 +88,9 @@ export function CatalogStoreRows({
               style={{ "--row-index": groupIndex } as React.CSSProperties}
             >
               <div className="store-row-header">
-                <span className="store-row-number">{sectionNum}</span>
-                <span className="store-row-dash" aria-hidden="true" />
-                <h3 className="store-row-title">{toDisplayName(store)}</h3>
+                <span className="store-row-number store-row-number--display">{sectionNum}</span>
+                <span className="store-row-fleuron" aria-hidden="true">&#10086;</span>
+                <h3 className="store-row-title store-row-title--swash">{toDisplayName(store)}</h3>
               </div>
               <p className="store-row-meta">
                 {countLabel} &middot; {freshnestLabel}

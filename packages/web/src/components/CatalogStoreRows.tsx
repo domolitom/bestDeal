@@ -72,40 +72,56 @@ export function CatalogStoreRows({
         const sectionNum = String(groupIndex + 1).padStart(2, "0");
         const countLabel = `${storeCatalogs.length} ${storeCatalogs.length === 1 ? "weekly leaflet" : "weekly leaflets"}`;
         const freshnestLabel = formatFreshest(storeCatalogs[0].dateFrom);
+        const isLast = groupIndex === groups.length - 1;
 
         return (
-          <section
-            key={store}
-            className="store-row"
-            style={{ "--row-index": groupIndex } as React.CSSProperties}
-          >
-            <div className="store-row-header">
-              <span className="store-row-number">{sectionNum}</span>
-              <span className="store-row-dash" aria-hidden="true" />
-              <h3 className="store-row-title">{toDisplayName(store)}</h3>
-            </div>
-            <p className="store-row-meta">
-              {countLabel} &middot; {freshnestLabel}
-            </p>
-            <div
-              className={`store-row-cards${muted ? " store-row-cards--muted" : ""}`}
+          <div key={store}>
+            {groupIndex > 0 && (
+              <div className="section-divider" aria-hidden="true">
+                <span className="section-divider-rule" />
+                <span className="section-divider-ornament">&#8258;</span>
+                <span className="section-divider-rule" />
+              </div>
+            )}
+            <section
+              className="store-row"
+              style={{ "--row-index": groupIndex } as React.CSSProperties}
             >
-              {storeCatalogs.map((catalog, i) => (
-                <div
-                  key={catalog.id}
-                  className="store-row-card-wrapper"
-                  style={
-                    {
-                      zIndex: storeCatalogs.length - i,
-                      "--card-rotation": cardRotation(i),
-                    } as React.CSSProperties
-                  }
-                >
-                  <CatalogCard catalog={catalog} />
-                </div>
-              ))}
-            </div>
-          </section>
+              <div className="store-row-header">
+                <span className="store-row-number">{sectionNum}</span>
+                <span className="store-row-dash" aria-hidden="true" />
+                <h3 className="store-row-title">{toDisplayName(store)}</h3>
+              </div>
+              <p className="store-row-meta">
+                {countLabel} &middot; {freshnestLabel}
+              </p>
+              <div
+                className={`store-row-cards${muted ? " store-row-cards--muted" : ""}`}
+              >
+                {storeCatalogs.map((catalog, i) => (
+                  <div
+                    key={catalog.id}
+                    className="store-row-card-wrapper"
+                    style={
+                      {
+                        zIndex: storeCatalogs.length - i,
+                        "--card-rotation": cardRotation(i),
+                      } as React.CSSProperties
+                    }
+                  >
+                    <CatalogCard catalog={catalog} />
+                  </div>
+                ))}
+              </div>
+            </section>
+            {isLast && (
+              <div className="section-divider" aria-hidden="true">
+                <span className="section-divider-rule" />
+                <span className="section-divider-ornament">&#8258;</span>
+                <span className="section-divider-rule" />
+              </div>
+            )}
+          </div>
         );
       })}
     </div>

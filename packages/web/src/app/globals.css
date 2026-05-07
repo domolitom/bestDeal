@@ -898,6 +898,37 @@ a {
 }
 
 /* ============================================================
+   Fraunces OpenType features — oldstyle figures + ligatures
+   ============================================================ */
+.use-fraunces {
+  font-feature-settings: "onum" 1, "dlig" 1, "ss01" 1;
+}
+
+.use-fraunces-onum {
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  font-feature-settings: "onum" 1;
+}
+
+/* Apply to Fraunces-set body elements */
+.page-subtitle,
+.page-intro,
+.store-row-title,
+.catalog-card-type,
+.masthead-subtitle,
+.masthead-title,
+.home-masthead-title,
+.country-info h3 {
+  font-feature-settings: "onum" 1, "dlig" 1, "ss01" 1;
+}
+
+/* Apply oldstyle numerals to date-bearing text using Fraunces */
+.catalog-card-dates,
+.masthead-kicker,
+.masthead-byline {
+  font-variant-numeric: oldstyle-nums proportional-nums;
+}
+
+/* ============================================================
    Homepage hero masthead
    ============================================================ */
 .home-masthead {

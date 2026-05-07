@@ -30,16 +30,28 @@ interface LeafletsApiFlyer {
   offerEndDate?: string;
   startDate?: string;
   endDate?: string;
+  category?: string;
 }
 
 /**
  * Fetch date information for a single flyer slug from the Leaflets API.
- * Uses offerStartDate/offerEndDate when available, falls back to startDate/endDate.
- * Returns ISO-formatted dates or null if the API call fails.
+ *
+ * Date field selection:
+ *   - Prefers `offerStartDate`/`offerEndDate` which represent the actual offer
+ *     validity window (typically the weekly grocery promo period).
+ *   - Falls back to `startDate`/`endDate` only when the offer dates are absent.
+ *
+ * If `allowedCategories` is provided and non-empty, flyers whose `category`
+ * is not in that list are skipped (returns null). This prevents travel
+ * catalogs ("Lidl Reisen") and special topic flyers ("Sonderflyer") from
+ * being ingested as grocery catalogs.
+ *
+ * Returns ISO-formatted dates or null if the call fails or flyer is filtered.
  */
-async function fetchLeafletsApiDates(
+export async function fetchLeafletsApiDates(
   slug: string,
-  apiHost: string
+  apiHost: string,
+  allowedCategories?: string[]
 ): Promise<{ dateFrom: string; dateTo: string } | null> {
   const apiUrl = `https://${apiHost}/v4/flyer?flyer_identifier=${encodeURIComponent(slug)}`;
   try {
@@ -51,6 +63,15 @@ async function fetchLeafletsApiDates(
     const data = await resp.json();
     const flyer: LeafletsApiFlyer = data.flyer;
     if (!flyer) return null;
+
+    // Category filter: skip non-allowed flyer types when an allowlist is set
+    if (allowedCategories && allowedCategories.length > 0) {
+      const cat = flyer.category ?? "";
+      if (!allowedCategories.includes(cat)) {
+        log.info(`skipping flyer "${slug}" (category "${cat}" not in allowlist)`);
+        return null;
+      }
+    }
 
     const dateFrom = flyer.offerStartDate || flyer.startDate;
     const dateTo = flyer.offerEndDate || flyer.endDate;
@@ -249,7 +270,7 @@ export async function discoverStore(
     if (!dates && storeDef.dateSource === "leaflets_api" && leafletsApiHost) {
       // Use the slug as the flyer identifier to fetch dates from the Leaflets API.
       // The slug is extracted from the link pattern (slugGroup) — it is the flyer identifier.
-      dates = await fetchLeafletsApiDates(raw.slug, leafletsApiHost);
+      dates = await fetchLeafletsApiDates(raw.slug, leafletsApiHost, storeDef.leafletsAllowedCategories);
     }
 
     if (!dates) {

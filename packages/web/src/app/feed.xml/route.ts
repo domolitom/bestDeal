@@ -49,6 +49,18 @@ export async function GET() {
 
   const now = new Date().toUTCString();
 
+  // Compute Last-Modified: the most recent dateFrom across all feed items
+  let lastModifiedDate: Date | undefined;
+  for (const catalog of recent) {
+    const d = new Date(catalog.dateFrom);
+    if (!isNaN(d.getTime())) {
+      if (!lastModifiedDate || d > lastModifiedDate) {
+        lastModifiedDate = d;
+      }
+    }
+  }
+  const lastModified = lastModifiedDate ? lastModifiedDate.toUTCString() : now;
+
   const items = recent.map((catalog) => {
     const storeName = toDisplayName(catalog.store);
     const countryName = getCountryName(catalog.country);
@@ -94,6 +106,7 @@ export async function GET() {
     headers: {
       "Content-Type": "application/rss+xml; charset=utf-8",
       "Cache-Control": "public, max-age=600, s-maxage=600",
+      "Last-Modified": lastModified,
     },
   });
 }

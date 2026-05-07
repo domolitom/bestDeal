@@ -247,30 +247,39 @@ a {
 }
 
 /* ============================================================
-   Store filter pills — kiosk-tab ribbon
+   Store filter pills — kiosk-strip ribbon
    ============================================================ */
 .store-list {
   display: flex;
-  gap: 6px;
+  gap: 0;
   flex-wrap: wrap;
   margin-bottom: 36px;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
 }
 
 .store-pill {
   position: relative;
-  padding: 6px 14px;
-  border-radius: var(--radius);
+  padding: 7px 14px;
+  border-radius: 0;
   font-family: var(--font-mono, monospace);
-  font-size: var(--text-xs);
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  letter-spacing: 0.18em;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border);
   cursor: pointer;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
   color: var(--ink-soft);
   overflow: hidden;
+  transition: color 200ms ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.store-pill:last-child {
+  border-right: none;
 }
 
 .store-pill::after {
@@ -280,12 +289,11 @@ a {
   left: 0;
   width: 0;
   height: 2px;
-  background: var(--ink);
-  transition: width 180ms ease-out;
+  background: var(--accent);
+  transition: width 200ms ease-out;
 }
 
 .store-pill:hover {
-  border-color: var(--ink);
   color: var(--ink);
 }
 
@@ -296,7 +304,7 @@ a {
 .store-pill-active {
   background: var(--ink);
   color: var(--bg);
-  border-color: var(--ink);
+  border-right-color: var(--ink);
 }
 
 .store-pill-active::after {

@@ -47,6 +47,47 @@
   --radius-sm: 2px;
 }
 
+/* ============================================================
+   Editorial top ribbon
+   ============================================================ */
+.editorial-ribbon {
+  height: 28px;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  user-select: none;
+  position: sticky;
+  top: 0;
+  z-index: 101;
+}
+
+.editorial-ribbon-compact {
+  display: none;
+}
+
+.ribbon-sep {
+  letter-spacing: 0;
+  margin: 0 0.1em;
+  opacity: 0.6;
+}
+
+@media (max-width: 640px) {
+  .editorial-ribbon-full {
+    display: none;
+  }
+  .editorial-ribbon-compact {
+    display: inline;
+  }
+}
+
 /* Fine paper-grain texture via SVG data-URI, felt not seen */
 body {
   font-family: var(--font-body, "Instrument Sans"), "Helvetica Neue", Arial, sans-serif;
@@ -80,7 +121,7 @@ a {
   border-bottom: 3px solid var(--rule);
   padding: 18px 0 14px;
   position: sticky;
-  top: 0;
+  top: 28px;
   z-index: 100;
 }
 

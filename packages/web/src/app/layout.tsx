@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { EditorialRibbon } from "@/components/EditorialRibbon";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -42,7 +43,10 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${instrumentSans.variable} ${jetbrainsMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <EditorialRibbon />
+        {children}
+      </body>
     </html>
   );
 }

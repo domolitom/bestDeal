@@ -145,7 +145,12 @@ export default async function CountryPage({
           </p>
           <hr className="masthead-rule" />
           <h1 className="masthead-title">{countryName}</h1>
-          <p className="masthead-subtitle">{mastheadSubtitle}</p>
+          <p className="page-intro">
+            <span className="drop-cap" aria-hidden="true">
+              {mastheadSubtitle.charAt(0)}
+            </span>
+            {mastheadSubtitle.slice(1)}
+          </p>
           <hr className="masthead-rule" />
           <p className="masthead-byline">{byline}</p>
         </div>

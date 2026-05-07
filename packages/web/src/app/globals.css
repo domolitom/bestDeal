@@ -849,6 +849,23 @@ a {
   line-height: 1.7;
 }
 
+.drop-cap {
+  font-family: var(--font-display, serif);
+  font-style: italic;
+  font-weight: 500;
+  float: left;
+  font-size: 5rem;
+  line-height: 0.85;
+  margin: 0.05em 0.12em -0.1em 0;
+  color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .drop-cap {
+    font-size: 3.5rem;
+  }
+}
+
 /* ============================================================
    Homepage hero masthead
    ============================================================ */

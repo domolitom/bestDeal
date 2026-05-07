@@ -6,6 +6,7 @@ import { CatalogStoreRows } from "@/components/CatalogStoreRows";
 import { toDisplayName } from "@/lib/display-name";
 import { STORE_CONFIGS } from "@/lib/store-configs";
 import { isCatalogActive } from "@bestdeal/shared";
+import type { CatalogSummary } from "@bestdeal/shared";
 import Link from "next/link";
 
 export const runtime = "edge";
@@ -74,6 +75,63 @@ function isRecentEnough(dateTo: string): boolean {
   return end >= cutoff;
 }
 
+/**
+ * Priority-ordered variant types per store family.
+ * The first matching type in the list wins within a (store, dateFrom, dateTo) group.
+ */
+const STORE_VARIANT_PRIORITY: Record<string, string[]> = {
+  "aldi-sued": ["op", "vop", "op-mp"],
+  "aldi-nord": ["op", "vop", "op-mp"],
+  aldi: ["op", "vop", "op-mp"],
+  kaufland: ["kdz", "hyper", "leaflet", "magazine", "wrapper", "inlet"],
+};
+
+/**
+ * From a group of catalog variants sharing the same (store, dateFrom, dateTo),
+ * pick the single canonical one to show on the country page.
+ */
+function pickCanonicalCatalog(group: CatalogSummary[]): CatalogSummary {
+  if (group.length === 1) return group[0];
+
+  const store = group[0].store;
+  const priorities = STORE_VARIANT_PRIORITY[store];
+
+  if (priorities) {
+    for (const variant of priorities) {
+      const match = group.find((c) => c.catalogType === variant);
+      if (match) return match;
+    }
+    // Fell through all known priorities — return first remaining
+    return group[0];
+  }
+
+  // Generic fallback: prefer catalog with no catalogType, then sort alphabetically
+  const noType = group.find((c) => !c.catalogType);
+  if (noType) return noType;
+
+  return [...group].sort((a, b) =>
+    (a.catalogType ?? "").localeCompare(b.catalogType ?? ""),
+  )[0];
+}
+
+/**
+ * Deduplicate a catalog list by (store, dateFrom, dateTo), keeping the canonical
+ * variant per group. Preserves the original ordering of first-seen groups.
+ */
+function dedupeCatalogs(catalogs: CatalogSummary[]): CatalogSummary[] {
+  const groups = new Map<string, CatalogSummary[]>();
+  for (const catalog of catalogs) {
+    const key = `${catalog.store}|${catalog.dateFrom}|${catalog.dateTo}`;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.push(catalog);
+    } else {
+      groups.set(key, [catalog]);
+    }
+  }
+  return [...groups.values()].map(pickCanonicalCatalog);
+}
+
 function buildMastheadSubtitle(
   storesWithCatalogs: string[],
   activeCatalogCount: number,
@@ -115,8 +173,12 @@ export default async function CountryPage({
     status: "ready",
   });
   const catalogs = allCatalogs.filter((c) => isRecentEnough(c.dateTo));
-  const activeCatalogs = catalogs.filter((c) => isCatalogActive(c.dateTo));
-  const expiredCatalogs = catalogs.filter((c) => !isCatalogActive(c.dateTo));
+  const activeCatalogs = dedupeCatalogs(
+    catalogs.filter((c) => isCatalogActive(c.dateTo)),
+  );
+  const expiredCatalogs = dedupeCatalogs(
+    catalogs.filter((c) => !isCatalogActive(c.dateTo)),
+  );
 
   const countryName = getCountryName(country);
   const storesWithCatalogs = [...new Set(activeCatalogs.map((c) => c.store))];

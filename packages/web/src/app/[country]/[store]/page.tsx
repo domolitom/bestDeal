@@ -33,6 +33,7 @@ export async function generateMetadata({
     description,
     alternates: { canonical: `${BASE_URL}/${country}/${store}` },
     openGraph: { title, description, type: "website" },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 

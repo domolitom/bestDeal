@@ -1082,6 +1082,73 @@ a {
 }
 
 /* ============================================================
+   Related catalog row — horizontal fan (catalog detail page)
+   ============================================================ */
+.related-catalog-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.related-catalog-row::-webkit-scrollbar {
+  height: 3px;
+}
+
+.related-catalog-row::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+
+/* ============================================================
+   Other-stores grid — small thumbnail tiles (catalog detail page)
+   ============================================================ */
+.other-stores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+}
+
+.other-store-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: opacity var(--transition);
+}
+
+.other-store-tile:hover {
+  opacity: 0.8;
+}
+
+.other-store-thumb {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+
+.other-store-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.other-store-name {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* ============================================================
    Keyframe animations
    ============================================================ */
 @keyframes masthead-in {

@@ -7,6 +7,7 @@ import { toDisplayName } from "@/lib/display-name";
 import { STORE_CONFIGS } from "@/lib/store-configs";
 import { isCatalogActive } from "@bestdeal/shared";
 import type { CatalogSummary } from "@bestdeal/shared";
+import { getCoverUrl } from "@/lib/image-url";
 import Link from "next/link";
 
 export const runtime = "edge";
@@ -57,12 +58,29 @@ export async function generateMetadata({
     ? `Weekly Catalogs in ${countryName} — ${monthYear} — ${storeFragment} · BestDeal`
     : `Weekly Catalogs in ${countryName} — ${monthYear} · BestDeal`;
   const description = `Browse weekly retail catalogs from stores in ${countryName}. Updated every Monday and Thursday.`;
+
+  // Pick the freshest active catalog's cover as OG image
+  const sortedActive = allCatalogs
+    .filter((c) => isCatalogActive(c.dateTo))
+    .sort((a, b) => b.dateFrom.localeCompare(a.dateFrom));
+  const coverUrl = sortedActive[0] ? getCoverUrl(sortedActive[0]) : undefined;
+
   return {
     title,
     description,
     alternates: { canonical: `${BASE_URL}/${country}` },
-    openGraph: { title, description, type: "website" },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      ...(coverUrl && { images: [{ url: coverUrl }] }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(coverUrl && { images: [coverUrl] }),
+    },
   };
 }
 

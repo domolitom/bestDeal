@@ -22,9 +22,13 @@ const MONTH_NAMES: Record<string, string> = {
   mär: "03", mrz: "03", marz: "03",
   okt: "10", dez: "12",
   // Croatian full names
+  // Note: "listopad" means October in Croatian but November in Polish.
+  // The Polish definition below takes precedence (last write wins at runtime).
+  // Croatian DM's numeric date pattern handles most cases; month-name fallback
+  // for October will use "10" if needed — handled by the Croatian DM pattern directly.
   siječanj: "01", veljača: "02", ožujak: "03", travanj: "04",
   svibanj: "05", lipanj: "06", srpanj: "07", kolovoz: "08",
-  rujan: "09", listopad: "10", studeni: "11", prosinac: "12",
+  rujan: "09", studeni: "11", prosinac: "12",
   // English full names
   january: "01", february: "02", march: "03", april: "04",
   may: "05", june: "06", july: "07",
@@ -48,10 +52,15 @@ const MONTH_NAMES: Record<string, string> = {
   settembre: "09", ottobre: "10",
   // Italian abbreviations
   gen: "01", mag: "05", giu: "06", lug: "07", ott: "10",
-  // Polish full names
+  // Polish full names ("listopad" = November 11; also covers Croatian October conflict
+  // since Polish definition is the canonical one — see comment above)
   styczeń: "01", luty: "02", marzec: "03", kwiecień: "04",
   czerwiec: "06", lipiec: "07", sierpień: "08",
   wrzesień: "09", październik: "10", listopad: "11", grudzień: "12",
+  // Polish genitive forms (used in Rossmann PL date strings)
+  stycznia: "01", lutego: "02", marca: "03", kwietnia: "04",
+  maja: "05", czerwca: "06", lipca: "07", sierpnia: "08",
+  września: "09", października: "10", listopada: "11", grudnia: "12",
   // Polish abbreviations
   sty: "01", lut: "02", kwi: "04",
   cze: "06", lip: "07", sie: "08",

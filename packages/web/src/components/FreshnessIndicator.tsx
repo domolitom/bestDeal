@@ -7,7 +7,6 @@ export function FreshnessIndicator({ dateTo }: { dateTo: string }) {
   const label = getFreshnessLabel(dateTo);
   if (!label) return null;
 
-  // Determine color class
   let className = "freshness ";
   if (!active) {
     className += "freshness-expired";
@@ -17,7 +16,11 @@ export function FreshnessIndicator({ dateTo }: { dateTo: string }) {
     className += "freshness-active";
   }
 
-  return <span className={className}>{label}</span>;
+  return (
+    <span className={className} title={active ? "Currently valid" : "Expired"}>
+      {active ? `▲ ${label}` : label}
+    </span>
+  );
 }
 
 export function StatusBadge({ dateTo }: { dateTo: string }) {

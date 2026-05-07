@@ -5,8 +5,11 @@ export function CatalogGrid({ catalogs }: { catalogs: CatalogSummary[] }) {
   if (catalogs.length === 0) {
     return (
       <div className="empty-state">
-        <h3>No catalogs found</h3>
-        <p>No catalogs available right now. Check back soon!</p>
+        <span className="empty-state-ornament">&#10022;</span>
+        <span className="empty-state-kicker">On Press</span>
+        <p className="empty-state-message">
+          This issue is at the printers &mdash; fresh leaflets arrive Monday morning.
+        </p>
       </div>
     );
   }

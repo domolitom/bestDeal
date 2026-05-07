@@ -1,16 +1,18 @@
 {
     "name": "mediamarkt",
-    "landingUrl": "https://www.mediamarkt.de/de/campaign/flyer",
-    "waitAfterLoad": 10000,
+    "landingUrl": "https://view.publitas.com/mediamarkt/",
+    "waitAfterLoad": 5000,
     "linkDomain": "view.publitas.com",
     "linkPatterns": [
         {
-            "match": "view\\.publitas\\.com/mediamarkt[^/]*/([^/?#]+)/page/\\d+",
+            "match": "view\\.publitas\\.com/mediamarkt/([^/?#]+)/page/\\d+",
             "slugGroup": 1,
-            "normalizeUrl": []
+            "normalizeUrl": [
+                { "type": "replace", "match": "/page/\\d+.*$", "replacement": "/page/1" }
+            ]
         },
         {
-            "match": "view\\.publitas\\.com/mediamarkt[^/]*/([^/?#]+)/?$",
+            "match": "view\\.publitas\\.com/mediamarkt/([^/?#]+)/?$",
             "slugGroup": 1,
             "normalizeUrl": [
                 { "type": "replace", "match": "/?$", "replacement": "/page/1" }

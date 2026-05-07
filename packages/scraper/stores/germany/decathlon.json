@@ -1,16 +1,22 @@
 {
     "name": "decathlon",
-    "landingUrl": "https://www.decathlon.de/browse/clp/angebote-deals/_/N-gqgbv5",
-    "waitAfterLoad": 10000,
+    "landingUrl": "https://view.publitas.com/decathlon-germany/",
+    "waitAfterLoad": 5000,
     "linkDomain": "view.publitas.com",
     "resolver": "publitas",
     "linkPatterns": [
         {
-            "match": "view\\.publitas\\.com/decathlon-germany/([^/?#]+)",
+            "match": "view\\.publitas\\.com/decathlon-germany/([^/?#]+)/page/\\d+",
             "slugGroup": 1,
             "normalizeUrl": [
-                { "type": "replace", "match": "/page/\\d+", "replacement": "/page/1" },
-                { "type": "replace", "match": "\\?.*$", "replacement": "" }
+                { "type": "replace", "match": "/page/\\d+.*$", "replacement": "/page/1" }
+            ]
+        },
+        {
+            "match": "view\\.publitas\\.com/decathlon-germany/([^/?#]+)/?$",
+            "slugGroup": 1,
+            "normalizeUrl": [
+                { "type": "replace", "match": "/?$", "replacement": "/page/1" }
             ]
         }
     ],

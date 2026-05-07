@@ -1,17 +1,12 @@
 {
     "name": "norma",
     "landingUrl": "https://www.norma.fr/fr/bonnes-affaires/catalogues-interactifs/",
-    "waitAfterLoad": 8000,
+    "waitAfterLoad": 5000,
     "linkDomain": "norma.fr",
     "resolver": "pdf",
     "linkPatterns": [
         {
             "match": "norma\\.fr/fr/bonnes-affaires/catalogues_interactifs/(\\d{2}_\\d{2}_\\d{2})\\.pdf",
-            "slugGroup": 1,
-            "normalizeUrl": []
-        },
-        {
-            "match": "norma\\.fr/[^/]+/([^/]+\\.pdf)",
             "slugGroup": 1,
             "normalizeUrl": []
         }
@@ -20,8 +15,8 @@
     "datePatterns": [
         {
             "match": "(\\d{2})_(\\d{2})_(\\d{2})",
-            "dateFrom": "20$3-$2-$1",
-            "dateTo": "20$3-$2-$1"
+            "dateFrom": "20$1-$2-$3",
+            "dateTo": "20$1-$2-$3"
         }
     ]
 }

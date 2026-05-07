@@ -39,10 +39,10 @@ function formatFreshest(dateFrom: string): string {
   return `freshest ${day} ${month}`;
 }
 
-/** Rotation cycles -1.5°, 0°, +1.5° based on card index — SSR-stable */
+/** Irregular rotation cycle — SSR-stable, feels less pattern-y */
 function cardRotation(i: number): string {
-  const rotations = ["-1.5deg", "0deg", "1.5deg"];
-  return rotations[i % 3];
+  const rotations = ["-1.2deg", "0.4deg", "-0.6deg", "1.1deg", "-0.3deg"];
+  return rotations[i % 5];
 }
 
 export function CatalogStoreRows({

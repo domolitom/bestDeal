@@ -38,8 +38,14 @@ function toRfc822(dateStr: string): string {
 export async function GET() {
   const allCatalogs = await storage.listCatalogs({ status: "ready" });
 
+  // todayISO is used to exclude future-dated catalogs from the feed.
+  // The date validator upstream should reject these, but the manifest has
+  // demonstrably had entries with dateFrom years in the future (e.g. 2027),
+  // so we filter defensively here rather than trusting upstream.
+  const todayISO = new Date().toISOString().slice(0, 10);
+
   const recent = allCatalogs
-    .filter((c) => isRecentEnough(c.dateTo))
+    .filter((c) => isRecentEnough(c.dateTo) && c.dateFrom <= todayISO)
     .sort((a, b) => {
       const aDate = a.dateFrom;
       const bDate = b.dateFrom;
@@ -49,17 +55,20 @@ export async function GET() {
 
   const now = new Date().toUTCString();
 
-  // Compute Last-Modified: the most recent dateFrom across all feed items
-  let lastModifiedDate: Date | undefined;
+  // Compute Last-Modified: the most recent dateFrom across all feed items,
+  // clamped to the current time. A future-dated Last-Modified header is both
+  // technically wrong and ignored by search engine crawlers, so we cap it.
+  const nowMs = Date.now();
+  let maxDateFromMs = 0;
   for (const catalog of recent) {
     const d = new Date(catalog.dateFrom);
     if (!isNaN(d.getTime())) {
-      if (!lastModifiedDate || d > lastModifiedDate) {
-        lastModifiedDate = d;
+      if (d.getTime() > maxDateFromMs) {
+        maxDateFromMs = d.getTime();
       }
     }
   }
-  const lastModified = lastModifiedDate ? lastModifiedDate.toUTCString() : now;
+  const lastModified = new Date(Math.min(maxDateFromMs || nowMs, nowMs)).toUTCString();
 
   const items = recent.map((catalog) => {
     const storeName = toDisplayName(catalog.store);

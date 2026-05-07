@@ -1,10 +1,11 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test, mock, beforeEach } from "bun:test";
 import {
   parseDates,
   applyUrlTransforms,
   extractCatalogType,
 } from "@bestdeal/shared";
 import type { DatePattern, CatalogTypePattern, UrlTransform } from "@bestdeal/shared";
+import { fetchLeafletsApiDates } from "../src/discovery/discovery-engine.ts";
 
 // --- parseDates ---
 
@@ -242,5 +243,121 @@ describe("extractCatalogType", () => {
     expect(
       extractCatalogType("https://example.com", undefined)
     ).toBeNull();
+  });
+});
+
+// --- fetchLeafletsApiDates ---
+
+describe("fetchLeafletsApiDates", () => {
+  function makeMockFetch(flyer: Record<string, unknown>) {
+    return mock((_url: string) =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ flyer }),
+      })
+    );
+  }
+
+  const weeklyFlyer = {
+    category: "Wochenaktionen Flugblatt",
+    offerStartDate: "2026-04-30",
+    offerEndDate: "2026-05-06",
+    startDate: "2026-04-26",
+    endDate: "2026-05-06",
+  };
+
+  const travelFlyer = {
+    category: "Lidl Reisen",
+    offerStartDate: "2026-04-29",
+    offerEndDate: "2026-06-04",
+    startDate: "2026-04-29",
+    endDate: "2026-06-04",
+  };
+
+  const sonderflyer = {
+    category: "Sonderflyer",
+    offerStartDate: "2027-04-23",
+    offerEndDate: "2027-04-23",
+    startDate: "2026-04-19",
+    endDate: "2026-07-31",
+  };
+
+  test("returns offerStartDate/offerEndDate for a weekly flyer", async () => {
+    // @ts-ignore
+    globalThis.fetch = makeMockFetch(weeklyFlyer);
+    const result = await fetchLeafletsApiDates("some-slug", "endpoints.leaflets.schwarz");
+    expect(result).toEqual({ dateFrom: "2026-04-30", dateTo: "2026-05-06" });
+  });
+
+  test("returns null when category not in allowlist (travel flyer)", async () => {
+    // @ts-ignore
+    globalThis.fetch = makeMockFetch(travelFlyer);
+    const result = await fetchLeafletsApiDates(
+      "last-minute-mai-juni",
+      "endpoints.leaflets.schwarz",
+      ["Wochenaktionen Flugblatt"]
+    );
+    expect(result).toBeNull();
+  });
+
+  test("returns null when category not in allowlist (Sonderflyer)", async () => {
+    // @ts-ignore
+    globalThis.fetch = makeMockFetch(sonderflyer);
+    const result = await fetchLeafletsApiDates(
+      "eiszeit-zum-tiefpreis",
+      "endpoints.leaflets.schwarz",
+      ["Wochenaktionen Flugblatt"]
+    );
+    expect(result).toBeNull();
+  });
+
+  test("returns dates when category matches allowlist", async () => {
+    // @ts-ignore
+    globalThis.fetch = makeMockFetch(weeklyFlyer);
+    const result = await fetchLeafletsApiDates(
+      "ab-donnerstag-30-4-flugblatt-nat",
+      "endpoints.leaflets.schwarz",
+      ["Wochenaktionen Flugblatt"]
+    );
+    expect(result).toEqual({ dateFrom: "2026-04-30", dateTo: "2026-05-06" });
+  });
+
+  test("accepts any category when allowlist is empty", async () => {
+    // @ts-ignore
+    globalThis.fetch = makeMockFetch(travelFlyer);
+    const result = await fetchLeafletsApiDates(
+      "last-minute-mai-juni",
+      "endpoints.leaflets.schwarz",
+      []
+    );
+    expect(result).toEqual({ dateFrom: "2026-04-29", dateTo: "2026-06-04" });
+  });
+
+  test("accepts any category when no allowlist provided", async () => {
+    // @ts-ignore
+    globalThis.fetch = makeMockFetch(travelFlyer);
+    const result = await fetchLeafletsApiDates(
+      "last-minute-mai-juni",
+      "endpoints.leaflets.schwarz"
+    );
+    expect(result).toEqual({ dateFrom: "2026-04-29", dateTo: "2026-06-04" });
+  });
+
+  test("returns null when API call fails", async () => {
+    // @ts-ignore
+    globalThis.fetch = mock(() => Promise.resolve({ ok: false, status: 404 }));
+    const result = await fetchLeafletsApiDates("bad-slug", "endpoints.leaflets.schwarz");
+    expect(result).toBeNull();
+  });
+
+  test("falls back to startDate/endDate when offerDates absent", async () => {
+    // @ts-ignore
+    globalThis.fetch = makeMockFetch({
+      category: "Wochenaktionen Flugblatt",
+      startDate: "2026-05-01",
+      endDate: "2026-05-07",
+    });
+    const result = await fetchLeafletsApiDates("some-slug", "endpoints.leaflets.schwarz");
+    expect(result).toEqual({ dateFrom: "2026-05-01", dateTo: "2026-05-07" });
   });
 });

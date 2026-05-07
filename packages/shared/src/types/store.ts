@@ -96,6 +96,11 @@ export interface StoreDefinition {
   linkPatterns: LinkPattern[];
   dateSource: "slug" | "text" | "slug_then_text" | "leaflets_api";
   datePatterns: DatePattern[];
+  /**
+   * When dateSource is "leaflets_api", only accept flyers whose `category`
+   * field is in this list. Omit to accept all categories.
+   */
+  leafletsAllowedCategories?: string[];
   catalogTypePattern?: CatalogTypePattern;
   imageExtraction?: ImageExtraction;
   resolver?: string; // override auto-detection ("leaflets" | "browser" | etc.)

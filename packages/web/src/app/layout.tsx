@@ -29,9 +29,13 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://best-deal-shops.com"),
   title: "BestDeal — European Catalog Review",
   description:
     "Browse weekly retail catalogs from grocery, electronics, and furniture stores across Europe.",
+  alternates: {
+    types: { "application/atom+xml": "/feed.xml" },
+  },
 };
 
 export default function RootLayout({

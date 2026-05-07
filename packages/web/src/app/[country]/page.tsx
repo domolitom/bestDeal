@@ -29,17 +29,39 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { country } = await params;
   const countryName = getCountryName(country);
-  const title = `${countryName} Catalogs — BestDeal`;
-  const description = `Browse weekly retail catalogs from stores in ${countryName}.`;
+  const now = new Date();
+  const monthYear = now.toLocaleDateString("en-GB", {
+    month: "long",
+    year: "numeric",
+  });
+
+  // Fetch active stores for richer title — fetch is deduplicated by Next.js
+  const allCatalogs = await storage.listCatalogs({ country, status: "ready" });
+  const storesWithCatalogs = [
+    ...new Set(
+      allCatalogs
+        .filter((c) => isCatalogActive(c.dateTo))
+        .map((c) => c.store),
+    ),
+  ];
+  const storeNamesShort = storesWithCatalogs.slice(0, 3).map(toDisplayName);
+  const moreCount = storesWithCatalogs.length - 3;
+  const storeFragment =
+    storeNamesShort.length > 0
+      ? storeNamesShort.join(", ") +
+        (moreCount > 0 ? ` & ${moreCount} more` : "")
+      : null;
+
+  const title = storeFragment
+    ? `Weekly Catalogs in ${countryName} — ${monthYear} — ${storeFragment} · BestDeal`
+    : `Weekly Catalogs in ${countryName} — ${monthYear} · BestDeal`;
+  const description = `Browse weekly retail catalogs from stores in ${countryName}. Updated every Monday and Thursday.`;
   return {
     title,
     description,
     alternates: { canonical: `${BASE_URL}/${country}` },
-    openGraph: {
-      title,
-      description,
-      type: "website",
-    },
+    openGraph: { title, description, type: "website" },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 

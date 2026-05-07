@@ -25,9 +25,10 @@ export async function generateMetadata({
   }
   const countryName = getCountryName(country);
   const storeName = toDisplayName(store);
-  const dateRange = `${formatDate(catalog.dateFrom)} to ${formatDate(catalog.dateTo)}`;
-  const title = `${storeName} ${countryName} — ${dateRange} — BestDeal`;
-  const description = `View the ${storeName} catalog in ${countryName} valid from ${dateRange}.`;
+  const dateRange = `${formatDate(catalog.dateFrom)} – ${formatDate(catalog.dateTo)}`;
+  const pageInfo = catalog.pageCount ? ` (${catalog.pageCount} pages)` : "";
+  const title = `${storeName} ${countryName} Catalog ${dateRange}${pageInfo} · BestDeal`;
+  const description = `View the ${storeName} ${countryName} weekly leaflet for ${dateRange}. ${catalog.pageCount ?? "Multiple"} pages of deals and special offers.`;
   const coverUrl = getCoverUrl(catalog);
   return {
     title,
@@ -38,6 +39,12 @@ export async function generateMetadata({
       description,
       type: "article",
       images: [{ url: coverUrl }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [coverUrl],
     },
   };
 }
@@ -56,6 +63,10 @@ export default async function CatalogPage({
 
   const countryName = getCountryName(country);
   const storeName = toDisplayName(store);
+  const pageUrl = `${BASE_URL}/${country}/${store}/${catalogId}`;
+  const coverUrl = getCoverUrl(catalog);
+  // scrapedAt is optional on CatalogMeta; fall back to dateFrom for temporal signals
+  const publishedDate = catalog.scrapedAt ?? catalog.dateFrom;
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -83,9 +94,45 @@ export default async function CatalogPage({
         "@type": "ListItem",
         position: 4,
         name: `${formatDate(catalog.dateFrom)} – ${formatDate(catalog.dateTo)}`,
-        item: `${BASE_URL}/${country}/${store}/${catalogId}`,
+        item: pageUrl,
       },
     ],
+  };
+
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: `${storeName} catalog — ${formatDate(catalog.dateFrom)} to ${formatDate(catalog.dateTo)}`,
+    image: [coverUrl],
+    datePublished: publishedDate,
+    dateModified: publishedDate,
+    publisher: {
+      "@type": "Organization",
+      name: "BestDeal",
+      url: BASE_URL,
+    },
+    mainEntityOfPage: pageUrl,
+    expires: catalog.dateTo,
+  };
+
+  const offerJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Offer",
+    name: `${storeName} weekly leaflet`,
+    url: pageUrl,
+    image: coverUrl,
+    validFrom: catalog.dateFrom,
+    validThrough: catalog.dateTo,
+    availabilityStarts: catalog.dateFrom,
+    availabilityEnds: catalog.dateTo,
+    seller: {
+      "@type": "Organization",
+      name: storeName,
+    },
+    areaServed: {
+      "@type": "Country",
+      name: countryName,
+    },
   };
 
   return (
@@ -93,6 +140,14 @@ export default async function CatalogPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(offerJsonLd) }}
       />
       <Header
         crumbs={[

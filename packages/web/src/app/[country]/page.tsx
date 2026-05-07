@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { storage } from "@/lib/storage";
 import { Header, getCountryName } from "@/components/Header";
-import { CatalogGrid } from "@/components/CatalogGrid";
+import { CatalogStoreRows } from "@/components/CatalogStoreRows";
 import { toDisplayName } from "@/lib/display-name";
 import { STORE_CONFIGS } from "@/lib/store-configs";
 import { isCatalogActive } from "@bestdeal/shared";
@@ -147,14 +147,14 @@ export default async function CountryPage({
           ))}
         </div>
 
-        <CatalogGrid catalogs={activeCatalogs} />
+        <CatalogStoreRows catalogs={activeCatalogs} />
 
         {expiredCatalogs.length > 0 && (
           <details className="expired-section" open>
             <summary className="expired-section-title">
               Recently expired ({expiredCatalogs.length})
             </summary>
-            <CatalogGrid catalogs={expiredCatalogs} />
+            <CatalogStoreRows catalogs={expiredCatalogs} muted />
           </details>
         )}
       </main>

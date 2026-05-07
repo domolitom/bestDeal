@@ -363,6 +363,105 @@ a {
   color: var(--warning);
 }
 
+/* Store rows (grouped by store with overlapping fan layout) */
+.store-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.store-row {
+  /* no extra styles needed — children handle layout */
+}
+
+.store-row-title {
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.store-row-count {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.store-row-cards {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  /* Padding at bottom so the lifted hover card isn't clipped */
+  padding-bottom: 12px;
+  /* Scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.store-row-cards::-webkit-scrollbar {
+  height: 4px;
+}
+
+.store-row-cards::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.store-row-cards::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.store-row-card-wrapper {
+  position: relative;
+  flex-shrink: 0;
+  width: 200px;
+  /* Negative margin creates the fan/overlap effect.
+     First child keeps margin-left: 0, handled by :first-child rule below. */
+  margin-left: -40px;
+  transition: transform var(--transition), z-index 0s;
+}
+
+.store-row-card-wrapper:first-child {
+  margin-left: 0;
+}
+
+.store-row-card-wrapper:hover {
+  transform: translateY(-6px) scale(1.04);
+  z-index: 100 !important;
+}
+
+/* Constrain the card inside the fixed-width wrapper */
+.store-row-card-wrapper .card {
+  width: 100%;
+}
+
+/* Muted variant (used inside the expired section) */
+.store-row-cards--muted {
+  opacity: 0.75;
+  filter: grayscale(30%);
+}
+
+/* Mobile: reduce overlap so cards remain individually tappable */
+@media (max-width: 640px) {
+  .store-row-card-wrapper {
+    width: 160px;
+    margin-left: -25px;
+  }
+
+  .store-row-card-wrapper:first-child {
+    margin-left: 0;
+  }
+}
+
 /* Expired catalogs collapsible section */
 .expired-section {
   margin-top: 40px;

@@ -56,7 +56,6 @@ export default async function CatalogPage({
 
   const countryName = getCountryName(country);
   const storeName = toDisplayName(store);
-  const dateRange = `${formatDate(catalog.dateFrom)} to ${formatDate(catalog.dateTo)}`;
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -83,7 +82,7 @@ export default async function CatalogPage({
       {
         "@type": "ListItem",
         position: 4,
-        name: dateRange,
+        name: `${formatDate(catalog.dateFrom)} – ${formatDate(catalog.dateTo)}`,
         item: `${BASE_URL}/${country}/${store}/${catalogId}`,
       },
     ],
@@ -100,28 +99,36 @@ export default async function CatalogPage({
           { label: countryName, href: `/${country}` },
           { label: storeName, href: `/${country}/${store}` },
           {
-            label: `${formatDate(catalog.dateFrom)} - ${formatDate(catalog.dateTo)}`,
+            label: `${formatDate(catalog.dateFrom)} – ${formatDate(catalog.dateTo)}`,
           },
         ]}
       />
       <main>
-        <div className="container" style={{ paddingTop: 24, paddingBottom: 8 }}>
+        <div
+          className="container"
+          style={{ paddingTop: 28, paddingBottom: 8 }}
+        >
           <div
             style={{
               display: "flex",
-              alignItems: "center",
-              gap: 12,
+              alignItems: "baseline",
+              gap: 14,
               flexWrap: "wrap",
+              marginBottom: 8,
             }}
           >
-            <h1
-              className="page-title"
-              style={{ margin: 0 }}
-            >
+            <h1 className="page-title" style={{ margin: 0 }}>
               {storeName}
             </h1>
             {catalog.catalogType && (
-              <span style={{ fontSize: 14, color: "var(--text-secondary)" }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-display, serif)",
+                  fontStyle: "italic",
+                  fontSize: "var(--text-lg)",
+                  color: "var(--ink-soft)",
+                }}
+              >
                 {catalog.catalogType}
               </span>
             )}
@@ -132,15 +139,30 @@ export default async function CatalogPage({
               display: "flex",
               alignItems: "center",
               gap: 12,
-              marginTop: 8,
-              marginBottom: 24,
+              marginBottom: 28,
+              flexWrap: "wrap",
             }}
           >
-            <span style={{ fontSize: 14, color: "var(--text-secondary)" }}>
-              {formatDate(catalog.dateFrom)} - {formatDate(catalog.dateTo)}
+            <span
+              style={{
+                fontFamily: "var(--font-mono, monospace)",
+                fontSize: "var(--text-sm)",
+                color: "var(--ink-faded)",
+                letterSpacing: "0.04em",
+              }}
+            >
+              {formatDate(catalog.dateFrom)} &ndash; {formatDate(catalog.dateTo)}
             </span>
             <FreshnessIndicator dateTo={catalog.dateTo} />
-            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+            <span
+              style={{
+                fontFamily: "var(--font-mono, monospace)",
+                fontSize: "var(--text-xs)",
+                color: "var(--ink-faded)",
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+              }}
+            >
               {catalog.pages.length} pages
             </span>
           </div>

@@ -13,6 +13,15 @@ export const revalidate = 300;
 
 const BASE_URL = "https://best-deal-shops.com";
 
+/** ISO week number (Monday-based), computed from a Date */
+function isoWeek(d: Date): number {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  // Thursday of the current week → determines the year
+  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -34,7 +43,6 @@ export async function generateMetadata({
   };
 }
 
-// Keep catalogs that expired within the last 2 days (grace period), hide older ones.
 function isRecentEnough(dateTo: string): boolean {
   const end = new Date(dateTo);
   if (isNaN(end.getTime())) return false;
@@ -44,14 +52,12 @@ function isRecentEnough(dateTo: string): boolean {
   return end >= cutoff;
 }
 
-function buildIntroText(
-  countryName: string,
-  catalogCount: number,
-  storesWithCatalogs: string[]
+function buildMastheadSubtitle(
+  storesWithCatalogs: string[],
+  activeCatalogCount: number,
 ): string {
-  const catalogWord = `${catalogCount} weekly catalog${catalogCount !== 1 ? "s" : ""}`;
   if (storesWithCatalogs.length === 0) {
-    return `No catalogs available for ${countryName} right now. Check back soon!`;
+    return "fresh editions arriving soon.";
   }
   const storeNames = storesWithCatalogs.map(toDisplayName);
   let storeList: string;
@@ -62,7 +68,8 @@ function buildIntroText(
   } else {
     storeList = `${storeNames.slice(0, -1).join(", ")}, and ${storeNames[storeNames.length - 1]}`;
   }
-  return `Browse ${catalogWord} from stores in ${countryName} including ${storeList}.`;
+  const count = activeCatalogCount;
+  return `${count} fresh ${count === 1 ? "edition" : "editions"} from ${storeList} — curated each Monday and Thursday.`;
 }
 
 export default async function CountryPage({
@@ -73,14 +80,10 @@ export default async function CountryPage({
   const { country } = await params;
   const manifestStores = await storage.listStores(country);
 
-  // Build the full store list from the static config (all configured stores for
-  // this country) merged with any manifest stores. Mirrors the same approach
-  // used by the store page so both pages stay consistent.
   const configStores: string[] = [...(STORE_CONFIGS[country] ?? [])];
   const allStoresSet = new Set([...configStores, ...manifestStores]);
   const allStores = [...allStoresSet].sort();
 
-  // 404 only when neither the config nor the manifest knows about this country.
   if (allStores.length === 0) {
     notFound();
   }
@@ -95,6 +98,18 @@ export default async function CountryPage({
 
   const countryName = getCountryName(country);
   const storesWithCatalogs = [...new Set(activeCatalogs.map((c) => c.store))];
+
+  // Magazine issue metadata
+  const now = new Date();
+  const week = isoWeek(now);
+  const year = now.getFullYear();
+  const issueNum = String(week).padStart(3, "0");
+  const mastheadSubtitle = buildMastheadSubtitle(
+    storesWithCatalogs,
+    activeCatalogs.length,
+  );
+
+  const byline = `${allStores.length} store${allStores.length !== 1 ? "s" : ""} · ${activeCatalogs.length} catalog${activeCatalogs.length !== 1 ? "s" : ""} · updated weekly`;
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -121,21 +136,21 @@ export default async function CountryPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <Header
-        crumbs={[{ label: countryName }]}
-      />
+      <Header crumbs={[{ label: countryName }]} />
       <main className="container">
-        <h1 className="page-title">{countryName}</h1>
-        <p className="page-subtitle">
-          {allStores.length} store{allStores.length !== 1 ? "s" : ""} &middot;{" "}
-          {activeCatalogs.length} catalog{activeCatalogs.length !== 1 ? "s" : ""}
-        </p>
+        {/* Magazine masthead */}
+        <div className="masthead">
+          <p className="masthead-kicker">
+            Issue &nbsp;&#x2116;{issueNum}&nbsp;&middot;&nbsp;Week {week}&nbsp;&middot;&nbsp;{year}
+          </p>
+          <hr className="masthead-rule" />
+          <h1 className="masthead-title">{countryName}</h1>
+          <p className="masthead-subtitle">{mastheadSubtitle}</p>
+          <hr className="masthead-rule" />
+          <p className="masthead-byline">{byline}</p>
+        </div>
 
-        <p className="page-intro">
-          {buildIntroText(countryName, activeCatalogs.length, storesWithCatalogs)}
-        </p>
-
-        {/* Store pills — all configured stores, not just those with live catalogs */}
+        {/* Store filter pills */}
         <div className="store-list">
           <Link href={`/${country}`}>
             <span className="store-pill store-pill-active">All</span>

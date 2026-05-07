@@ -5,8 +5,11 @@ export function CountrySelector({ countries }: { countries: Country[] }) {
   if (countries.length === 0) {
     return (
       <div className="empty-state">
-        <h3>No countries available</h3>
-        <p>No countries available right now. Check back soon!</p>
+        <span className="empty-state-ornament">&#10022;</span>
+        <span className="empty-state-kicker">On Press</span>
+        <p className="empty-state-message">
+          This issue is at the printers &mdash; fresh leaflets arrive Monday morning.
+        </p>
       </div>
     );
   }
@@ -17,7 +20,7 @@ export function CountrySelector({ countries }: { countries: Country[] }) {
     <div className="grid-countries">
       {activeCountries.map((country) => (
         <Link key={country.code} href={`/${country.code}`}>
-          <div className="card country-card">
+          <div className="country-card">
             <div className="country-flag">{country.flag}</div>
             <div className="country-info">
               <h3>{country.name}</h3>

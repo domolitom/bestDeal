@@ -35,7 +35,6 @@ export async function generateMetadata({
   };
 }
 
-// Keep catalogs that expired within the last 2 days (grace period), hide older ones.
 function isRecentEnough(dateTo: string): boolean {
   const end = new Date(dateTo);
   if (isNaN(end.getTime())) return false;
@@ -52,10 +51,6 @@ export default async function StorePage({
 }) {
   const { country, store } = await params;
 
-  // Guard: if no store config exists for this country+store slug, hard 404.
-  // We check the static config lookup first (edge-compatible, no network call)
-  // so pages for configured-but-not-yet-scraped stores render an empty state
-  // instead of returning 404.
   if (!storeConfigExists(country, store)) {
     notFound();
   }
@@ -71,9 +66,6 @@ export default async function StorePage({
   const countryName = getCountryName(country);
   const storeName = toDisplayName(store);
 
-  // Build the store pill list from the static config (all configured stores for this
-  // country), merged with any stores that exist in the live manifest but aren't in
-  // the config yet. Sorted alphabetically.
   const configStores: string[] = [...(STORE_CONFIGS[country] ?? [])];
   const manifestStores = await storage.listStores(country);
   const allStoresSet = new Set([...configStores, ...manifestStores]);
@@ -117,12 +109,10 @@ export default async function StorePage({
         ]}
       />
       <main className="container">
-        <h1 className="page-title">
-          {storeName}
-        </h1>
+        <h1 className="page-title">{storeName}</h1>
         <p className="page-subtitle">
           {activeCatalogs.length > 0
-            ? `${activeCatalogs.length} catalog${activeCatalogs.length !== 1 ? "s" : ""} in ${countryName}`
+            ? `${activeCatalogs.length} catalog${activeCatalogs.length !== 1 ? "s" : ""} · ${countryName}`
             : countryName}
         </p>
 
@@ -144,10 +134,10 @@ export default async function StorePage({
 
         {catalogs.length === 0 ? (
           <div className="empty-state">
-            <h3>No catalogs yet</h3>
-            <p>
-              We&apos;re working on bringing you the latest deals from{" "}
-              {storeName} in {countryName}. Check back soon!
+            <span className="empty-state-ornament">&#10022;</span>
+            <span className="empty-state-kicker">On Press</span>
+            <p className="empty-state-message">
+              This issue is at the printers &mdash; fresh leaflets arrive Monday morning.
             </p>
           </div>
         ) : (

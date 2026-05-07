@@ -998,6 +998,63 @@ a {
 }
 
 /* ============================================================
+   Colophon footer
+   ============================================================ */
+.colophon {
+  border-top: 1px solid var(--border);
+  padding-top: 96px;
+  padding-bottom: 64px;
+  margin-top: clamp(48px, 8vw, 96px);
+  text-align: center;
+}
+
+.colophon-inner {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.colophon-asterism {
+  font-family: var(--font-display, serif);
+  font-size: 1.5rem;
+  color: var(--ink-faded);
+  letter-spacing: 0.4em;
+  margin-bottom: 8px;
+}
+
+.colophon-title {
+  font-family: var(--font-display, serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-lg);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.colophon-body {
+  font-family: var(--font-body, sans-serif);
+  font-style: italic;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  line-height: 1.8;
+}
+
+.colophon-legal {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--text-xs);
+  color: var(--ink-faded);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-variant: small-caps;
+  margin-top: 8px;
+}
+
+/* ============================================================
    Keyframe animations
    ============================================================ */
 @keyframes masthead-in {

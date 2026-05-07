@@ -25,9 +25,10 @@ export async function generateMetadata({
   }
   const countryName = getCountryName(country);
   const storeName = toDisplayName(store);
-  const dateRange = `${formatDate(catalog.dateFrom)} to ${formatDate(catalog.dateTo)}`;
-  const title = `${storeName} ${countryName} — ${dateRange} — BestDeal`;
-  const description = `View the ${storeName} catalog in ${countryName} valid from ${dateRange}.`;
+  const dateRange = `${formatDate(catalog.dateFrom)} – ${formatDate(catalog.dateTo)}`;
+  const pageInfo = catalog.pageCount ? ` (${catalog.pageCount} pages)` : "";
+  const title = `${storeName} ${countryName} Catalog ${dateRange}${pageInfo} · BestDeal`;
+  const description = `View the ${storeName} ${countryName} weekly leaflet for ${dateRange}. ${catalog.pageCount ?? "Multiple"} pages of deals and special offers.`;
   const coverUrl = getCoverUrl(catalog);
   return {
     title,

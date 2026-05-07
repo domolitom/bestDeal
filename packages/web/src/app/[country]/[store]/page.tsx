@@ -21,17 +21,18 @@ export async function generateMetadata({
   const { country, store } = await params;
   const countryName = getCountryName(country);
   const storeName = toDisplayName(store);
-  const title = `${storeName} ${countryName} Catalogs — BestDeal`;
-  const description = `Browse ${storeName} catalogs in ${countryName}.`;
+  const now = new Date();
+  const monthYear = now.toLocaleDateString("en-GB", {
+    month: "long",
+    year: "numeric",
+  });
+  const title = `${storeName} ${countryName} Weekly Catalog — ${monthYear} · BestDeal`;
+  const description = `Browse current ${storeName} weekly leaflets and special offers in ${countryName}. Updated each Monday and Thursday.`;
   return {
     title,
     description,
     alternates: { canonical: `${BASE_URL}/${country}/${store}` },
-    openGraph: {
-      title,
-      description,
-      type: "website",
-    },
+    openGraph: { title, description, type: "website" },
   };
 }
 

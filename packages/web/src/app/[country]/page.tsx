@@ -57,7 +57,7 @@ function buildMastheadSubtitle(
   activeCatalogCount: number,
 ): string {
   if (storesWithCatalogs.length === 0) {
-    return "fresh editions arriving soon.";
+    return "Quiet on the floor — fresh leaflets are due Monday morning.";
   }
   const storeNames = storesWithCatalogs.map(toDisplayName);
   let storeList: string;
@@ -69,7 +69,7 @@ function buildMastheadSubtitle(
     storeList = `${storeNames.slice(0, -1).join(", ")}, and ${storeNames[storeNames.length - 1]}`;
   }
   const count = activeCatalogCount;
-  return `${count} fresh ${count === 1 ? "edition" : "editions"} from ${storeList} — curated each Monday and Thursday.`;
+  return `This week — ${count} fresh ${count === 1 ? "edition" : "editions"} from ${storeList} — curated each Monday and Thursday.`;
 }
 
 export default async function CountryPage({
@@ -146,10 +146,14 @@ export default async function CountryPage({
           <hr className="masthead-rule" />
           <h1 className="masthead-title">{countryName}</h1>
           <p className="page-intro">
-            <span className="drop-cap" aria-hidden="true">
-              {mastheadSubtitle.charAt(0)}
-            </span>
-            {mastheadSubtitle.slice(1)}
+            {/^\p{L}/u.test(mastheadSubtitle.charAt(0)) && (
+              <span className="drop-cap" aria-hidden="true">
+                {mastheadSubtitle.charAt(0)}
+              </span>
+            )}
+            {/^\p{L}/u.test(mastheadSubtitle.charAt(0))
+              ? mastheadSubtitle.slice(1)
+              : mastheadSubtitle}
           </p>
           <hr className="masthead-rule" />
           <p className="masthead-byline">{byline}</p>

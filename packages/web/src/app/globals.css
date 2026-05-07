@@ -1107,7 +1107,7 @@ a {
 }
 
 /* ============================================================
-   Reduced motion
+   Reduced motion — disable entrance animations and rotation
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
   .masthead,
@@ -1127,12 +1127,37 @@ a {
   }
 
   .store-row-card-wrapper:hover {
-    transform: none !important;
+    transform: translateY(-10px) scale(1.04) !important;
   }
 
   .freshness-active,
   .freshness-soon {
     transform: none;
+  }
+
+  .store-pill::after {
+    transition: none;
+  }
+}
+
+/* ============================================================
+   Dark mode — minimal flip so the site doesn't blast eyes
+   ============================================================ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:           #1A1714;
+    --bg-card:      #221F1B;
+    --bg-elevated:  #2A2622;
+    --ink:          #F0E8D6;
+    --ink-soft:     #C4B89A;
+    --ink-faded:    #7A7164;
+    --rule:         #E0D4BA;
+    --border:       #3A352E;
+    --border-hover: #4A4540;
+    --paper-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.4);
+    --shadow:       0 1px 2px rgba(0,0,0,0.2);
+    --shadow-md:    0 4px 12px rgba(0,0,0,0.3);
+    /* Cinnabar accent stays — it reads well on both backgrounds */
   }
 }
 

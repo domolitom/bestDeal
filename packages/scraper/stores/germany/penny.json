@@ -1,0 +1,10 @@
+{
+    "name": "penny",
+    "landingUrl": "https://www.penny.de/angebote",
+    "waitAfterLoad": 0,
+    "resolver": "blaetterkatalog",
+    "restApiDiscovery": {
+        "endpoint": "https://www.penny.de/.rest/market",
+        "urlField": "flippingBookURL"
+    }
+}

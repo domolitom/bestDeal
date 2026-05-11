@@ -1,6 +1,6 @@
 import type { Page } from "playwright";
 import type { StoreDefinition } from "@bestdeal/shared";
-import { applyUrlTransforms, parseDates, extractCatalogType } from "@bestdeal/shared";
+import { applyUrlTransforms, parseDates, extractCatalogType, toISODate } from "@bestdeal/shared";
 import { createLogger } from "../logger.ts";
 import { extractFlyerSlug, deriveLeafletsApiHost } from "../scraping/leaflets-api-resolver.ts";
 
@@ -391,5 +391,132 @@ export async function discoverStoreViaApi(
   }
 
   log.info(`found ${discovered.length} ${storeDef.name} catalog(s) via API`);
+  return discovered;
+}
+
+/**
+ * Discover catalogs via a plain JSON REST endpoint (no Playwright required).
+ *
+ * The endpoint must return a JSON array (or an object with an `arrayField`).
+ * Each element is scanned for `urlField`.  Duplicate URLs are removed.
+ *
+ * Dates are fetched from the blaetterkatalog catalog viewer page:
+ *   - catalogName contains "KW{n}-{yy}" which is parsed via toISODate()
+ *   - The same KW value maps to the same date range, so duplicates are dropped
+ *
+ * This is used by Penny DE which exposes catalog viewer URLs via
+ *   https://www.penny.de/.rest/market → [{flippingBookURL: "...catalogId=N"}, ...]
+ */
+export async function discoverStoreViaRestApi(
+  storeDef: StoreDefinition
+): Promise<DiscoveredCatalog[]> {
+  const cfg = storeDef.restApiDiscovery!;
+  log.info(`discovering ${storeDef.name} catalogs via REST API: ${cfg.endpoint}`);
+
+  // 1. Fetch the JSON endpoint
+  let items: unknown[];
+  try {
+    const resp = await fetch(cfg.endpoint, {
+      signal: AbortSignal.timeout(30000),
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        Accept: "application/json",
+      },
+    });
+    if (!resp.ok) {
+      log.warn(`REST API ${resp.status} for ${storeDef.name}`);
+      return [];
+    }
+    const json = await resp.json();
+    if (cfg.arrayField) {
+      items = (json as Record<string, unknown>)[cfg.arrayField] as unknown[] ?? [];
+    } else {
+      items = Array.isArray(json) ? json : [];
+    }
+  } catch (err) {
+    log.warn(`REST API fetch error for ${storeDef.name}`, { err: String(err) });
+    return [];
+  }
+
+  // 2. Extract unique non-null viewer URLs
+  const uniqueUrls = new Set<string>();
+  for (const item of items) {
+    if (typeof item !== "object" || item === null) continue;
+    const val = (item as Record<string, unknown>)[cfg.urlField];
+    if (typeof val === "string" && val.trim()) {
+      uniqueUrls.add(val.trim());
+    }
+  }
+
+  if (uniqueUrls.size === 0) {
+    log.info(`no catalog URLs found for ${storeDef.name}`);
+    return [];
+  }
+
+  log.info(`found ${uniqueUrls.size} unique catalog URL(s) for ${storeDef.name}`);
+
+  // 3. For each unique URL, fetch the viewer page to get catalog dates
+  //    Deduplicate by date range (same KW week → same date range).
+  const seenDateRanges = new Set<string>();
+  const discovered: DiscoveredCatalog[] = [];
+
+  for (const viewerUrl of uniqueUrls) {
+    try {
+      const resp = await fetch(viewerUrl, {
+        signal: AbortSignal.timeout(15000),
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        },
+      });
+      if (!resp.ok) {
+        log.info(`catalog page ${resp.status}: ${viewerUrl}`);
+        continue;
+      }
+
+      const html = await resp.text();
+
+      // Extract catalogName from: var catalogName = 'PENNY-HZ-KW20-15A-08-26';
+      const nameMatch = html.match(/var\s+catalogName\s*=\s*['"]([^'"]+)['"]/);
+      if (!nameMatch) {
+        log.info(`no catalogName found in: ${viewerUrl}`);
+        continue;
+      }
+      const catalogName = nameMatch[1]!;
+
+      // Extract KW from catalog name, e.g. "PENNY-HZ-KW20-15A-08-26" → "KW20-26"
+      const kwMatch = catalogName.match(/KW(\d+)-(?:[\w]+-)*(\d{2})(?:$|-)/);
+      if (!kwMatch) {
+        log.info(`no KW date found in catalogName "${catalogName}": ${viewerUrl}`);
+        continue;
+      }
+
+      const kwCode = `KW${kwMatch[1]}-${kwMatch[2]}`;
+      const dateFrom = toISODate(kwCode);
+      const dateTo = toISODate(kwCode, undefined, true);
+      const dateKey = `${dateFrom}|${dateTo}`;
+
+      if (seenDateRanges.has(dateKey)) {
+        // Same week, different regional edition — skip duplicate
+        continue;
+      }
+      seenDateRanges.add(dateKey);
+
+      discovered.push({
+        store: storeDef.name,
+        country: storeDef.country,
+        slug: catalogName,
+        dateFrom,
+        dateTo,
+        firstPageUrl: viewerUrl,
+        coverImageUrl: viewerUrl,
+      });
+    } catch (err) {
+      log.warn(`failed to fetch catalog page ${viewerUrl}`, { err: String(err) });
+    }
+  }
+
+  log.info(`found ${discovered.length} unique ${storeDef.name} catalog(s) via REST API`);
   return discovered;
 }

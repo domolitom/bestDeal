@@ -12,6 +12,7 @@ import { digitalCatalogueResolver } from "./digital-catalogue-resolver.ts";
 import { tjekResolver } from "./tjek-resolver.ts";
 import { issuuResolver } from "./issuu-resolver.ts";
 import { rossmannResolver } from "./rossmann-resolver.ts";
+import { blaetterkatalogResolver } from "./blaetterkatalog-resolver.ts";
 import { browserResolver } from "./resolver.ts";
 
 export interface ResolveInput {
@@ -84,6 +85,10 @@ const detectionRules: DetectionRule[] = [
     test: (url) => url.includes("pro-fra-s3-magazine.rossmann.pl"),
     resolverName: "rossmann",
   },
+  {
+    test: (url) => url.includes("blaetterkatalog.de"),
+    resolverName: "blaetterkatalog",
+  },
 ];
 
 // --- Explicit resolver registry ---
@@ -100,6 +105,7 @@ const resolvers: Record<string, CatalogResolver> = {
   tjek: tjekResolver,
   issuu: issuuResolver,
   rossmann: rossmannResolver,
+  blaetterkatalog: blaetterkatalogResolver,
   browser: browserResolver,
 };
 

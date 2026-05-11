@@ -24,6 +24,9 @@ describe("loadStoreDefinitions", () => {
         expect(def.apiDiscovery.idAttribute).toBeString();
         expect(def.apiDiscovery.apiUrl).toBeString();
         expect(def.apiDiscovery.fieldMap).toBeDefined();
+      } else if (def.restApiDiscovery) {
+        expect(def.restApiDiscovery.endpoint).toBeString();
+        expect(def.restApiDiscovery.urlField).toBeString();
       } else {
         expect(def.linkPatterns.length).toBeGreaterThan(0);
         expect(["slug", "text", "slug_then_text", "leaflets_api"]).toContain(def.dateSource);

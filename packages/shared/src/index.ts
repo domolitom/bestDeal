@@ -19,6 +19,7 @@ export type {
   ImageExtraction,
   ApiDiscoveryFieldMap,
   ApiDiscoveryConfig,
+  RestApiDiscoveryConfig,
   StoreDefinition,
 } from "./types/store";
 

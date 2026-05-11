@@ -78,6 +78,35 @@ export interface ApiDiscoveryConfig {
   fieldMap: ApiDiscoveryFieldMap;
 }
 
+// --- REST API discovery config (no DOM / no Playwright needed) ---
+
+/**
+ * Configures discovery via a plain JSON REST endpoint.
+ *
+ * The endpoint must return a JSON array (or an object wrapping an array under
+ * `arrayField`). Each element is scanned for `urlField`.  Duplicate URLs are
+ * removed.  Dates are extracted from the catalog viewer page itself (via the
+ * `blaetterkatalog` resolver) rather than from the REST response.
+ *
+ * Example (Penny DE):
+ *   endpoint: "https://www.penny.de/.rest/market"
+ *   urlField:  "flippingBookURL"
+ */
+export interface RestApiDiscoveryConfig {
+  /** URL of the JSON REST endpoint */
+  endpoint: string;
+  /**
+   * Key in each array element that contains the catalog viewer URL.
+   * Null/empty values are skipped automatically.
+   */
+  urlField: string;
+  /**
+   * Optional: if the JSON root is an object, name of the key whose value is
+   * the array to iterate.  Omit when the root is already an array.
+   */
+  arrayField?: string;
+}
+
 // --- Store definition ---
 
 export interface StoreDefinition {
@@ -107,4 +136,6 @@ export interface StoreDefinition {
   /** When visiting linked pages, extract an iframe URL matching this pattern to use as firstPageUrl */
   iframeExtract?: string;
   apiDiscovery?: ApiDiscoveryConfig;
+  /** Discovery via a plain JSON REST endpoint (no Playwright required) */
+  restApiDiscovery?: RestApiDiscoveryConfig;
 }

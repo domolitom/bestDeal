@@ -43,6 +43,17 @@ function validateStoreDefinition(def: StoreDefinition, file: string): void {
     }
   }
 
+  if (def.restApiDiscovery) {
+    const { endpoint, urlField } = def.restApiDiscovery;
+    if (!endpoint || !urlField) {
+      throw new Error(
+        `Store definition ${file} has incomplete restApiDiscovery config`
+      );
+    }
+    // restApiDiscovery stores don't need linkPatterns / dateSource / datePatterns
+    return;
+  }
+
   if (def.apiDiscovery) {
     const { selector, idAttribute, apiUrl, fieldMap } = def.apiDiscovery;
     if (!selector || !idAttribute || !apiUrl || !fieldMap) {

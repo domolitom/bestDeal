@@ -54,7 +54,14 @@ function validateStoreDefinition(def: StoreDefinition, file: string): void {
     return;
   }
 
-  if (def.apiDiscovery) {
+  if (def.shopfullyConfig) {
+    const { propertyId, language, lat, lng } = def.shopfullyConfig;
+    if (!propertyId || !language || lat == null || lng == null) {
+      throw new Error(
+        `Store definition ${file} has incomplete shopfullyConfig (requires propertyId, language, lat, lng)`
+      );
+    }
+  } else if (def.apiDiscovery) {
     const { selector, idAttribute, apiUrl, fieldMap } = def.apiDiscovery;
     if (!selector || !idAttribute || !apiUrl || !fieldMap) {
       throw new Error(

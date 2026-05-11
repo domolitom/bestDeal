@@ -13,6 +13,7 @@ import { tjekResolver } from "./tjek-resolver.ts";
 import { issuuResolver } from "./issuu-resolver.ts";
 import { rossmannResolver } from "./rossmann-resolver.ts";
 import { blaetterkatalogResolver } from "./blaetterkatalog-resolver.ts";
+import { shopfullyResolver } from "./shopfully-resolver.ts";
 import { browserResolver } from "./resolver.ts";
 
 export interface ResolveInput {
@@ -66,6 +67,14 @@ const detectionRules: DetectionRule[] = [
     resolverName: "fliphtml5",
   },
   {
+    // Must appear before the generic PDF rule so that Shopfully CDN URLs
+    // are routed to the shopfully resolver rather than the generic pdf resolver.
+    test: (url) =>
+      url.includes("media-publications.shopfully.cloud") ||
+      url.includes("shopfully.cloud/publications"),
+    resolverName: "shopfully",
+  },
+  {
     test: (url) => /\.pdf(\?|$)/i.test(url),
     resolverName: "pdf",
   },
@@ -106,6 +115,7 @@ const resolvers: Record<string, CatalogResolver> = {
   issuu: issuuResolver,
   rossmann: rossmannResolver,
   blaetterkatalog: blaetterkatalogResolver,
+  shopfully: shopfullyResolver,
   browser: browserResolver,
 };
 

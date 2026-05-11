@@ -520,3 +520,114 @@ export async function discoverStoreViaRestApi(
   log.info(`found ${discovered.length} unique ${storeDef.name} catalog(s) via REST API`);
   return discovered;
 }
+
+// --- Shopfully Cloud types ---
+
+interface ShopfullyFlyer {
+  id: string;
+  start_date: string;
+  end_date: string;
+  publication_url: string;
+  lastPubblication?: {
+    pdf_url?: string;
+    settings?: {
+      number_of_pages?: number;
+    };
+  };
+}
+
+interface ShopfullyFlyersResponse {
+  status: string;
+  data?: {
+    list?: Record<string, ShopfullyFlyer>;
+  };
+}
+
+/**
+ * Discover catalogs via the Shopfully Cloud properties API.
+ *
+ * Calls the CloudFront-backed properties endpoint:
+ *   GET /v1/{language}/{propertyId}/flyers?lat={lat}&lng={lng}
+ *
+ * Returns one DiscoveredCatalog per unique publication (deduplicated by
+ * publication_url). The firstPageUrl is the PDF URL from lastPubblication.
+ */
+export async function discoverStoreViaShopfully(
+  storeDef: StoreDefinition
+): Promise<DiscoveredCatalog[]> {
+  const cfg = storeDef.shopfullyConfig!;
+  log.info(`discovering ${storeDef.name} catalogs via Shopfully Cloud...`);
+
+  const apiBase = "https://d3k4i39zecu9l5.cloudfront.net";
+  const apiKey = "eeb8526b-4f6e-48f3-8c86-d60e8c9a6d88";
+
+  const url =
+    `${apiBase}/v1/${cfg.language}/${cfg.propertyId}/flyers` +
+    `?lat=${cfg.lat}&lng=${cfg.lng}`;
+
+  let data: ShopfullyFlyersResponse;
+  try {
+    const resp = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "x-api-key": apiKey,
+        "Origin": "https://viewer-whitelabel.shopfully.cloud",
+        "Referer": "https://viewer-whitelabel.shopfully.cloud/",
+      },
+    });
+    if (!resp.ok) {
+      log.warn(`Shopfully API ${resp.status} for ${storeDef.name}`);
+      return [];
+    }
+    data = await resp.json();
+  } catch (err) {
+    log.warn(`Shopfully API error for ${storeDef.name}`, { err: String(err) });
+    return [];
+  }
+
+  if (data.status !== "SUCCESS" || !data.data?.list) {
+    log.warn(`Shopfully API bad response for ${storeDef.name}: ${data.status}`);
+    return [];
+  }
+
+  const flyerList = data.data.list;
+  const discovered: DiscoveredCatalog[] = [];
+  // Deduplicate by publication_url so the same catalog across multiple stores appears once
+  const seenPublicationUrls = new Set<string>();
+
+  for (const flyer of Object.values(flyerList)) {
+    const pdfUrl = flyer.lastPubblication?.pdf_url;
+    if (!pdfUrl) {
+      log.info(`skipping Shopfully flyer ${flyer.id} (no pdf_url)`);
+      continue;
+    }
+
+    // Deduplicate by publication_url
+    if (seenPublicationUrls.has(flyer.publication_url)) {
+      continue;
+    }
+    seenPublicationUrls.add(flyer.publication_url);
+
+    const dateFrom = flyer.start_date;
+    const dateTo = flyer.end_date;
+
+    if (!dateFrom || !dateTo) {
+      log.info(`skipping Shopfully flyer ${flyer.id} (missing dates)`);
+      continue;
+    }
+
+    discovered.push({
+      store: storeDef.name,
+      country: storeDef.country,
+      slug: flyer.id,
+      dateFrom,
+      dateTo,
+      firstPageUrl: pdfUrl,
+      coverImageUrl: pdfUrl,
+    });
+  }
+
+  log.info(`found ${discovered.length} ${storeDef.name} catalog(s) via Shopfully`);
+  return discovered;
+}

@@ -1,0 +1,15 @@
+{
+    "name": "penny",
+    "landingUrl": "https://www.penny.it/sfoglia-il-volantino-mobile",
+    "waitAfterLoad": 0,
+    "linkPatterns": [],
+    "dateSource": "slug",
+    "datePatterns": [],
+    "resolver": "shopfully",
+    "shopfullyConfig": {
+        "propertyId": "5b50951b-b644-4f17-9904-335fac1f50fd",
+        "language": "it_it",
+        "lat": 45.468009637255086,
+        "lng": 9.191463304656601
+    }
+}

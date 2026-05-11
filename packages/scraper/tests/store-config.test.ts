@@ -19,7 +19,12 @@ describe("loadStoreDefinitions", () => {
       expect(def.landingUrl).toBeString();
       expect(def.waitAfterLoad).toBeNumber();
 
-      if (def.apiDiscovery) {
+      if (def.shopfullyConfig) {
+        expect(def.shopfullyConfig.propertyId).toBeString();
+        expect(def.shopfullyConfig.language).toBeString();
+        expect(def.shopfullyConfig.lat).toBeNumber();
+        expect(def.shopfullyConfig.lng).toBeNumber();
+      } else if (def.apiDiscovery) {
         expect(def.apiDiscovery.selector).toBeString();
         expect(def.apiDiscovery.idAttribute).toBeString();
         expect(def.apiDiscovery.apiUrl).toBeString();

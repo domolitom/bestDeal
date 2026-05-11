@@ -20,6 +20,7 @@ export type {
   ApiDiscoveryFieldMap,
   ApiDiscoveryConfig,
   RestApiDiscoveryConfig,
+  ShopfullyConfig,
   StoreDefinition,
 } from "./types/store";
 

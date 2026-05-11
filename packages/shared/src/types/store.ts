@@ -107,6 +107,33 @@ export interface RestApiDiscoveryConfig {
   arrayField?: string;
 }
 
+// --- Shopfully Cloud discovery config ---
+
+/**
+ * Configuration for Shopfully Cloud catalog discovery.
+ *
+ * Shopfully hosts catalogs at viewer-whitelabel.shopfully.cloud.
+ * Discovery calls the CloudFront properties API with a property ID to list
+ * active flyers. Each flyer includes a pdf_url in lastPubblication.pdf_url
+ * which the shopfully resolver renders via PDF rendering.
+ */
+export interface ShopfullyConfig {
+  /** Shopfully property (retailer) UUID, e.g. "5b50951b-b644-4f17-9904-335fac1f50fd" */
+  propertyId: string;
+  /**
+   * BCP 47 language/locale, underscore-separated, e.g. "it_it".
+   * Used in API path: /v1/{language}/{propertyId}/flyers
+   */
+  language: string;
+  /**
+   * Default latitude for the flyers geo-query.
+   * Use a central city coordinate for the country.
+   */
+  lat: number;
+  /** Default longitude for the flyers geo-query. */
+  lng: number;
+}
+
 // --- Store definition ---
 
 export interface StoreDefinition {
@@ -138,4 +165,6 @@ export interface StoreDefinition {
   apiDiscovery?: ApiDiscoveryConfig;
   /** Discovery via a plain JSON REST endpoint (no Playwright required) */
   restApiDiscovery?: RestApiDiscoveryConfig;
+  /** Shopfully Cloud API discovery — when present, skips DOM-based discovery */
+  shopfullyConfig?: ShopfullyConfig;
 }

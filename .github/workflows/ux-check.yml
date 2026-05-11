@@ -31,461 +31,9 @@ jobs:
         if: github.event_name == 'push'
         run: sleep 300
 
-      # ----------------------------------------------------------------
-      # 1. Key URLs return expected HTTP status
-      # ----------------------------------------------------------------
-      - name: "Check 1: Key URLs return expected HTTP status"
-        id: check-status
-        run: |
-          set -euo pipefail
-          FAILED=""
-
-          check_status() {
-            local path="$1"
-            local expected="$2"
-            local actual
-            actual=$(curl -s -o /dev/null -L --max-time 20 -w "%{http_code}" "${BASE_URL}${path}")
-            if [ "$actual" != "$expected" ]; then
-              echo "FAIL: ${path} → expected ${expected}, got ${actual}"
-              FAILED="${FAILED}\n  - ${path}: expected HTTP ${expected}, got ${actual}"
-            else
-              echo "PASS: ${path} → ${actual}"
-            fi
-          }
-
-          check_status "/"                          "200"
-          check_status "/romania"                   "200"
-          check_status "/germany"                   "200"
-          check_status "/austria"                   "200"
-          check_status "/finland"                   "200"
-          check_status "/germany/lidl"              "200"
-          check_status "/austria/penny"             "200"
-          check_status "/germany/totally-fake-store" "404"
-          check_status "/feed.xml"                  "200"
-          check_status "/sitemap.xml"               "200"
-          check_status "/robots.txt"                "200"
-          check_status "/manifest.webmanifest"      "200"
-
-          if [ -n "$FAILED" ]; then
-            echo "check_detail<<EOF" >> "$GITHUB_OUTPUT"
-            printf "HTTP status failures:%b" "$FAILED" >> "$GITHUB_OUTPUT"
-            echo "" >> "$GITHUB_OUTPUT"
-            echo "EOF" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
-
-      # ----------------------------------------------------------------
-      # 2. JSON-LD schema types present per page type
-      # ----------------------------------------------------------------
-      - name: "Check 2: JSON-LD schema types"
-        id: check-jsonld
-        run: |
-          set -euo pipefail
-          FAILED=""
-
-          # Fetch pages once, reuse below
-          HOME_HTML=$(curl -s -L --max-time 20 "${BASE_URL}/")
-          ROMANIA_HTML=$(curl -s -L --max-time 20 "${BASE_URL}/romania")
-          LIDL_HTML=$(curl -s -L --max-time 20 "${BASE_URL}/romania/lidl")
-
-          check_contains() {
-            local label="$1"
-            local html="$2"
-            local pattern="$3"
-            if echo "$html" | grep -qE "$pattern"; then
-              echo "PASS: $label"
-            else
-              echo "FAIL: $label"
-              FAILED="${FAILED}\n  - ${label}"
-            fi
-          }
-
-          check_contains "/ @type:WebSite"          "$HOME_HTML"   '"@type"\s*:\s*"WebSite"'
-          check_contains "/ @type:ItemList"         "$HOME_HTML"   '"@type"\s*:\s*"ItemList"'
-          check_contains "/romania @type:BreadcrumbList" "$ROMANIA_HTML" '"@type"\s*:\s*"BreadcrumbList"'
-          check_contains "/romania/lidl @type:BreadcrumbList" "$LIDL_HTML" '"@type"\s*:\s*"BreadcrumbList"'
-
-          # Find a real current catalog from the manifest
-          TODAY=$(date -u +%Y-%m-%d)
-          CATALOG_PATH=$(curl -s --max-time 20 "${CDN_URL}/manifest.json" | python3 -c "
-          import json, sys, os
-          data = json.load(sys.stdin)
-          catalogs = data if isinstance(data, list) else data.get('catalogs', [])
-          today = os.environ.get('TODAY', '')
-          for c in catalogs:
-              if (c.get('status') == 'ready'
-                      and c.get('dateFrom', '') <= today
-                      and c.get('dateTo', '') >= today):
-                  print(f\"{c['country']}/{c['store']}/{c['id']}\")
-                  break
-          " TODAY="$TODAY")
-
-          if [ -n "$CATALOG_PATH" ]; then
-            CATALOG_HTML=$(curl -s -L --max-time 20 "${BASE_URL}/${CATALOG_PATH}")
-            check_contains "catalog ${CATALOG_PATH} @type:Article" "$CATALOG_HTML" '"@type"\s*:\s*"Article"'
-            check_contains "catalog ${CATALOG_PATH} @type:Offer"   "$CATALOG_HTML" '"@type"\s*:\s*"Offer"'
-            # Persist catalog path for later checks
-            echo "catalog_path=${CATALOG_PATH}" >> "$GITHUB_OUTPUT"
-          else
-            echo "WARN: No current ready catalog found in manifest — skipping catalog JSON-LD checks"
-          fi
-
-          if [ -n "$FAILED" ]; then
-            echo "check_detail<<EOF" >> "$GITHUB_OUTPUT"
-            printf "JSON-LD failures:%b" "$FAILED" >> "$GITHUB_OUTPUT"
-            echo "" >> "$GITHUB_OUTPUT"
-            echo "EOF" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
-
-      # ----------------------------------------------------------------
-      # 3. OpenGraph + Twitter metadata
-      # ----------------------------------------------------------------
-      - name: "Check 3: OpenGraph and Twitter metadata"
-        id: check-og
-        run: |
-          set -euo pipefail
-          FAILED=""
-
-          HOME_HTML=$(curl -s -L --max-time 20 "${BASE_URL}/")
-          ROMANIA_HTML=$(curl -s -L --max-time 20 "${BASE_URL}/romania")
-
-          check_contains() {
-            local label="$1"
-            local html="$2"
-            local pattern="$3"
-            if echo "$html" | grep -qE "$pattern"; then
-              echo "PASS: $label"
-            else
-              echo "FAIL: $label"
-              FAILED="${FAILED}\n  - ${label}"
-            fi
-          }
-
-          check_contains "/ og:title"       "$HOME_HTML"   'property="og:title"'
-          check_contains "/ twitter:card"   "$HOME_HTML"   'name="twitter:card"'
-
-          OG_IMAGE=$(echo "$ROMANIA_HTML" | python3 -c "
-          import sys, re
-          m = re.search(r'property=\"og:image\" content=\"([^\"]+)\"', sys.stdin.read())
-          print(m.group(1) if m else '')
-          ")
-          if echo "$OG_IMAGE" | grep -q "cdn.best-deal-shops.com"; then
-            echo "PASS: /romania og:image points to CDN ($OG_IMAGE)"
-          else
-            echo "FAIL: /romania og:image not pointing to CDN (got: $OG_IMAGE)"
-            FAILED="${FAILED}\n  - /romania og:image: expected cdn.best-deal-shops.com, got '${OG_IMAGE}'"
-          fi
-
-          CATALOG_PATH="${{ steps.check-jsonld.outputs.catalog_path }}"
-          if [ -n "$CATALOG_PATH" ]; then
-            CATALOG_HTML=$(curl -s -L --max-time 20 "${BASE_URL}/${CATALOG_PATH}")
-            check_contains "catalog ${CATALOG_PATH} twitter:image" "$CATALOG_HTML" 'name="twitter:image"'
-          else
-            echo "WARN: No catalog path from step 2 — skipping catalog twitter:image check"
-          fi
-
-          if [ -n "$FAILED" ]; then
-            echo "check_detail<<EOF" >> "$GITHUB_OUTPUT"
-            printf "OpenGraph/Twitter failures:%b" "$FAILED" >> "$GITHUB_OUTPUT"
-            echo "" >> "$GITHUB_OUTPUT"
-            echo "EOF" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
-
-      # ----------------------------------------------------------------
-      # 4. Feed sanity
-      # ----------------------------------------------------------------
-      - name: "Check 4: Feed sanity"
-        id: check-feed
-        run: |
-          set -euo pipefail
-          FAILED=""
-
-          FEED_HEADERS=$(curl -sI --max-time 20 "${BASE_URL}/feed.xml")
-          FEED_BODY=$(curl -s -L --max-time 20 "${BASE_URL}/feed.xml")
-
-          # Valid XML
-          XML_ERR=$(echo "$FEED_BODY" | python3 -c "
-          import sys, xml.etree.ElementTree as ET
-          try:
-              ET.fromstring(sys.stdin.read())
-          except Exception as e:
-              print(str(e))
-          " 2>&1 || true)
-          if [ -z "$XML_ERR" ]; then
-            echo "PASS: /feed.xml is valid XML"
-          else
-            echo "FAIL: /feed.xml XML parse error: $XML_ERR"
-            FAILED="${FAILED}\n  - /feed.xml invalid XML: ${XML_ERR}"
-          fi
-
-          # Last-Modified not in the future
-          LAST_MOD=$(echo "$FEED_HEADERS" | grep -i "^last-modified:" | sed 's/[Ll]ast-[Mm]odified: //' | tr -d '\r' | head -1)
-          if [ -n "$LAST_MOD" ]; then
-            LAST_MOD_CHECK=$(python3 -c "
-          from email.utils import parsedate_to_datetime
-          import time
-          try:
-              epoch = int(parsedate_to_datetime('${LAST_MOD}').timestamp())
-              now = int(time.time())
-              if epoch > now:
-                  print(f'FUTURE:{epoch}:{now}')
-              else:
-                  print(f'OK:{epoch}')
-          except Exception as e:
-              print(f'PARSE_ERROR:{e}')
-          ")
-            case "$LAST_MOD_CHECK" in
-              OK:*)     echo "PASS: /feed.xml Last-Modified is not in the future (${LAST_MOD})" ;;
-              FUTURE:*) echo "FAIL: /feed.xml Last-Modified is in the future: ${LAST_MOD}"
-                        FAILED="${FAILED}\n  - /feed.xml Last-Modified in the future: ${LAST_MOD}" ;;
-              PARSE_ERROR:*) echo "WARN: Could not parse Last-Modified header: ${LAST_MOD}" ;;
-            esac
-          else
-            echo "FAIL: /feed.xml missing Last-Modified header"
-            FAILED="${FAILED}\n  - /feed.xml: no Last-Modified response header"
-          fi
-
-          # At least 1 <item>
-          ITEM_COUNT=$(echo "$FEED_BODY" | python3 -c "
-          import sys, xml.etree.ElementTree as ET
-          try:
-              root = ET.fromstring(sys.stdin.read())
-              print(len(root.findall('.//item')))
-          except:
-              print(0)
-          ")
-          if [ "$ITEM_COUNT" -ge 1 ] 2>/dev/null; then
-            echo "PASS: /feed.xml has ${ITEM_COUNT} <item> elements"
-          else
-            echo "FAIL: /feed.xml has no <item> elements"
-            FAILED="${FAILED}\n  - /feed.xml has 0 <item> elements"
-          fi
-
-          if [ -n "$FAILED" ]; then
-            echo "check_detail<<EOF" >> "$GITHUB_OUTPUT"
-            printf "Feed failures:%b" "$FAILED" >> "$GITHUB_OUTPUT"
-            echo "" >> "$GITHUB_OUTPUT"
-            echo "EOF" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
-
-      # ----------------------------------------------------------------
-      # 5. Drop cap is a letter, not a digit or symbol
-      # ----------------------------------------------------------------
-      - name: "Check 5: Drop cap is a letter"
-        id: check-dropcap
-        run: |
-          set -euo pipefail
-          FAILED=""
-
-          check_dropcap() {
-            local url_path="$1"
-            local html
-            html=$(curl -s -L --max-time 20 "${BASE_URL}${url_path}")
-
-            RESULT=$(echo "$html" | python3 -c "
-          import sys, re, unicodedata
-          html = sys.stdin.read()
-          m = re.search(r'class=\"drop-cap\" aria-hidden=\"true\">(.)', html)
-          if not m:
-              empty = len(re.findall(r'empty-state', html))
-              print('EMPTY' if empty > 0 else 'MISSING')
-          else:
-              c = m.group(1)
-              cat = unicodedata.category(c)
-              if cat.startswith('L'):
-                  print(f'LETTER:{c}')
-              else:
-                  print(f'NOTLETTER:{c}:{cat}')
-          ")
-            case "$RESULT" in
-              LETTER:*)
-                CHAR="${RESULT#LETTER:}"
-                echo "PASS: ${url_path} drop-cap is a letter ('${CHAR}')"
-                ;;
-              NOTLETTER:*)
-                DETAIL="${RESULT#NOTLETTER:}"
-                echo "FAIL: ${url_path} drop-cap is not a letter: ${DETAIL}"
-                FAILED="${FAILED}\n  - ${url_path} drop-cap: got '${DETAIL}' (not a Unicode letter)"
-                ;;
-              EMPTY)
-                echo "PASS: ${url_path} drop-cap absent — page is in empty-state (expected)"
-                ;;
-              MISSING)
-                echo "FAIL: ${url_path} drop-cap element not found on non-empty page"
-                FAILED="${FAILED}\n  - ${url_path}: .drop-cap element absent on non-empty page"
-                ;;
-            esac
-          }
-
-          check_dropcap "/romania"
-          check_dropcap "/germany"
-
-          if [ -n "$FAILED" ]; then
-            echo "check_detail<<EOF" >> "$GITHUB_OUTPUT"
-            printf "Drop-cap failures:%b" "$FAILED" >> "$GITHUB_OUTPUT"
-            echo "" >> "$GITHUB_OUTPUT"
-            echo "EOF" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
-
-      # ----------------------------------------------------------------
-      # 6. Dedup sanity — byline count matches rendered card count
-      # ----------------------------------------------------------------
-      - name: "Check 6: Dedup sanity (Germany)"
-        id: check-dedup
-        run: |
-          set -euo pipefail
-          FAILED=""
-
-          GERMANY_HTML=$(curl -s -L --max-time 20 "${BASE_URL}/germany")
-
-          DEDUP_TMP=$(mktemp)
-          echo "$GERMANY_HTML" > "$DEDUP_TMP"
-          DEDUP_RESULT=$(python3 - "$DEDUP_TMP" <<'PYEOF'
-import sys, re
-html = open(sys.argv[1]).read()
-
-byline_m = re.search(r'class="masthead-byline"[^>]*>\s*(\d+)\s+stores?[^·]*·[^·]*\s(\d+)\s+catalog', html)
-byline_count = int(byline_m.group(2)) if byline_m else None
-
-store_rows_m = re.search(r'class="store-rows"(.*?)(?=class="expired-section|</main)', html, re.DOTALL)
-if store_rows_m:
-    card_count = len(re.findall(r'store-row-card-wrapper', store_rows_m.group(1)))
-else:
-    card_count = None
-
-if byline_count is None:
-    empty = len(re.findall(r'empty-state', html))
-    print('EMPTY' if empty > 0 else 'SKIP:no-byline')
-elif card_count is None:
-    print('SKIP:no-store-rows')
-elif byline_count != card_count:
-    print(f'FAIL:{byline_count}:{card_count}')
-else:
-    print(f'PASS:{byline_count}')
-PYEOF
-          )
-          rm -f "$DEDUP_TMP"
-
-          case "$DEDUP_RESULT" in
-            PASS:*)
-              COUNT="${DEDUP_RESULT#PASS:}"
-              echo "PASS: /germany dedup OK — byline and card count both ${COUNT}"
-              ;;
-            FAIL:*)
-              PARTS="${DEDUP_RESULT#FAIL:}"
-              BYLINE="${PARTS%%:*}"
-              CARDS="${PARTS##*:}"
-              echo "FAIL: /germany dedup mismatch — byline says ${BYLINE} catalogs, rendered ${CARDS} cards"
-              FAILED="${FAILED}\n  - /germany dedup: byline=${BYLINE} but rendered cards=${CARDS}"
-              ;;
-            EMPTY)
-              echo "PASS: /germany dedup check skipped (page is in empty-state)"
-              ;;
-            SKIP:*)
-              echo "WARN: /germany dedup check inconclusive (${DEDUP_RESULT#SKIP:})"
-              ;;
-          esac
-
-          if [ -n "$FAILED" ]; then
-            echo "check_detail<<EOF" >> "$GITHUB_OUTPUT"
-            printf "Dedup failures:%b" "$FAILED" >> "$GITHUB_OUTPUT"
-            echo "" >> "$GITHUB_OUTPUT"
-            echo "EOF" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
-
-      # ----------------------------------------------------------------
-      # 7. No wildly future-dated validFrom on catalog Offer JSON-LD
-      # ----------------------------------------------------------------
-      - name: "Check 7: No future-dated validFrom on catalog detail"
-        id: check-dates
-        run: |
-          set -euo pipefail
-          FAILED=""
-
-          CATALOG_PATH="${{ steps.check-jsonld.outputs.catalog_path }}"
-          if [ -z "$CATALOG_PATH" ]; then
-            echo "WARN: No catalog URL from step 2 — skipping validFrom check"
-            exit 0
-          fi
-
-          CATALOG_HTML=$(curl -s -L --max-time 20 "${BASE_URL}/${CATALOG_PATH}")
-
-          DATES_TMP=$(mktemp)
-          echo "$CATALOG_HTML" > "$DATES_TMP"
-          DATE_RESULT=$(python3 - "$DATES_TMP" <<'PYEOF'
-import sys, re, json
-from datetime import datetime, timedelta, timezone
-
-html = open(sys.argv[1]).read()
-blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.DOTALL)
-today = datetime.now(timezone.utc).date()
-threshold = today + timedelta(days=90)
-
-for block in blocks:
-    try:
-        data = json.loads(block)
-    except Exception:
-        continue
-    if data.get('@type') != 'Offer':
-        continue
-    vf = data.get('validFrom', '')
-    vt = data.get('validThrough', '')
-    if not vf:
-        print('FAIL:no-validFrom')
-        break
-    try:
-        valid_from = datetime.strptime(vf, '%Y-%m-%d').date()
-    except Exception as e:
-        print(f'FAIL:parse:{e}')
-        break
-    if valid_from > threshold:
-        print(f'FAIL:future:{vf}:{today}')
-        break
-    print(f'PASS:{vf}:{vt}')
-    break
-else:
-    print('SKIP')
-PYEOF
-          )
-          rm -f "$DATES_TMP"
-
-          case "$DATE_RESULT" in
-            PASS:*)
-              DATES="${DATE_RESULT#PASS:}"
-              echo "PASS: catalog validFrom is sane (${DATES})"
-              ;;
-            FAIL:future:*)
-              DETAIL="${DATE_RESULT#FAIL:future:}"
-              VF="${DETAIL%%:*}"
-              TODAY_="${DETAIL##*:}"
-              echo "FAIL: catalog validFrom ${VF} is more than 90 days in the future (today=${TODAY_})"
-              FAILED="${FAILED}\n  - catalog validFrom ${VF} > today+90d (today=${TODAY_}): ${CATALOG_PATH}"
-              ;;
-            FAIL:no-validFrom)
-              echo "FAIL: catalog Offer missing validFrom field"
-              FAILED="${FAILED}\n  - catalog Offer has no validFrom: ${CATALOG_PATH}"
-              ;;
-            FAIL:parse:*)
-              echo "FAIL: catalog validFrom parse error: ${DATE_RESULT#FAIL:parse:}"
-              FAILED="${FAILED}\n  - catalog validFrom parse error: ${DATE_RESULT#FAIL:parse:}"
-              ;;
-            SKIP)
-              echo "PASS: catalog validFrom check skipped (no Offer JSON-LD block found)"
-              ;;
-          esac
-
-          if [ -n "$FAILED" ]; then
-            echo "check_detail<<EOF" >> "$GITHUB_OUTPUT"
-            printf "Date validation failures:%b" "$FAILED" >> "$GITHUB_OUTPUT"
-            echo "" >> "$GITHUB_OUTPUT"
-            echo "EOF" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
+      - name: Run UX checks
+        id: ux-check
+        run: bash scripts/ux-check.sh "$BASE_URL"
 
       # ----------------------------------------------------------------
       # On failure: file or update a GitHub issue
@@ -500,22 +48,6 @@ PYEOF
             const titlePrefix = '[UX-CHECK]';
             const issueTitle = `${titlePrefix} Post-deploy regression on ${sha.slice(0, 7)}`;
 
-            // Collect failure details from step outputs
-            const stepOutputs = {
-              'HTTP status':   `${{ steps.check-status.outputs.check_detail }}`,
-              'JSON-LD':       `${{ steps.check-jsonld.outputs.check_detail }}`,
-              'OpenGraph':     `${{ steps.check-og.outputs.check_detail }}`,
-              'Feed':          `${{ steps.check-feed.outputs.check_detail }}`,
-              'Drop-cap':      `${{ steps.check-dropcap.outputs.check_detail }}`,
-              'Dedup':         `${{ steps.check-dedup.outputs.check_detail }}`,
-              'Date validity': `${{ steps.check-dates.outputs.check_detail }}`,
-            };
-
-            const failedChecks = Object.entries(stepOutputs)
-              .filter(([, detail]) => detail && detail.trim().length > 0)
-              .map(([name, detail]) => `### ${name}\n${detail.trim()}`)
-              .join('\n\n');
-
             const body = [
               `## UX-Check regression detected`,
               ``,
@@ -523,9 +55,7 @@ PYEOF
               `**Workflow run:** ${runUrl}`,
               `**Branch:** ${context.ref}`,
               ``,
-              `## Failed checks`,
-              ``,
-              failedChecks || '_No structured output captured — check the workflow run logs._',
+              `Check the workflow run logs for details on which assertions failed.`,
               ``,
               `---`,
               `_Auto-filed by the post-deploy UX-check workflow._`,
@@ -539,7 +69,7 @@ PYEOF
               per_page: 20,
             });
 
-            // Check for an issue for the same SHA (don't duplicate)
+            // Don't duplicate for the same SHA
             const sameShortSha = sha.slice(0, 7);
             const existingSameSha = openIssues.find(i => i.title.includes(sameShortSha));
             if (existingSameSha) {
@@ -553,13 +83,13 @@ PYEOF
               return;
             }
 
-            // Check if any ux-regression issue was filed in the last 24 hours
+            // Don't open a second issue if one was filed in the last 24 hours
             const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
             const recentIssue = openIssues.find(i =>
               i.title.startsWith(titlePrefix) && new Date(i.created_at) > oneDayAgo
             );
             if (recentIssue) {
-              console.log(`Recent UX-check issue found (#${recentIssue.number}) — adding a comment instead of opening a new one`);
+              console.log(`Recent UX-check issue found (#${recentIssue.number}) — adding a comment instead`);
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -569,7 +99,7 @@ PYEOF
               return;
             }
 
-            // Create labels if they don't exist (best-effort)
+            // Create labels best-effort
             for (const label of ['automated', 'ux-regression']) {
               try {
                 await github.rest.issues.getLabel({

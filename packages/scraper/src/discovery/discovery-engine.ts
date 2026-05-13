@@ -46,12 +46,19 @@ interface LeafletsApiFlyer {
  * catalogs ("Lidl Reisen") and special topic flyers ("Sonderflyer") from
  * being ingested as grocery catalogs.
  *
+ * If `maxSpanDays` is provided, flyers whose offer window exceeds that many
+ * days are skipped (returns null). This catches seasonal/non-food catalogs
+ * that share the same category string as weekly grocery flyers (e.g. in
+ * Lithuania, Denmark, Serbia where the Schwarz API returns a single category
+ * for all flyer types).
+ *
  * Returns ISO-formatted dates or null if the call fails or flyer is filtered.
  */
 export async function fetchLeafletsApiDates(
   slug: string,
   apiHost: string,
-  allowedCategories?: string[]
+  allowedCategories?: string[],
+  maxSpanDays?: number
 ): Promise<{ dateFrom: string; dateTo: string } | null> {
   const apiUrl = `https://${apiHost}/v4/flyer?flyer_identifier=${encodeURIComponent(slug)}`;
   try {
@@ -76,6 +83,20 @@ export async function fetchLeafletsApiDates(
     const dateFrom = flyer.offerStartDate || flyer.startDate;
     const dateTo = flyer.offerEndDate || flyer.endDate;
     if (!dateFrom || !dateTo) return null;
+
+    // Span guard: reject flyers whose offer window exceeds the configured limit.
+    // Used for locales where the Schwarz API returns a single category for both
+    // weekly grocery flyers and multi-month seasonal/non-food catalogs.
+    if (maxSpanDays !== undefined) {
+      const msPerDay = 86_400_000;
+      const spanDays = (new Date(dateTo).getTime() - new Date(dateFrom).getTime()) / msPerDay;
+      if (spanDays > maxSpanDays) {
+        log.info(
+          `skipping flyer "${slug}" (span ${spanDays} days exceeds max ${maxSpanDays} days)`
+        );
+        return null;
+      }
+    }
 
     return { dateFrom, dateTo };
   } catch (err) {
@@ -270,7 +291,7 @@ export async function discoverStore(
     if (!dates && storeDef.dateSource === "leaflets_api" && leafletsApiHost) {
       // Use the slug as the flyer identifier to fetch dates from the Leaflets API.
       // The slug is extracted from the link pattern (slugGroup) — it is the flyer identifier.
-      dates = await fetchLeafletsApiDates(raw.slug, leafletsApiHost, storeDef.leafletsAllowedCategories);
+      dates = await fetchLeafletsApiDates(raw.slug, leafletsApiHost, storeDef.leafletsAllowedCategories, storeDef.leafletsMaxSpanDays);
     }
 
     if (!dates) {

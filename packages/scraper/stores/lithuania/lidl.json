@@ -13,5 +13,7 @@
         }
     ],
     "dateSource": "leaflets_api",
+    "leafletsAllowedCategories": ["Visi leidiniai"],
+    "leafletsMaxSpanDays": 30,
     "datePatterns": []
 }

@@ -360,4 +360,97 @@ describe("fetchLeafletsApiDates", () => {
     const result = await fetchLeafletsApiDates("some-slug", "endpoints.leaflets.schwarz");
     expect(result).toEqual({ dateFrom: "2026-05-01", dateTo: "2026-05-07" });
   });
+
+  // --- maxSpanDays guard ---
+
+  const ltWeeklyFlyer = {
+    category: "Visi leidiniai",
+    offerStartDate: "2026-05-11",
+    offerEndDate: "2026-05-17",
+  };
+
+  const ltSeasonalFlyer = {
+    category: "Visi leidiniai",
+    offerStartDate: "2026-04-06",
+    offerEndDate: "2026-08-31",
+  };
+
+  test("accepts flyer within maxSpanDays limit (LT weekly, 6 days)", async () => {
+    // @ts-ignore
+    globalThis.fetch = makeMockFetch(ltWeeklyFlyer);
+    const result = await fetchLeafletsApiDates(
+      "maisto-prekiu-pasiulymai-20260511-kw20-pr",
+      "endpoints.leaflets.schwarz",
+      undefined,
+      30
+    );
+    expect(result).toEqual({ dateFrom: "2026-05-11", dateTo: "2026-05-17" });
+  });
+
+  test("rejects flyer exceeding maxSpanDays limit (LT seasonal, 147 days)", async () => {
+    // @ts-ignore
+    globalThis.fetch = makeMockFetch(ltSeasonalFlyer);
+    const result = await fetchLeafletsApiDates(
+      "grilio-katalogas-2026-kw15",
+      "endpoints.leaflets.schwarz",
+      undefined,
+      30
+    );
+    expect(result).toBeNull();
+  });
+
+  test("rejects flyer with category not in allowlist even if within span", async () => {
+    // @ts-ignore
+    globalThis.fetch = makeMockFetch(travelFlyer);
+    const result = await fetchLeafletsApiDates(
+      "travel-slug",
+      "endpoints.leaflets.schwarz",
+      ["Wochenaktionen Flugblatt"],
+      30
+    );
+    expect(result).toBeNull();
+  });
+
+  test("accepts flyer exactly at maxSpanDays boundary (30 days)", async () => {
+    // @ts-ignore
+    globalThis.fetch = makeMockFetch({
+      category: "Tilbudsaviser",
+      offerStartDate: "2026-05-01",
+      offerEndDate: "2026-05-31",
+    });
+    const result = await fetchLeafletsApiDates(
+      "exact-boundary-slug",
+      "endpoints.leaflets.schwarz",
+      undefined,
+      30
+    );
+    expect(result).toEqual({ dateFrom: "2026-05-01", dateTo: "2026-05-31" });
+  });
+
+  test("rejects flyer one day over maxSpanDays boundary (31 days)", async () => {
+    // @ts-ignore
+    globalThis.fetch = makeMockFetch({
+      category: "Tilbudsaviser",
+      offerStartDate: "2026-05-01",
+      offerEndDate: "2026-06-01",
+    });
+    const result = await fetchLeafletsApiDates(
+      "one-over-boundary-slug",
+      "endpoints.leaflets.schwarz",
+      undefined,
+      30
+    );
+    expect(result).toBeNull();
+  });
+
+  test("ignores maxSpanDays when undefined (no span limit)", async () => {
+    // @ts-ignore
+    globalThis.fetch = makeMockFetch(ltSeasonalFlyer);
+    const result = await fetchLeafletsApiDates(
+      "grilio-katalogas-2026-kw15",
+      "endpoints.leaflets.schwarz"
+    );
+    // No maxSpanDays: long-span flyer is accepted
+    expect(result).toEqual({ dateFrom: "2026-04-06", dateTo: "2026-08-31" });
+  });
 });

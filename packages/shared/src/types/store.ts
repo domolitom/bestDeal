@@ -157,6 +157,13 @@ export interface StoreDefinition {
    * field is in this list. Omit to accept all categories.
    */
   leafletsAllowedCategories?: string[];
+  /**
+   * When dateSource is "leaflets_api", reject flyers whose offer window
+   * (offerEndDate − offerStartDate) exceeds this many days. Use this to
+   * prevent seasonal/non-food catalogs with multi-month spans from being
+   * ingested as weekly grocery catalogs. Omit to allow any span.
+   */
+  leafletsMaxSpanDays?: number;
   catalogTypePattern?: CatalogTypePattern;
   imageExtraction?: ImageExtraction;
   resolver?: string; // override auto-detection ("leaflets" | "browser" | etc.)

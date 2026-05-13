@@ -24,6 +24,8 @@ describe("loadStoreDefinitions", () => {
         expect(def.shopfullyConfig.language).toBeString();
         expect(def.shopfullyConfig.lat).toBeNumber();
         expect(def.shopfullyConfig.lng).toBeNumber();
+      } else if (def.leafletsOverviewConfig) {
+        expect(def.leafletsOverviewConfig.clientLocale).toBeString();
       } else if (def.apiDiscovery) {
         expect(def.apiDiscovery.selector).toBeString();
         expect(def.apiDiscovery.idAttribute).toBeString();

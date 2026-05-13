@@ -14,5 +14,6 @@
     ],
     "dateSource": "leaflets_api",
     "leafletsAllowedCategories": ["Wochenaktionen Flugblatt"],
+    "leafletsMaxSpanDays": 30,
     "datePatterns": []
 }

@@ -13,5 +13,6 @@
         }
     ],
     "dateSource": "leaflets_api",
+    "leafletsMaxSpanDays": 30,
     "datePatterns": []
 }

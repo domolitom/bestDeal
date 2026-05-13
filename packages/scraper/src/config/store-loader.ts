@@ -54,6 +54,17 @@ function validateStoreDefinition(def: StoreDefinition, file: string): void {
     return;
   }
 
+  if (def.leafletsOverviewConfig) {
+    const { clientLocale } = def.leafletsOverviewConfig;
+    if (!clientLocale) {
+      throw new Error(
+        `Store definition ${file} has incomplete leafletsOverviewConfig (requires clientLocale)`
+      );
+    }
+    // leafletsOverviewConfig stores don't need dateSource / datePatterns (dates come from API)
+    return;
+  }
+
   if (def.shopfullyConfig) {
     const { propertyId, language, lat, lng } = def.shopfullyConfig;
     if (!propertyId || !language || lat == null || lng == null) {

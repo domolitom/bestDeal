@@ -652,3 +652,143 @@ export async function discoverStoreViaShopfully(
   log.info(`found ${discovered.length} ${storeDef.name} catalog(s) via Shopfully`);
   return discovered;
 }
+
+// --- Leaflets Overview API types ---
+
+interface LeafletsOverviewFlyer {
+  id: string;
+  offerStartDate?: string;
+  offerEndDate?: string;
+  startDate?: string;
+  endDate?: string;
+  flyerUrlAbsolute?: string;
+  thumbnailUrl?: string;
+}
+
+interface LeafletsOverviewSubcategory {
+  name: string;
+  flyers: LeafletsOverviewFlyer[];
+}
+
+interface LeafletsOverviewCategory {
+  subcategories: LeafletsOverviewSubcategory[];
+}
+
+interface LeafletsOverviewResponse {
+  success?: boolean;
+  categories?: LeafletsOverviewCategory[];
+}
+
+/**
+ * Discover catalogs via the Leaflets Schwarz /v4/overview API.
+ *
+ * This is used for Lidl country pages where weekly flyers are rendered as
+ * regionalized <button> elements (not <a> links), which prevents standard
+ * DOM-based link discovery.  The overview API returns all flyers for a given
+ * locale directly, without needing a browser.
+ *
+ * The `leafletsOverviewConfig.subcategoryFilter` restricts results to a single
+ * subcategory (e.g. "Volantini settimanali" for Lidl IT).
+ *
+ * The `flyerUrlAbsolute` from the API is used as firstPageUrl after applying
+ * the store's `linkPatterns` normalizeUrl transforms.
+ */
+export async function discoverStoreViaLeafletsOverview(
+  storeDef: StoreDefinition
+): Promise<DiscoveredCatalog[]> {
+  const cfg = storeDef.leafletsOverviewConfig!;
+  log.info(`discovering ${storeDef.name} catalogs via Leaflets overview API...`);
+
+  const apiUrl =
+    `https://endpoints.leaflets.schwarz/v4/overview` +
+    `?client_locale=${encodeURIComponent(cfg.clientLocale)}&region_id=0&store_id=0`;
+
+  let data: LeafletsOverviewResponse;
+  try {
+    const resp = await fetch(apiUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        Accept: "application/json",
+      },
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!resp.ok) {
+      log.warn(`Leaflets overview API ${resp.status} for ${storeDef.name}`);
+      return [];
+    }
+    data = await resp.json();
+  } catch (err) {
+    log.warn(`Leaflets overview API error for ${storeDef.name}`, { err: String(err) });
+    return [];
+  }
+
+  if (!data.success || !data.categories) {
+    log.warn(`Leaflets overview API bad response for ${storeDef.name}`);
+    return [];
+  }
+
+  const discovered: DiscoveredCatalog[] = [];
+  const seenIds = new Set<string>();
+
+  for (const category of data.categories) {
+    for (const subcategory of category.subcategories) {
+      // Apply subcategory filter if configured
+      if (cfg.subcategoryFilter && subcategory.name !== cfg.subcategoryFilter) {
+        log.info(`skipping subcategory "${subcategory.name}" (filter: "${cfg.subcategoryFilter}")`);
+        continue;
+      }
+
+      for (const flyer of subcategory.flyers) {
+        if (!flyer.flyerUrlAbsolute) {
+          log.info(`skipping flyer ${flyer.id} (no flyerUrlAbsolute)`);
+          continue;
+        }
+
+        // Deduplicate by flyer ID
+        if (seenIds.has(flyer.id)) continue;
+        seenIds.add(flyer.id);
+
+        const dateFrom = flyer.offerStartDate || flyer.startDate;
+        const dateTo = flyer.offerEndDate || flyer.endDate;
+
+        if (!dateFrom || !dateTo) {
+          log.info(`skipping flyer ${flyer.id} (missing dates)`);
+          continue;
+        }
+
+        // Normalize the flyerUrlAbsolute using the store's linkPatterns normalizeUrl
+        let firstPageUrl = flyer.flyerUrlAbsolute;
+        for (const lp of storeDef.linkPatterns) {
+          if (new RegExp(lp.match).test(flyer.flyerUrlAbsolute)) {
+            firstPageUrl = applyUrlTransforms(flyer.flyerUrlAbsolute, lp.normalizeUrl);
+            break;
+          }
+        }
+
+        // Extract slug from the flyerUrlAbsolute for use as catalog ID component
+        let slug = flyer.id;
+        for (const lp of storeDef.linkPatterns) {
+          const m = flyer.flyerUrlAbsolute.match(new RegExp(lp.match));
+          if (m && lp.slugGroup > 0) {
+            slug = m[lp.slugGroup] || flyer.id;
+            break;
+          }
+        }
+
+        discovered.push({
+          store: storeDef.name,
+          country: storeDef.country,
+          slug,
+          dateFrom,
+          dateTo,
+          firstPageUrl,
+          coverImageUrl: flyer.thumbnailUrl || firstPageUrl,
+        });
+      }
+    }
+  }
+
+  log.info(`found ${discovered.length} ${storeDef.name} catalog(s) via Leaflets overview`);
+  return discovered;
+}

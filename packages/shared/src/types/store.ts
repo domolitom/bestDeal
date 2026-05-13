@@ -107,6 +107,36 @@ export interface RestApiDiscoveryConfig {
   arrayField?: string;
 }
 
+// --- Leaflets Overview API discovery config ---
+
+/**
+ * Configures discovery via the Leaflets Schwarz `/v4/overview` API.
+ *
+ * This endpoint returns a nested structure of categories > subcategories > flyers
+ * for a given `client_locale` (e.g. "lidl/it-IT").  It does not require
+ * Playwright — no browser is launched.
+ *
+ * Use this for Lidl country pages where the weekly flyers are rendered as
+ * `<button>` elements (not `<a>` links) due to store-picker regionalization,
+ * making standard DOM-based discovery impossible.
+ *
+ * Example (Lidl IT):
+ *   clientLocale: "lidl/it-IT"
+ *   subcategoryFilter: "Volantini settimanali"
+ */
+export interface LeafletsOverviewConfig {
+  /**
+   * `client_locale` parameter for the overview API.
+   * Format: "{brand}/{lang}-{COUNTRY}" e.g. "lidl/it-IT", "lidl/de-DE".
+   */
+  clientLocale: string;
+  /**
+   * Optional: only include flyers from this subcategory name.
+   * When omitted, all flyers from all subcategories are included.
+   */
+  subcategoryFilter?: string;
+}
+
 // --- Shopfully Cloud discovery config ---
 
 /**
@@ -172,6 +202,8 @@ export interface StoreDefinition {
   apiDiscovery?: ApiDiscoveryConfig;
   /** Discovery via a plain JSON REST endpoint (no Playwright required) */
   restApiDiscovery?: RestApiDiscoveryConfig;
+  /** Discovery via the Leaflets Schwarz /v4/overview API (no Playwright required) */
+  leafletsOverviewConfig?: LeafletsOverviewConfig;
   /** Shopfully Cloud API discovery — when present, skips DOM-based discovery */
   shopfullyConfig?: ShopfullyConfig;
 }

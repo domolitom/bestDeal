@@ -13,5 +13,7 @@
         }
     ],
     "dateSource": "leaflets_api",
+    "leafletsAllowedCategories": ["Category RS"],
+    "leafletsMaxSpanDays": 30,
     "datePatterns": []
 }

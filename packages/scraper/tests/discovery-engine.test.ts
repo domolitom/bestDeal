@@ -4,8 +4,16 @@ import {
   applyUrlTransforms,
   extractCatalogType,
 } from "@bestdeal/shared";
-import type { DatePattern, CatalogTypePattern, UrlTransform } from "@bestdeal/shared";
-import { fetchLeafletsApiDates } from "../src/discovery/discovery-engine.ts";
+import type {
+  DatePattern,
+  CatalogTypePattern,
+  UrlTransform,
+  StoreDefinition,
+} from "@bestdeal/shared";
+import {
+  fetchLeafletsApiDates,
+  discoverStoreViaLeafletsOverview,
+} from "../src/discovery/discovery-engine.ts";
 
 // --- parseDates ---
 
@@ -452,5 +460,159 @@ describe("fetchLeafletsApiDates", () => {
     );
     // No maxSpanDays: long-span flyer is accepted
     expect(result).toEqual({ dateFrom: "2026-04-06", dateTo: "2026-08-31" });
+  });
+});
+
+// --- discoverStoreViaLeafletsOverview ---
+
+describe("discoverStoreViaLeafletsOverview", () => {
+  function makeOverviewStore(
+    subcategoryFilter?: string
+  ): StoreDefinition {
+    return {
+      name: "lidl",
+      country: "italy",
+      landingUrl: "https://www.lidl.it/c/volantino-lidl/s10018048",
+      waitAfterLoad: 0,
+      resolver: "leaflets",
+      leafletsOverviewConfig: {
+        clientLocale: "lidl/it-IT",
+        ...(subcategoryFilter ? { subcategoryFilter } : {}),
+      },
+      linkPatterns: [
+        {
+          match: "/l/it/volantini/([^/]+)/ar/\\d+",
+          slugGroup: 1,
+          normalizeUrl: [
+            {
+              type: "replace",
+              match: "/ar/\\d+.*$",
+              replacement: "/view/flyer/page/1",
+            },
+          ],
+        },
+      ],
+      dateSource: "leaflets_api",
+      datePatterns: [],
+    };
+  }
+
+  function mockOverview(body: unknown, ok = true, status = 200) {
+    return mock((_url: string) =>
+      Promise.resolve({
+        ok,
+        status,
+        json: () => Promise.resolve(body),
+      })
+    );
+  }
+
+  const weeklyFlyer = {
+    id: "f-weekly-1",
+    offerStartDate: "2026-05-14",
+    offerEndDate: "2026-05-20",
+    flyerUrlAbsolute:
+      "https://www.lidl.it/l/it/volantini/offerte-valide-dal-14-05-al-20-05-volantino-settimanale/ar/0",
+    thumbnailUrl: "https://cdn.example.com/thumb-weekly.jpg",
+  };
+
+  const specialFlyer = {
+    id: "f-special-1",
+    offerStartDate: "2026-05-01",
+    offerEndDate: "2026-06-30",
+    flyerUrlAbsolute:
+      "https://www.lidl.it/l/it/volantini/vivi-il-tuo-giardino-primavera-2026/ar/0",
+    thumbnailUrl: "https://cdn.example.com/thumb-special.jpg",
+  };
+
+  const twoSubcategoryResponse = {
+    success: true,
+    categories: [
+      {
+        subcategories: [
+          { name: "Volantini settimanali", flyers: [weeklyFlyer] },
+          { name: "Volantini speciali", flyers: [specialFlyer] },
+        ],
+      },
+    ],
+  };
+
+  test("subcategoryFilter restricts to the matching subcategory", async () => {
+    // @ts-ignore
+    globalThis.fetch = mockOverview(twoSubcategoryResponse);
+    const result = await discoverStoreViaLeafletsOverview(
+      makeOverviewStore("Volantini settimanali")
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0]!.slug).toBe(
+      "offerte-valide-dal-14-05-al-20-05-volantino-settimanale"
+    );
+    expect(result[0]!.dateFrom).toBe("2026-05-14");
+    expect(result[0]!.dateTo).toBe("2026-05-20");
+  });
+
+  test("no subcategoryFilter returns flyers from all subcategories", async () => {
+    // @ts-ignore
+    globalThis.fetch = mockOverview(twoSubcategoryResponse);
+    const result = await discoverStoreViaLeafletsOverview(makeOverviewStore());
+    expect(result).toHaveLength(2);
+    expect(result.map((c) => c.slug).sort()).toEqual([
+      "offerte-valide-dal-14-05-al-20-05-volantino-settimanale",
+      "vivi-il-tuo-giardino-primavera-2026",
+    ]);
+  });
+
+  test("API 4xx returns empty array", async () => {
+    // @ts-ignore
+    globalThis.fetch = mockOverview(null, false, 404);
+    const result = await discoverStoreViaLeafletsOverview(makeOverviewStore());
+    expect(result).toEqual([]);
+  });
+
+  test("flyerUrlAbsolute is normalized via linkPatterns", async () => {
+    // @ts-ignore
+    globalThis.fetch = mockOverview(twoSubcategoryResponse);
+    const result = await discoverStoreViaLeafletsOverview(
+      makeOverviewStore("Volantini settimanali")
+    );
+    expect(result[0]!.firstPageUrl).toBe(
+      "https://www.lidl.it/l/it/volantini/offerte-valide-dal-14-05-al-20-05-volantino-settimanale/view/flyer/page/1"
+    );
+  });
+
+  test("empty categories array returns empty result", async () => {
+    // @ts-ignore
+    globalThis.fetch = mockOverview({ success: true, categories: [] });
+    const result = await discoverStoreViaLeafletsOverview(makeOverviewStore());
+    expect(result).toEqual([]);
+  });
+
+  test("flyer with missing dates is skipped", async () => {
+    // @ts-ignore
+    globalThis.fetch = mockOverview({
+      success: true,
+      categories: [
+        {
+          subcategories: [
+            {
+              name: "Volantini settimanali",
+              flyers: [
+                {
+                  id: "f-no-dates",
+                  flyerUrlAbsolute:
+                    "https://www.lidl.it/l/it/volantini/no-dates/ar/0",
+                },
+                weeklyFlyer,
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    const result = await discoverStoreViaLeafletsOverview(makeOverviewStore());
+    expect(result).toHaveLength(1);
+    expect(result[0]!.slug).toBe(
+      "offerte-valide-dal-14-05-al-20-05-volantino-settimanale"
+    );
   });
 });

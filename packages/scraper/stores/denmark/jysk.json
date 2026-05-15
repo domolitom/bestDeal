@@ -12,7 +12,7 @@
             ]
         }
     ],
-    "dateSource": "text",
+    "dateSource": "ipaper_static_settings",
     "datePatterns": [
         {
             "match": "(\\d{1,2})\\.(\\d{2})\\.(\\d{4})\\s*-\\s*(\\d{1,2})\\.(\\d{2})\\.(\\d{4})",

@@ -207,14 +207,18 @@ export async function discoverStore(
   // Visit linked pages if we need text-based dates or iframe URL extraction
   const needsTextDate =
     storeDef.dateSource === "text" || storeDef.dateSource === "slug_then_text";
-  const needsPageVisit = needsTextDate || !!storeDef.iframeExtract;
+  const needsIpaperStaticSettings = storeDef.dateSource === "ipaper_static_settings";
+  const needsPageVisit = needsTextDate || needsIpaperStaticSettings || !!storeDef.iframeExtract;
   if (needsPageVisit) {
     for (const raw of rawLinks) {
       const hasDates = raw.dateText && parseDates(raw.dateText, storeDef.datePatterns);
-      // Skip if dates are found AND no iframe extraction needed
-      if (hasDates && !storeDef.iframeExtract) continue;
-      // Skip if dates are found AND iframe already extracted
-      if (hasDates && raw.iframeUrl) continue;
+      // For ipaper_static_settings, always visit — card text is not authoritative for iPaper
+      if (!needsIpaperStaticSettings) {
+        // Skip if dates are found AND no iframe extraction needed
+        if (hasDates && !storeDef.iframeExtract) continue;
+        // Skip if dates are found AND iframe already extracted
+        if (hasDates && raw.iframeUrl) continue;
+      }
       try {
         await page.goto(raw.href, { waitUntil: "domcontentloaded" });
         await page.waitForTimeout(storeDef.iframeExtract ? 8000 : 5000);
@@ -234,8 +238,16 @@ export async function discoverStore(
           }
         }
 
-        // Extract dates if still needed
-        if (!hasDates && needsTextDate) {
+        // For iPaper-based catalogs, read window.staticSettings.name directly
+        if (needsIpaperStaticSettings) {
+          const staticName = await page.evaluate(
+            () =>
+              (window as unknown as { staticSettings?: { name?: string } }).staticSettings?.name ??
+              ""
+          );
+          raw.dateText = staticName;
+        } else if (!hasDates && needsTextDate) {
+          // Extract dates if still needed via meta or html fallback
           const meta = await page.evaluate(() => {
             const el = document.querySelector('meta[name="description"]');
             return el ? el.getAttribute("content") || "" : "";
@@ -284,7 +296,8 @@ export async function discoverStore(
     if (
       !dates &&
       (storeDef.dateSource === "text" ||
-        storeDef.dateSource === "slug_then_text")
+        storeDef.dateSource === "slug_then_text" ||
+        storeDef.dateSource === "ipaper_static_settings")
     ) {
       dates = parseDates(raw.dateText, storeDef.datePatterns);
     }

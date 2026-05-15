@@ -36,7 +36,7 @@ describe("loadStoreDefinitions", () => {
         expect(def.restApiDiscovery.urlField).toBeString();
       } else {
         expect(def.linkPatterns.length).toBeGreaterThan(0);
-        expect(["slug", "text", "slug_then_text", "leaflets_api"]).toContain(def.dateSource);
+        expect(["slug", "text", "slug_then_text", "leaflets_api", "ipaper_static_settings"]).toContain(def.dateSource);
         // leaflets_api stores fetch dates from the API and don't need datePatterns
         if (def.dateSource !== "leaflets_api") {
           expect(def.datePatterns.length).toBeGreaterThan(0);

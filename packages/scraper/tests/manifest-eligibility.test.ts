@@ -53,14 +53,16 @@ describe("isManifestEligible", () => {
   });
 
   test("dateTo exactly 365 days ahead passes (boundary)", () => {
+    // dateFrom is set close to dateTo so span stays within the 60-day cap
     expect(
-      isManifestEligible({ id: "test", dateFrom: VALID_FROM, dateTo: isoOffset(365) })
+      isManifestEligible({ id: "test", dateFrom: isoOffset(306), dateTo: isoOffset(365) })
     ).toBe(true);
   });
 
   test("dateTo 366 days ahead fails (just over boundary)", () => {
+    // dateFrom is set close to dateTo so span stays within the 60-day cap
     expect(
-      isManifestEligible({ id: "test", dateFrom: VALID_FROM, dateTo: isoOffset(366) })
+      isManifestEligible({ id: "test", dateFrom: isoOffset(307), dateTo: isoOffset(366) })
     ).toBe(false);
   });
 
@@ -86,6 +88,18 @@ describe("isManifestEligible", () => {
     // cutoff = today - 30 days; to < cutoff fails; to === cutoff passes
     expect(
       isManifestEligible({ id: "test", dateFrom: isoOffset(-37), dateTo: isoOffset(-30) })
+    ).toBe(true);
+  });
+
+  test("90-day span catalog is rejected", () => {
+    expect(
+      isManifestEligible({ id: "test", dateFrom: isoOffset(-90), dateTo: isoOffset(0) })
+    ).toBe(false);
+  });
+
+  test("14-day span catalog is accepted", () => {
+    expect(
+      isManifestEligible({ id: "test", dateFrom: isoOffset(-7), dateTo: isoOffset(7) })
     ).toBe(true);
   });
 });

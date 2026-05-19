@@ -249,6 +249,9 @@ const MANIFEST_EXPIRY_DAYS = 30;
 /** Maximum days dateTo may be in the future before a catalog is excluded from the manifest. */
 const MANIFEST_MAX_FUTURE_DAYS = 365;
 
+/** Maximum allowed span (dateFrom → dateTo) in days before a catalog is excluded from the manifest. */
+const MANIFEST_MAX_SPAN_DAYS = 60;
+
 /**
  * Return true when a catalog's dates are sane enough to include in the manifest:
  * - dateFrom and dateTo must be parseable
@@ -267,6 +270,12 @@ export function isManifestEligible(meta: Pick<CatalogMeta, "id" | "dateFrom" | "
 
   if (to < from) {
     log.warn(`manifest: skipping ${meta.id} — inverted dates (dateTo before dateFrom)`);
+    return false;
+  }
+
+  const spanDays = (to.getTime() - from.getTime()) / 86400000;
+  if (spanDays > MANIFEST_MAX_SPAN_DAYS) {
+    log.warn(`manifest: skipping ${meta.id} — span is ${Math.round(spanDays)} days (max 60)`);
     return false;
   }
 

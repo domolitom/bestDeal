@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CatalogSummary } from "@bestdeal/shared";
 import { FreshnessIndicator } from "./FreshnessIndicator";
+import { CatalogCardImage } from "./CatalogCardImage";
 import { getCoverUrl } from "@/lib/image-url";
 import { toDisplayName } from "@/lib/display-name";
 
@@ -60,11 +61,10 @@ export function CatalogCard({ catalog }: { catalog: CatalogSummary }) {
         {/* Polaroid frame — image sits in a paper-white inset */}
         <div className="catalog-card-frame">
           <span className="catalog-card-stamp" aria-hidden="true">{filedStamp}</span>
-          <img
-            className="catalog-card-image"
+          <CatalogCardImage
             src={coverUrl}
             alt={`${toDisplayName(catalog.store)} catalog ${catalog.dateFrom} to ${catalog.dateTo}`}
-            loading="lazy"
+            storeName={toDisplayName(catalog.store)}
           />
         </div>
         <div className="catalog-card-info">

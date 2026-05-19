@@ -1298,3 +1298,21 @@ a {
     padding: 8px 10px 10px;
   }
 }
+
+/* ============================================================
+   404 not-found page
+   ============================================================ */
+.not-found-link {
+  display: inline-block;
+  margin-top: 28px;
+  font-family: var(--font-mono, monospace);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  transition: color var(--transition);
+}
+
+.not-found-link:hover {
+  color: var(--accent-deep);
+}

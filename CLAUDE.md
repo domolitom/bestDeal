@@ -93,8 +93,8 @@ Turborepo monorepo: `packages/shared` (types + utils), `packages/scraper` (Playw
 
 <!-- Update this section as the project evolves -->
 - 97 store configs across 31 countries
-- Only Romania (11/12 stores) and Germany (6/10 stores) actively producing catalogs
-- 25 countries with configs but 0 live catalogs — Lidl (16 countries) and JYSK (13 countries) are the biggest gaps
+- 26 countries actively producing catalogs (as of 2026-05-20). Top 5: Poland (12), Austria (11), Romania (10), Germany (10), Czechia (9).
+- Dormant gaps are store-level, not country-level — see open beads (`bestDeal-ce8`, `96w`, `kq0`, `wld`, `kn5`, `4om`) for known broken store configs
 - Scraper runs Mon + Thu 6am UTC via GitHub Actions
 - Granny UX audit scheduled Mon + Thu after scraper completes
-- Date validation added to reject bogus future dates (>1yr ahead or >365 day span)
+- Date validation: discovery rejects >1yr future / >365 day span; manifest writer additionally drops >60 day span catalogs from the user-facing index

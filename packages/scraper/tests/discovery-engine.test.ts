@@ -103,6 +103,51 @@ describe("parseDates", () => {
   });
 });
 
+// --- Animax date patterns ---
+
+const animaxDatePatterns: DatePattern[] = [
+  {
+    match:
+      "(ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)(?:-[IVXivx]+)?-(\\d{4})",
+    flags: "i",
+    dateFrom: "$1-$2",
+    dateTo: "$1-$2",
+  },
+];
+
+describe("parseDates — Animax FlipHTML5 slugs", () => {
+  test("old-style slug: Catalog-Animax-Martie-2026", () => {
+    expect(
+      parseDates("Catalog-Animax-Martie-2026", animaxDatePatterns)
+    ).toEqual({ dateFrom: "Martie-2026", dateTo: "Martie-2026" });
+  });
+
+  test("new-style slug with Roman numeral Part I: Aniamx-Mai-I-2026-v2", () => {
+    expect(
+      parseDates("Aniamx-Mai-I-2026-v2", animaxDatePatterns)
+    ).toEqual({ dateFrom: "Mai-2026", dateTo: "Mai-2026" });
+  });
+
+  test("new-style slug with Roman numeral Part II: Aniamx-Mai-II-2026-v2", () => {
+    expect(
+      parseDates("Aniamx-Mai-II-2026-v2", animaxDatePatterns)
+    ).toEqual({ dateFrom: "Mai-2026", dateTo: "Mai-2026" });
+  });
+
+  test("new-style slug without version suffix: Aniamx-Iunie-I-2026", () => {
+    expect(
+      parseDates("Aniamx-Iunie-I-2026", animaxDatePatterns)
+    ).toEqual({ dateFrom: "Iunie-2026", dateTo: "Iunie-2026" });
+  });
+
+  test("does not match Roman numerals as month (old broken pattern would): II is not a month", () => {
+    // The new pattern only matches known Romanian month names — 'II' alone must not match
+    expect(
+      parseDates("SomeSlug-II-2026", animaxDatePatterns)
+    ).toBeNull();
+  });
+});
+
 // --- applyUrlTransforms ---
 
 describe("applyUrlTransforms", () => {

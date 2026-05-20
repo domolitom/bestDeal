@@ -13,7 +13,8 @@
     "dateSource": "slug",
     "datePatterns": [
         {
-            "match": "([A-Za-zăîșțâ]+)-(\\d{4})",
+            "match": "(ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)(?:-[IVXivx]+)?-(\\d{4})",
+            "flags": "i",
             "dateFrom": "$1-$2",
             "dateTo": "$1-$2"
         }

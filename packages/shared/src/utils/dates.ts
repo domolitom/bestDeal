@@ -106,7 +106,7 @@ export function parseDates(
   patterns: DatePattern[]
 ): { dateFrom: string; dateTo: string } | null {
   for (const p of patterns) {
-    const match = text.match(new RegExp(p.match));
+    const match = text.match(new RegExp(p.match, p.flags ?? ""));
     if (!match) continue;
 
     const dateFrom = applyGroupRefs(p.dateFrom, match);

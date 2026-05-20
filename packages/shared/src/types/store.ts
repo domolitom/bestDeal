@@ -34,6 +34,8 @@ export interface DatePattern {
   match: string;
   dateFrom: string;
   dateTo: string;
+  /** Optional regex flags, e.g. "i" for case-insensitive matching */
+  flags?: string;
 }
 
 // --- Catalog type pattern ---

@@ -182,7 +182,7 @@ a {
   font-family: var(--font-body, sans-serif);
   font-size: var(--text-xs);
   letter-spacing: 0.04em;
-  color: var(--oak);
+  color: var(--oak-deep);
   font-weight: 500;
   text-transform: uppercase;
   margin-bottom: 10px;
@@ -465,7 +465,7 @@ a {
   font-style: normal;
   font-size: var(--text-xs);
   font-weight: 500;
-  color: var(--oak);
+  color: #6F4A28;
   background: rgba(176, 125, 67, 0.10);
   border-radius: var(--radius-pill);
   display: inline-block;

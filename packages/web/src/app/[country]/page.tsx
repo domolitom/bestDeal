@@ -15,15 +15,6 @@ export const revalidate = 300;
 
 const BASE_URL = "https://best-deal-shops.com";
 
-/** ISO week number (Monday-based), computed from a Date */
-function isoWeek(d: Date): number {
-  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  // Thursday of the current week → determines the year
-  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  return Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-}
-
 export async function generateMetadata({
   params,
 }: {
@@ -201,11 +192,6 @@ export default async function CountryPage({
   const countryName = getCountryName(country);
   const storesWithCatalogs = [...new Set(activeCatalogs.map((c) => c.store))];
 
-  // Magazine issue metadata
-  const now = new Date();
-  const week = isoWeek(now);
-  const year = now.getFullYear();
-  const issueNum = String(week).padStart(3, "0");
   const mastheadSubtitle = buildMastheadSubtitle(
     storesWithCatalogs,
     activeCatalogs.length,
@@ -240,24 +226,10 @@ export default async function CountryPage({
       />
       <Header crumbs={[{ label: countryName }]} />
       <main className="container">
-        {/* Magazine masthead */}
+        {/* Page masthead */}
         <div className="masthead">
-          <p className="masthead-kicker">
-            Issue &nbsp;&#x2116;{issueNum}&nbsp;&middot;&nbsp;Week {week}&nbsp;&middot;&nbsp;{year}
-          </p>
-          <hr className="masthead-rule" />
-          <h1 className="masthead-title">{countryName}</h1>
-          <p className="page-intro">
-            {/^\p{L}/u.test(mastheadSubtitle.charAt(0)) && (
-              <span className="drop-cap" aria-hidden="true">
-                {mastheadSubtitle.charAt(0)}
-              </span>
-            )}
-            {/^\p{L}/u.test(mastheadSubtitle.charAt(0))
-              ? mastheadSubtitle.slice(1)
-              : mastheadSubtitle}
-          </p>
-          <hr className="masthead-rule" />
+          <p className="masthead-kicker">{countryName}</p>
+          <h1 className="masthead-title">{mastheadSubtitle}</h1>
           <p className="masthead-byline">{byline}</p>
         </div>
 

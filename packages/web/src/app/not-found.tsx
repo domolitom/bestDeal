@@ -9,13 +9,13 @@ export default function NotFound() {
       <Header />
       <main className="container">
         <div className="home-masthead">
-          <p className="home-masthead-kicker">404 &nbsp;&middot;&nbsp; Page Not Found</p>
-          <h1 className="home-masthead-title">Lost<br />in the stacks.</h1>
+          <p className="home-masthead-kicker">404</p>
+          <h1 className="home-masthead-title">Page not found.</h1>
           <p className="home-masthead-subtitle">
             That page doesn&rsquo;t exist &mdash; but this week&rsquo;s catalogs are right where you left them.
           </p>
           <Link href="/" className="not-found-link">
-            &larr; Back to the front page
+            &larr; Back to all catalogs
           </Link>
         </div>
       </main>

@@ -69,11 +69,6 @@ function dedupeCatalogs(catalogs: CatalogSummary[]): CatalogSummary[] {
   return [...groups.values()].map(pickCanonicalCatalog);
 }
 
-/** Irregular rotation cycle — SSR-stable, feels less pattern-y */
-function cardRotation(i: number): string {
-  const rotations = ["-1.2deg", "0.4deg", "-0.6deg", "1.1deg", "-0.3deg"];
-  return rotations[i % 5];
-}
 
 export async function generateMetadata({
   params,
@@ -249,61 +244,23 @@ export default async function CatalogPage({
           className="container"
           style={{ paddingTop: 28, paddingBottom: 8 }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              gap: 14,
-              flexWrap: "wrap",
-              marginBottom: 8,
-            }}
-          >
-            <h1 className="page-title" style={{ margin: 0 }}>
+          <div className="catalog-detail-header">
+            <h1 className="page-title">
               {storeName}
             </h1>
             {catalog.catalogType && (
-              <span
-                style={{
-                  fontFamily: "var(--font-display, serif)",
-                  fontStyle: "italic",
-                  fontSize: "var(--text-lg)",
-                  color: "var(--ink-soft)",
-                }}
-              >
+              <span className="catalog-card-type">
                 {catalog.catalogType}
               </span>
             )}
             <StatusBadge dateTo={catalog.dateTo} />
           </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              marginBottom: 28,
-              flexWrap: "wrap",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-mono, monospace)",
-                fontSize: "var(--text-sm)",
-                color: "var(--ink-faded)",
-                letterSpacing: "0.04em",
-              }}
-            >
+          <div className="catalog-detail-meta">
+            <span className="catalog-detail-dates">
               {formatDate(catalog.dateFrom)} &ndash; {formatDate(catalog.dateTo)}
             </span>
             <FreshnessIndicator dateTo={catalog.dateTo} />
-            <span
-              style={{
-                fontFamily: "var(--font-mono, monospace)",
-                fontSize: "var(--text-xs)",
-                color: "var(--ink-faded)",
-                textTransform: "uppercase",
-                letterSpacing: "0.12em",
-              }}
-            >
+            <span className="catalog-detail-pages">
               {catalog.pages.length} pages
             </span>
           </div>
@@ -321,49 +278,17 @@ export default async function CatalogPage({
         <div className="container" style={{ paddingTop: 0, paddingBottom: 48 }}>
           {moreCatalogs.length > 0 && (
             <>
-              <div className="section-divider" aria-hidden="true" style={{ marginTop: 56 }}>
-                <span className="section-divider-rule" />
-                <span className="section-divider-ornament">&#8258;</span>
-                <span className="section-divider-rule" />
-              </div>
+              <div className="section-divider" aria-hidden="true" style={{ marginTop: 56 }} />
               <section style={{ marginTop: 36, marginBottom: 0 }}>
-                <h2
-                  style={{
-                    fontFamily: "var(--font-display, serif)",
-                    fontStyle: "italic",
-                    fontWeight: 400,
-                    fontSize: "var(--text-3xl)",
-                    letterSpacing: "-0.02em",
-                    color: "var(--ink)",
-                    lineHeight: 1,
-                    marginBottom: 8,
-                  }}
-                >
+                <h2 className="section-heading">
                   More from {storeName}
                 </h2>
-                <p
-                  style={{
-                    fontFamily: "var(--font-body, sans-serif)",
-                    fontStyle: "italic",
-                    fontSize: "var(--text-sm)",
-                    color: "var(--ink-soft)",
-                    marginBottom: 24,
-                  }}
-                >
+                <p className="section-subheading">
                   Recent editions from {storeName} in {countryName}
                 </p>
                 <div className="related-catalog-row">
-                  {moreCatalogs.map((c, i) => (
-                    <div
-                      key={c.id}
-                      className="store-row-card-wrapper"
-                      style={
-                        {
-                          zIndex: moreCatalogs.length - i,
-                          "--card-rotation": cardRotation(i),
-                        } as React.CSSProperties
-                      }
-                    >
+                  {moreCatalogs.map((c) => (
+                    <div key={c.id} className="store-row-card-wrapper">
                       <CatalogCard catalog={c} />
                     </div>
                   ))}
@@ -374,35 +299,12 @@ export default async function CatalogPage({
 
           {otherStoreEntries.length > 0 && (
             <>
-              <div className="section-divider" aria-hidden="true" style={{ marginTop: moreCatalogs.length > 0 ? 56 : 56 }}>
-                <span className="section-divider-rule" />
-                <span className="section-divider-ornament">&#8258;</span>
-                <span className="section-divider-rule" />
-              </div>
+              <div className="section-divider" aria-hidden="true" style={{ marginTop: 56 }} />
               <section style={{ marginTop: 36 }}>
-                <h2
-                  style={{
-                    fontFamily: "var(--font-display, serif)",
-                    fontStyle: "italic",
-                    fontWeight: 400,
-                    fontSize: "var(--text-3xl)",
-                    letterSpacing: "-0.02em",
-                    color: "var(--ink)",
-                    lineHeight: 1,
-                    marginBottom: 8,
-                  }}
-                >
+                <h2 className="section-heading">
                   Other stores in {countryName}
                 </h2>
-                <p
-                  style={{
-                    fontFamily: "var(--font-body, sans-serif)",
-                    fontStyle: "italic",
-                    fontSize: "var(--text-sm)",
-                    color: "var(--ink-soft)",
-                    marginBottom: 24,
-                  }}
-                >
+                <p className="section-subheading">
                   Fresh catalogs from other retailers this week
                 </p>
                 <div className="other-stores-grid">

@@ -1086,6 +1086,21 @@ a {
   }
 }
 
+@media (max-width: 640px) {
+  .masthead {
+    padding: 24px 0 16px;
+  }
+
+  .masthead-title {
+    font-size: clamp(1.4rem, 7vw, 2rem);
+    margin-bottom: 8px;
+  }
+
+  .masthead-byline {
+    margin-top: 4px;
+  }
+}
+
 @media (max-width: 480px) {
   .grid-catalogs {
     grid-template-columns: repeat(2, 1fr);

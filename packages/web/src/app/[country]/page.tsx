@@ -146,19 +146,22 @@ function buildMastheadSubtitle(
   activeCatalogCount: number,
 ): string {
   if (storesWithCatalogs.length === 0) {
-    return "Quiet on the floor — fresh leaflets are due Monday morning.";
-  }
-  const storeNames = storesWithCatalogs.map(toDisplayName);
-  let storeList: string;
-  if (storeNames.length === 1) {
-    storeList = storeNames[0];
-  } else if (storeNames.length === 2) {
-    storeList = `${storeNames[0]} and ${storeNames[1]}`;
-  } else {
-    storeList = `${storeNames.slice(0, -1).join(", ")}, and ${storeNames[storeNames.length - 1]}`;
+    return "Fresh leaflets are due Monday morning.";
   }
   const count = activeCatalogCount;
-  return `This week — ${count} fresh ${count === 1 ? "edition" : "editions"} from ${storeList} — curated each Monday and Thursday.`;
+  const editions = `${count} fresh ${count === 1 ? "edition" : "editions"}`;
+
+  const MAX_STORES = 3;
+  const storeNames = storesWithCatalogs.slice(0, MAX_STORES).map(toDisplayName);
+  const overflow = storesWithCatalogs.length - MAX_STORES;
+  const storeFragment =
+    overflow > 0
+      ? `${storeNames.join(", ")} and ${overflow} more`
+      : storeNames.length === 1
+        ? storeNames[0]
+        : `${storeNames.slice(0, -1).join(", ")} and ${storeNames[storeNames.length - 1]}`;
+
+  return `This week — ${editions} from ${storeFragment}.`;
 }
 
 export default async function CountryPage({

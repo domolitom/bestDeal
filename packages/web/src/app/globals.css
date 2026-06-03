@@ -284,9 +284,6 @@ a {
   background: var(--border);
 }
 
-.section-divider-ornament {
-  display: none;
-}
 
 .store-row-header {
   display: flex;
@@ -313,19 +310,7 @@ a {
   color: var(--ink-faded);
 }
 
-/* Fleuron hidden in new theme */
-.store-row-fleuron {
-  display: none;
-}
 
-/* Dash hidden in new theme */
-.store-row-dash {
-  display: none;
-}
-
-.store-row-title--swash {
-  /* No swash in Inter — intentionally empty */
-}
 
 .store-row-title {
   font-family: var(--font-display, sans-serif);
@@ -424,10 +409,6 @@ a {
   position: relative;
 }
 
-/* Stamp hidden in new theme */
-.catalog-card-stamp {
-  display: none;
-}
 
 .catalog-card-image-wrapper {
   width: 100%;
@@ -560,13 +541,6 @@ a {
   letter-spacing: 0.01em;
 }
 
-/* Legacy bento grid — kept for any references, now invisible */
-.bento-countries {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: clamp(40px, 6vw, 80px);
-}
 
 /* Legacy grid kept for any remaining uses */
 .grid-countries {

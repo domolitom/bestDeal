@@ -149,19 +149,11 @@ function buildMastheadSubtitle(
     return "Fresh leaflets are due Monday morning.";
   }
   const count = activeCatalogCount;
-  const editions = `${count} fresh ${count === 1 ? "edition" : "editions"}`;
-
-  const MAX_STORES = 3;
-  const storeNames = storesWithCatalogs.slice(0, MAX_STORES).map(toDisplayName);
-  const overflow = storesWithCatalogs.length - MAX_STORES;
-  const storeFragment =
-    overflow > 0
-      ? `${storeNames.join(", ")} and ${overflow} more`
-      : storeNames.length === 1
-        ? storeNames[0]
-        : `${storeNames.slice(0, -1).join(", ")} and ${storeNames[storeNames.length - 1]}`;
-
-  return `This week — ${editions} from ${storeFragment}.`;
+  const storeCount = storesWithCatalogs.length;
+  if (count === 1) {
+    return "1 fresh catalog this week.";
+  }
+  return `${count} fresh catalogs across ${storeCount} ${storeCount === 1 ? "store" : "stores"} this week.`;
 }
 
 export default async function CountryPage({
@@ -251,9 +243,10 @@ export default async function CountryPage({
         <CatalogStoreRows catalogs={activeCatalogs} />
 
         {expiredCatalogs.length > 0 && (
-          <details className="expired-section" open>
+          <details className="expired-section">
             <summary className="expired-section-title">
-              Recently expired ({expiredCatalogs.length})
+              <span className="expired-section-label">Show older catalogs ({expiredCatalogs.length})</span>
+              <span className="expired-section-label--open">Hide older catalogs ({expiredCatalogs.length})</span>
             </summary>
             <CatalogStoreRows catalogs={expiredCatalogs} muted />
           </details>

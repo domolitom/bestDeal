@@ -23,6 +23,27 @@ export function CatalogViewer({
   const [scrollPage, setScrollPage] = useState(1);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Measure the actual site header height and expose it as --header-height
+  // so the sticky viewer bar always sits flush below the header on all viewports.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const headerEl = document.querySelector(".header") as HTMLElement | null;
+    if (!headerEl) return;
+
+    function updateHeaderHeight() {
+      const h = (headerEl as HTMLElement).offsetHeight;
+      document.documentElement.style.setProperty("--header-height", `${h}px`);
+    }
+
+    updateHeaderHeight();
+
+    const ro = new ResizeObserver(updateHeaderHeight);
+    ro.observe(headerEl);
+
+    return () => ro.disconnect();
+  }, []);
+
   const goNext = useCallback(() => {
     setCurrentPage((p) => Math.min(p + 1, pages.length - 1));
   }, [pages.length]);

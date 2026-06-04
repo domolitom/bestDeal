@@ -623,10 +623,12 @@ a {
   padding: 0 20px 20px;
 }
 
-/* Sticky control bar — below the site header (z-index 100) */
+/* Sticky control bar — below the site header (z-index 100).
+   --header-height is set at runtime by CatalogViewer's ResizeObserver;
+   the 53px fallback covers SSR / non-viewer pages. */
 .viewer-controls-sticky {
   position: sticky;
-  top: 53px; /* approximate height of sticky .header */
+  top: var(--header-height, 53px);
   z-index: 90;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
@@ -1180,6 +1182,32 @@ a {
   .masthead-byline {
     margin-top: 4px;
     font-size: var(--text-xs);
+  }
+
+  /* Store filter chips: horizontal scroll instead of multi-row wrap */
+  .store-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    padding-bottom: 6px;
+  }
+
+  .store-list::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  .store-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .store-list::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: var(--radius-pill);
+  }
+
+  .store-pill {
+    flex-shrink: 0;
   }
 }
 

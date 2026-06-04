@@ -8,14 +8,14 @@ export default function NotFound() {
     <>
       <Header />
       <main className="container">
-        <div className="home-masthead">
+        <div className="not-found-masthead">
           <p className="home-masthead-kicker">404</p>
-          <h1 className="home-masthead-title">Page not found.</h1>
-          <p className="home-masthead-subtitle">
+          <h1 className="not-found-title">Page not found.</h1>
+          <p className="not-found-body">
             That page doesn&rsquo;t exist &mdash; but this week&rsquo;s catalogs are right where you left them.
           </p>
           <Link href="/" className="not-found-link">
-            &larr; Back to all catalogs
+            &larr; Browse all catalogs
           </Link>
         </div>
       </main>

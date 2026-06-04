@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { CatalogPage } from "@bestdeal/shared";
 
 interface CatalogViewerProps {
@@ -20,6 +20,8 @@ export function CatalogViewer({
 }: CatalogViewerProps) {
   const [mode, setMode] = useState<"scroll" | "single">("scroll");
   const [currentPage, setCurrentPage] = useState(0);
+  const [scrollPage, setScrollPage] = useState(1);
+  const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const goNext = useCallback(() => {
     setCurrentPage((p) => Math.min(p + 1, pages.length - 1));
@@ -29,6 +31,7 @@ export function CatalogViewer({
     setCurrentPage((p) => Math.max(p - 1, 0));
   }, []);
 
+  // Keyboard navigation for single-page mode
   useEffect(() => {
     if (mode !== "single") return;
 
@@ -46,6 +49,43 @@ export function CatalogViewer({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [mode, goNext, goPrev]);
 
+  // Scroll-spy: track which page is most visible in the viewport
+  useEffect(() => {
+    if (mode !== "scroll") return;
+    if (typeof IntersectionObserver === "undefined") return;
+
+    const observers: IntersectionObserver[] = [];
+    const visibilityMap = new Map<number, number>();
+
+    pageRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            visibilityMap.set(i, entry.intersectionRatio);
+          }
+          // Pick the page with the highest intersection ratio
+          let best = 0;
+          let bestRatio = -1;
+          visibilityMap.forEach((ratio, idx) => {
+            if (ratio > bestRatio) {
+              bestRatio = ratio;
+              best = idx;
+            }
+          });
+          setScrollPage(best + 1);
+        },
+        { threshold: [0, 0.1, 0.25, 0.5, 0.75, 1.0] },
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+
+    return () => {
+      observers.forEach((obs) => obs.disconnect());
+    };
+  }, [mode, pages.length]);
+
   function pageAlt(pageNumber: number): string {
     if (storeName && dateFrom && dateTo) {
       return `${storeName} catalog page ${pageNumber} — ${dateFrom} to ${dateTo}`;
@@ -55,34 +95,48 @@ export function CatalogViewer({
 
   return (
     <div className="viewer-container">
-      <div className="viewer-controls">
-        <button
-          className={`store-pill ${mode === "scroll" ? "store-pill-active" : ""}`}
-          onClick={() => setMode("scroll")}
-        >
-          Scroll View
-        </button>
-        <button
-          className={`store-pill ${mode === "single" ? "store-pill-active" : ""}`}
-          onClick={() => setMode("single")}
-        >
-          Single Page
-        </button>
+      {/* Sticky control bar — sits below the sticky site header (z-index 100) */}
+      <div className="viewer-controls-sticky">
+        <div className="viewer-controls">
+          <button
+            className={`viewer-mode-btn ${mode === "scroll" ? "viewer-mode-btn--active" : ""}`}
+            onClick={() => setMode("scroll")}
+          >
+            Scroll
+          </button>
+          <button
+            className={`viewer-mode-btn ${mode === "single" ? "viewer-mode-btn--active" : ""}`}
+            onClick={() => setMode("single")}
+          >
+            Single page
+          </button>
+          {mode === "scroll" && (
+            <span className="viewer-scroll-counter" aria-live="polite">
+              {scrollPage} / {pages.length}
+            </span>
+          )}
+        </div>
       </div>
 
       {mode === "scroll" ? (
-        pages.map((page, i) => (
-          <div key={page.number} className="viewer-page">
-            <img
-              src={page.imageUrl}
-              alt={pageAlt(page.number)}
-              loading={i < 3 ? "eager" : "lazy"}
-            />
-            <div className="viewer-page-number">
-              Page {page.number} of {pages.length}
+        <div className="viewer-scroll-pages">
+          {pages.map((page, i) => (
+            <div
+              key={page.number}
+              className="viewer-page"
+              ref={(el) => { pageRefs.current[i] = el; }}
+            >
+              <img
+                src={page.imageUrl}
+                alt={pageAlt(page.number)}
+                loading={i < 3 ? "eager" : "lazy"}
+              />
+              <div className="viewer-page-number">
+                Page {page.number} of {pages.length}
+              </div>
             </div>
-          </div>
-        ))
+          ))}
+        </div>
       ) : (
         <div>
           {pages[currentPage] && (

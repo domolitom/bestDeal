@@ -20,7 +20,18 @@ dist/
 .env
 .env.*
 .env.local
+.env.*.local
 .env.production
+!.env.example
+
+# Secrets / credentials
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+credentials.json
+*-credential-key
 
 # English corrections log
 english-corrections.md
@@ -34,3 +45,7 @@ english-corrections.md
 # Dolt database files (added by bd init)
 .dolt/
 *.db
+
+# Agent worktrees and scratch artifacts
+.worktrees/
+.tmp-shots/

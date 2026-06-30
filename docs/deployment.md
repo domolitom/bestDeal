@@ -74,14 +74,14 @@ This document covers how bestDeal is deployed and how to manage the production e
 
 | Component | Service | Identifier |
 |-----------|---------|------------|
-| Web App | Cloudflare Pages | `bestdeal-9uy.pages.dev` |
+| Web App | Cloudflare Pages | `<pages-project>.pages.dev` |
 | Domain | Cloudflare DNS | `best-deal-shops.com` |
 | Storage | Cloudflare R2 | Bucket: `bestdeal-catalogs` |
 | CDN | Cloudflare R2 Public Bucket | `cdn.best-deal-shops.com` |
 | Scraper | GitHub Actions | Cron workflows |
 | Code | GitHub | Repository on master branch |
-| Cloudflare Account ID | — | `cd8ed13c62cae5a97c7ffa804277094a` |
-| Zone ID | — | `a88586e8fc0af0c359e0ac503aa045e6` |
+| Cloudflare Account ID | — | `<CF_ACCOUNT_ID>` (from Cloudflare dashboard, used for `wrangler` auth — not committed) |
+| Zone ID | — | `<CF_ZONE_ID>` (from Cloudflare dashboard, used for DNS/cache management — not committed) |
 
 ## Cloudflare R2 (Storage)
 

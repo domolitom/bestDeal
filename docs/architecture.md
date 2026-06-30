@@ -350,7 +350,7 @@ The web app's `CdnReadAdapter` fetches all per-country manifests in parallel on 
 
 ### Web App (Cloudflare Pages)
 
-- **Domain:** `best-deal-shops.com` (also `bestdeal-9uy.pages.dev`)
+- **Domain:** `best-deal-shops.com` (also `<pages-project>.pages.dev`)
 - **Build:** `curl -fsSL https://bun.sh/install | bash && ~/.bun/bin/bun install && cd packages/web && ~/.bun/bin/bun run build:cf`
 - **Runtime:** Edge (all routes use `export const runtime = "edge"`)
 - **ISR:** `revalidate = 300` (5-minute ISR for all pages)

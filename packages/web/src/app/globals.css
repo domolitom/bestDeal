@@ -156,7 +156,7 @@ a {
 }
 
 .breadcrumb-sep {
-  color: var(--border-hover);
+  color: var(--ink-faded);
   font-family: var(--font-body, sans-serif);
 }
 

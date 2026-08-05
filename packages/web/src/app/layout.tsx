@@ -1,23 +1,20 @@
 import type { Metadata } from "next";
-import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { EditorialRibbon } from "@/components/EditorialRibbon";
 import { Colophon } from "@/components/Colophon";
 
-const fraunces = Fraunces({
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: "variable",
-  style: ["normal", "italic"],
-  axes: ["opsz", "SOFT", "WONK"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const instrumentSans = Instrument_Sans({
+// Inter also serves as body font via --font-body alias set in globals.css
+const interBody = Inter({
   subsets: ["latin"],
   variable: "--font-body",
   weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -30,9 +27,9 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://best-deal-shops.com"),
-  title: "BestDeal — European Catalog Review",
+  title: "BestDeal — Every deal in Europe, in one place",
   description:
-    "Browse weekly retail catalogs from grocery, electronics, and furniture stores across Europe.",
+    "Browse weekly retail catalogs from grocery, electronics, and furniture stores across Europe. Updated every Monday and Thursday.",
   alternates: {
     types: { "application/atom+xml": "/feed.xml" },
   },
@@ -46,10 +43,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${instrumentSans.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${interBody.variable} ${jetbrainsMono.variable}`}
     >
       <body>
-        <EditorialRibbon />
         {children}
         <Colophon />
       </body>

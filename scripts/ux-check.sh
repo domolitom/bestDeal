@@ -261,10 +261,10 @@ else
 fi
 
 # --------------------------------------------------------------------------
-# CHECK 5: Drop cap is a letter, not a digit
+# CHECK 5: Country page masthead renders (has .masthead-title element)
 # --------------------------------------------------------------------------
 echo ""
-echo "=== Check 5: Drop cap is a letter ==="
+echo "=== Check 5: Country page masthead renders ==="
 
 for check_country in "romania" "germany"; do
   CHECK_HTML=""
@@ -274,33 +274,17 @@ for check_country in "romania" "germany"; do
     CHECK_HTML=$(http_get "${BASE_URL}/germany")
   fi
 
-  DROP_CAP_CHAR=$(echo "$CHECK_HTML" | python3 -c "
-import sys, re
-html = sys.stdin.read()
-m = re.search(r'class=\"drop-cap\" aria-hidden=\"true\">(.)', html)
-print(m.group(1) if m else '')
-")
+  HAS_MASTHEAD=$(echo "$CHECK_HTML" | grep -c 'class="masthead-title"' 2>/dev/null || true)
 
-  if [ -z "$DROP_CAP_CHAR" ]; then
-    # Drop cap missing — only a problem if the page has catalogs (empty state skips it)
+  if [ "$HAS_MASTHEAD" -gt 0 ]; then
+    pass "/${check_country} masthead-title is present"
+  else
+    # OK if page is in empty state
     EMPTY_STATE=$(echo "$CHECK_HTML" | grep -c "empty-state" 2>/dev/null || true)
     if [ "$EMPTY_STATE" -gt 0 ]; then
-      pass "/${check_country} drop-cap absent (page is in empty-state — expected)"
+      pass "/${check_country} masthead absent (page is in empty-state — expected)"
     else
-      fail "/${check_country} drop-cap not found" "No .drop-cap element in non-empty country page"
-    fi
-  else
-    # Check it matches a Unicode letter (not a digit or symbol)
-    IS_LETTER=$(python3 -c "
-import unicodedata
-c = '${DROP_CAP_CHAR}'
-cat = unicodedata.category(c)
-print('yes' if cat.startswith('L') else f'no ({cat})')
-")
-    if [ "$IS_LETTER" = "yes" ]; then
-      pass "/${check_country} drop-cap is a letter ('${DROP_CAP_CHAR}')"
-    else
-      fail "/${check_country} drop-cap is not a letter" "Got '${DROP_CAP_CHAR}' (category: ${IS_LETTER}) — dedup or subtitle logic may be broken"
+      fail "/${check_country} masthead-title not found" "No .masthead-title element in non-empty country page"
     fi
   fi
 done

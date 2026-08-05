@@ -39,12 +39,6 @@ function formatFreshest(dateFrom: string): string {
   return `freshest ${day} ${month}`;
 }
 
-/** Irregular rotation cycle — SSR-stable, feels less pattern-y */
-function cardRotation(i: number): string {
-  const rotations = ["-1.2deg", "0.4deg", "-0.6deg", "1.1deg", "-0.3deg"];
-  return rotations[i % 5];
-}
-
 export function CatalogStoreRows({
   catalogs,
   muted = false,
@@ -55,10 +49,8 @@ export function CatalogStoreRows({
   if (catalogs.length === 0) {
     return (
       <div className="empty-state">
-        <span className="empty-state-ornament">&#10022;</span>
-        <span className="empty-state-kicker">On Press</span>
         <p className="empty-state-message">
-          This issue is at the printers &mdash; fresh leaflets arrive Monday morning.
+          No catalogs available yet &mdash; fresh leaflets arrive every Monday and Thursday.
         </p>
       </div>
     );
@@ -69,28 +61,20 @@ export function CatalogStoreRows({
   return (
     <div className="store-rows">
       {groups.map(({ store, catalogs: storeCatalogs }, groupIndex) => {
-        const sectionNum = String(groupIndex + 1).padStart(2, "0");
-        const countLabel = `${storeCatalogs.length} ${storeCatalogs.length === 1 ? "weekly leaflet" : "weekly leaflets"}`;
+        const countLabel = `${storeCatalogs.length} ${storeCatalogs.length === 1 ? "leaflet" : "leaflets"}`;
         const freshnestLabel = formatFreshest(storeCatalogs[0].dateFrom);
-        const isLast = groupIndex === groups.length - 1;
 
         return (
           <div key={store}>
             {groupIndex > 0 && (
-              <div className="section-divider" aria-hidden="true">
-                <span className="section-divider-rule" />
-                <span className="section-divider-ornament">&#8258;</span>
-                <span className="section-divider-rule" />
-              </div>
+              <div className="section-divider" aria-hidden="true" />
             )}
             <section
               className="store-row"
               style={{ "--row-index": groupIndex } as React.CSSProperties}
             >
               <div className="store-row-header">
-                <span className="store-row-number store-row-number--display">{sectionNum}</span>
-                <span className="store-row-fleuron" aria-hidden="true">&#10086;</span>
-                <h3 className="store-row-title store-row-title--swash">{toDisplayName(store)}</h3>
+                <h3 className="store-row-title">{toDisplayName(store)}</h3>
               </div>
               <p className="store-row-meta">
                 {countLabel} &middot; {freshnestLabel}
@@ -98,29 +82,16 @@ export function CatalogStoreRows({
               <div
                 className={`store-row-cards${muted ? " store-row-cards--muted" : ""}`}
               >
-                {storeCatalogs.map((catalog, i) => (
+                {storeCatalogs.map((catalog) => (
                   <div
                     key={catalog.id}
                     className="store-row-card-wrapper"
-                    style={
-                      {
-                        zIndex: storeCatalogs.length - i,
-                        "--card-rotation": cardRotation(i),
-                      } as React.CSSProperties
-                    }
                   >
                     <CatalogCard catalog={catalog} />
                   </div>
                 ))}
               </div>
             </section>
-            {isLast && (
-              <div className="section-divider" aria-hidden="true">
-                <span className="section-divider-rule" />
-                <span className="section-divider-ornament">&#8258;</span>
-                <span className="section-divider-rule" />
-              </div>
-            )}
           </div>
         );
       })}

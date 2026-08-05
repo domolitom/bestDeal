@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { storage } from "@/lib/storage";
 import { Header, getCountryName } from "@/components/Header";
 import { CatalogStoreRows } from "@/components/CatalogStoreRows";
+import { StoreList } from "@/components/StoreList";
 import { toDisplayName } from "@/lib/display-name";
 import { STORE_CONFIGS } from "@/lib/store-configs";
 import { isCatalogActive } from "@bestdeal/shared";
@@ -14,15 +15,6 @@ export const runtime = "edge";
 export const revalidate = 300;
 
 const BASE_URL = "https://best-deal-shops.com";
-
-/** ISO week number (Monday-based), computed from a Date */
-function isoWeek(d: Date): number {
-  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  // Thursday of the current week → determines the year
-  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  return Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-}
 
 export async function generateMetadata({
   params,
@@ -155,19 +147,14 @@ function buildMastheadSubtitle(
   activeCatalogCount: number,
 ): string {
   if (storesWithCatalogs.length === 0) {
-    return "Quiet on the floor — fresh leaflets are due Monday morning.";
-  }
-  const storeNames = storesWithCatalogs.map(toDisplayName);
-  let storeList: string;
-  if (storeNames.length === 1) {
-    storeList = storeNames[0];
-  } else if (storeNames.length === 2) {
-    storeList = `${storeNames[0]} and ${storeNames[1]}`;
-  } else {
-    storeList = `${storeNames.slice(0, -1).join(", ")}, and ${storeNames[storeNames.length - 1]}`;
+    return "Fresh leaflets are due Monday morning.";
   }
   const count = activeCatalogCount;
-  return `This week — ${count} fresh ${count === 1 ? "edition" : "editions"} from ${storeList} — curated each Monday and Thursday.`;
+  const storeCount = storesWithCatalogs.length;
+  if (count === 1) {
+    return "1 fresh catalog this week.";
+  }
+  return `${count} fresh catalogs across ${storeCount} ${storeCount === 1 ? "store" : "stores"} this week.`;
 }
 
 export default async function CountryPage({
@@ -201,11 +188,6 @@ export default async function CountryPage({
   const countryName = getCountryName(country);
   const storesWithCatalogs = [...new Set(activeCatalogs.map((c) => c.store))];
 
-  // Magazine issue metadata
-  const now = new Date();
-  const week = isoWeek(now);
-  const year = now.getFullYear();
-  const issueNum = String(week).padStart(3, "0");
   const mastheadSubtitle = buildMastheadSubtitle(
     storesWithCatalogs,
     activeCatalogs.length,
@@ -240,29 +222,15 @@ export default async function CountryPage({
       />
       <Header crumbs={[{ label: countryName }]} />
       <main className="container">
-        {/* Magazine masthead */}
+        {/* Page masthead */}
         <div className="masthead">
-          <p className="masthead-kicker">
-            Issue &nbsp;&#x2116;{issueNum}&nbsp;&middot;&nbsp;Week {week}&nbsp;&middot;&nbsp;{year}
-          </p>
-          <hr className="masthead-rule" />
-          <h1 className="masthead-title">{countryName}</h1>
-          <p className="page-intro">
-            {/^\p{L}/u.test(mastheadSubtitle.charAt(0)) && (
-              <span className="drop-cap" aria-hidden="true">
-                {mastheadSubtitle.charAt(0)}
-              </span>
-            )}
-            {/^\p{L}/u.test(mastheadSubtitle.charAt(0))
-              ? mastheadSubtitle.slice(1)
-              : mastheadSubtitle}
-          </p>
-          <hr className="masthead-rule" />
+          <p className="masthead-kicker">{countryName}</p>
+          <h1 className="masthead-title">{mastheadSubtitle}</h1>
           <p className="masthead-byline">{byline}</p>
         </div>
 
         {/* Store filter pills */}
-        <div className="store-list">
+        <StoreList>
           <Link href={`/${country}`}>
             <span className="store-pill store-pill-active">All</span>
           </Link>
@@ -271,14 +239,15 @@ export default async function CountryPage({
               <span className="store-pill">{toDisplayName(store)}</span>
             </Link>
           ))}
-        </div>
+        </StoreList>
 
         <CatalogStoreRows catalogs={activeCatalogs} />
 
         {expiredCatalogs.length > 0 && (
-          <details className="expired-section" open>
+          <details className="expired-section">
             <summary className="expired-section-title">
-              Recently expired ({expiredCatalogs.length})
+              <span className="expired-section-label">Show older catalogs ({expiredCatalogs.length})</span>
+              <span className="expired-section-label--open">Hide older catalogs ({expiredCatalogs.length})</span>
             </summary>
             <CatalogStoreRows catalogs={expiredCatalogs} muted />
           </details>

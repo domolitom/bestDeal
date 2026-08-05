@@ -2,12 +2,11 @@ export function Colophon() {
   return (
     <footer className="colophon" role="contentinfo">
       <div className="colophon-inner">
-        <div className="colophon-asterism" aria-hidden="true">&#8258;</div>
-        <p className="colophon-title">BestDeal &nbsp;&middot;&nbsp; A Continental Catalog Review</p>
+        <p className="colophon-title">BestDeal</p>
         <p className="colophon-body">
-          Typeset in Fraunces, Instrument Sans, and JetBrains Mono.
+          Every deal in Europe, in one place.
           <br />
-          Compiled weekly. Filed each Monday and Thursday.
+          Updated every Monday and Thursday.
           <br />
           All prices subject to local availability.
         </p>

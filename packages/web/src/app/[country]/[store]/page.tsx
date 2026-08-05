@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { storage } from "@/lib/storage";
 import { Header, getCountryName } from "@/components/Header";
 import { CatalogGrid } from "@/components/CatalogGrid";
+import { StoreList } from "@/components/StoreList";
 import { toDisplayName } from "@/lib/display-name";
 import { storeConfigExists, STORE_CONFIGS } from "@/lib/store-configs";
 import { isCatalogActive } from "@bestdeal/shared";
@@ -135,15 +136,18 @@ export default async function StorePage({
         ]}
       />
       <main className="container">
-        <h1 className="page-title">{storeName}</h1>
-        <p className="page-subtitle">
-          {activeCatalogs.length > 0
-            ? `${activeCatalogs.length} catalog${activeCatalogs.length !== 1 ? "s" : ""} · ${countryName}`
-            : countryName}
-        </p>
+        <div className="masthead">
+          <p className="masthead-kicker">{countryName}</p>
+          <h1 className="masthead-title">{storeName}</h1>
+          {activeCatalogs.length > 0 && (
+            <p className="masthead-byline">
+              {activeCatalogs.length} catalog{activeCatalogs.length !== 1 ? "s" : ""} available
+            </p>
+          )}
+        </div>
 
         {/* Store pills */}
-        <div className="store-list">
+        <StoreList>
           <Link href={`/${country}`}>
             <span className="store-pill">All Stores</span>
           </Link>
@@ -156,14 +160,12 @@ export default async function StorePage({
               </span>
             </Link>
           ))}
-        </div>
+        </StoreList>
 
         {catalogs.length === 0 ? (
           <div className="empty-state">
-            <span className="empty-state-ornament">&#10022;</span>
-            <span className="empty-state-kicker">On Press</span>
             <p className="empty-state-message">
-              This issue is at the printers &mdash; fresh leaflets arrive Monday morning.
+              No catalogs available yet &mdash; fresh leaflets arrive every Monday and Thursday.
             </p>
           </div>
         ) : (

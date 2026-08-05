@@ -567,9 +567,9 @@ a {
 }
 
 .freshness-expired {
-  background: transparent;
-  color: var(--ink-faded);
-  border: 1px solid var(--border);
+  background: rgba(107, 98, 88, 0.10);
+  color: var(--ink-soft);
+  border: 1px solid rgba(107, 98, 88, 0.28);
 }
 
 /* ============================================================

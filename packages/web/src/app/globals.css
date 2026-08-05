@@ -1187,7 +1187,11 @@ a {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
     padding-bottom: 6px;
-    /* Right-edge fade signals more chips are scrollable off-screen */
+  }
+
+  /* Right-edge fade signals more chips are scrollable off-screen — only
+     applied when JS confirms the list actually overflows (bestDeal-4vn.6) */
+  .store-list.is-scrollable {
     mask-image: linear-gradient(to right, black 0%, black 88%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, black 0%, black 88%, transparent 100%);
   }

@@ -1187,6 +1187,9 @@ a {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
     padding-bottom: 6px;
+    /* Right-edge fade signals more chips are scrollable off-screen */
+    mask-image: linear-gradient(to right, black 0%, black 88%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 0%, black 88%, transparent 100%);
   }
 
   .store-list::-webkit-scrollbar {

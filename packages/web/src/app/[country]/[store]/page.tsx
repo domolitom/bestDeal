@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { storage } from "@/lib/storage";
 import { Header, getCountryName } from "@/components/Header";
 import { CatalogGrid } from "@/components/CatalogGrid";
+import { StoreList } from "@/components/StoreList";
 import { toDisplayName } from "@/lib/display-name";
 import { storeConfigExists, STORE_CONFIGS } from "@/lib/store-configs";
 import { isCatalogActive } from "@bestdeal/shared";
@@ -146,7 +147,7 @@ export default async function StorePage({
         </div>
 
         {/* Store pills */}
-        <div className="store-list">
+        <StoreList>
           <Link href={`/${country}`}>
             <span className="store-pill">All Stores</span>
           </Link>
@@ -159,7 +160,7 @@ export default async function StorePage({
               </span>
             </Link>
           ))}
-        </div>
+        </StoreList>
 
         {catalogs.length === 0 ? (
           <div className="empty-state">

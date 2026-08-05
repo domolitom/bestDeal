@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { storage } from "@/lib/storage";
 import { Header, getCountryName } from "@/components/Header";
 import { CatalogStoreRows } from "@/components/CatalogStoreRows";
+import { StoreList } from "@/components/StoreList";
 import { toDisplayName } from "@/lib/display-name";
 import { STORE_CONFIGS } from "@/lib/store-configs";
 import { isCatalogActive } from "@bestdeal/shared";
@@ -229,7 +230,7 @@ export default async function CountryPage({
         </div>
 
         {/* Store filter pills */}
-        <div className="store-list">
+        <StoreList>
           <Link href={`/${country}`}>
             <span className="store-pill store-pill-active">All</span>
           </Link>
@@ -238,7 +239,7 @@ export default async function CountryPage({
               <span className="store-pill">{toDisplayName(store)}</span>
             </Link>
           ))}
-        </div>
+        </StoreList>
 
         <CatalogStoreRows catalogs={activeCatalogs} />
 

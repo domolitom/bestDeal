@@ -14,7 +14,7 @@
 
   --ink:          #2B2622;
   --ink-soft:     #6B6258;
-  --ink-faded:    #9A9183;
+  --ink-faded:    #786F63; /* darkened for WCAG AA (>=4.5:1) against --bg / --bg-elevated */
 
   --border:       #E6DDCF;
   --border-hover: #D6C9B3;
@@ -156,7 +156,7 @@ a {
 }
 
 .breadcrumb-sep {
-  color: var(--border-hover);
+  color: var(--ink-faded);
   font-family: var(--font-body, sans-serif);
 }
 
@@ -209,6 +209,7 @@ a {
 
 .store-pill {
   padding: 6px 16px;
+  min-height: 44px;
   border-radius: var(--radius-pill);
   font-family: var(--font-body, sans-serif);
   font-size: var(--text-sm);
@@ -220,6 +221,7 @@ a {
   transition: background var(--transition), border-color var(--transition), color var(--transition);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   white-space: nowrap;
 }
 
@@ -565,9 +567,9 @@ a {
 }
 
 .freshness-expired {
-  background: transparent;
-  color: var(--ink-faded);
-  border: 1px solid var(--border);
+  background: rgba(107, 98, 88, 0.10);
+  color: var(--ink-soft);
+  border: 1px solid rgba(107, 98, 88, 0.28);
 }
 
 /* ============================================================
@@ -637,6 +639,7 @@ a {
 /* View-mode toggle buttons — oak filled (active) vs. outlined (inactive) */
 .viewer-mode-btn {
   padding: 6px 16px;
+  min-height: 44px;
   border-radius: var(--radius-pill);
   font-family: var(--font-body, sans-serif);
   font-size: var(--text-sm);
@@ -647,6 +650,9 @@ a {
   color: var(--ink-soft);
   transition: background var(--transition), border-color var(--transition), color var(--transition);
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .viewer-mode-btn:hover {
@@ -1181,6 +1187,9 @@ a {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
     padding-bottom: 6px;
+    /* Right-edge fade signals more chips are scrollable off-screen */
+    mask-image: linear-gradient(to right, black 0%, black 88%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 0%, black 88%, transparent 100%);
   }
 
   .store-list::-webkit-scrollbar {

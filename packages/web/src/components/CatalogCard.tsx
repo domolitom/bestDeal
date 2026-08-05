@@ -5,7 +5,7 @@ import { CatalogCardImage } from "./CatalogCardImage";
 import { getCoverUrl } from "@/lib/image-url";
 import { toDisplayName } from "@/lib/display-name";
 
-function catalogTypeLabel(type: string): string | null {
+export function catalogTypeLabel(type: string): string | null {
   const labels: Record<string, string> = {
     kdz: "Weekly Deals",
     inlet: "Flyer Insert",

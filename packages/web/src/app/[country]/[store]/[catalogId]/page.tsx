@@ -5,7 +5,7 @@ import { storage } from "@/lib/storage";
 import { Header, getCountryName } from "@/components/Header";
 import { CatalogViewer } from "@/components/CatalogViewer";
 import { FreshnessIndicator, StatusBadge } from "@/components/FreshnessIndicator";
-import { CatalogCard } from "@/components/CatalogCard";
+import { CatalogCard, catalogTypeLabel } from "@/components/CatalogCard";
 import { formatDate, isCatalogActive } from "@bestdeal/shared";
 import type { CatalogSummary } from "@bestdeal/shared";
 import { toDisplayName } from "@/lib/display-name";
@@ -124,6 +124,7 @@ export default async function CatalogPage({
   const coverUrl = getCoverUrl(catalog);
   // scrapedAt is optional on CatalogMeta; fall back to dateFrom for temporal signals
   const publishedDate = catalog.scrapedAt ?? catalog.dateFrom;
+  const typeLabel = catalog.catalogType ? catalogTypeLabel(catalog.catalogType) : null;
 
   // "More from {storeName}" — same store, exclude current, up to 4
   const allStoreCatalogs = await storage.listCatalogs({ country, store, status: "ready" });
@@ -248,9 +249,9 @@ export default async function CatalogPage({
             <h1 className="page-title">
               {storeName}
             </h1>
-            {catalog.catalogType && (
+            {typeLabel !== null && (
               <span className="catalog-card-type">
-                {catalog.catalogType}
+                {typeLabel}
               </span>
             )}
             <StatusBadge dateTo={catalog.dateTo} />

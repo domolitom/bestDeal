@@ -209,6 +209,7 @@ a {
 
 .store-pill {
   padding: 6px 16px;
+  min-height: 44px;
   border-radius: var(--radius-pill);
   font-family: var(--font-body, sans-serif);
   font-size: var(--text-sm);
@@ -220,6 +221,7 @@ a {
   transition: background var(--transition), border-color var(--transition), color var(--transition);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   white-space: nowrap;
 }
 
@@ -637,6 +639,7 @@ a {
 /* View-mode toggle buttons — oak filled (active) vs. outlined (inactive) */
 .viewer-mode-btn {
   padding: 6px 16px;
+  min-height: 44px;
   border-radius: var(--radius-pill);
   font-family: var(--font-body, sans-serif);
   font-size: var(--text-sm);
@@ -647,6 +650,9 @@ a {
   color: var(--ink-soft);
   transition: background var(--transition), border-color var(--transition), color var(--transition);
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .viewer-mode-btn:hover {

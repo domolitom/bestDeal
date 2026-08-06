@@ -14,5 +14,5 @@
     "noImplicitOverride": true,
     "moduleResolution": "bundler"
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", "scripts"]
 }

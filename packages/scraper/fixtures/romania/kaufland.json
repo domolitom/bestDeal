@@ -1,0 +1,57 @@
+{
+  "recordedAt": "2026-08-06T14:56:08.104Z",
+  "store": "kaufland",
+  "country": "romania",
+  "path": "browser",
+  "payload": {
+    "links": [
+      {
+        "href": "https://leaflets.kaufland.com/ro-RO/RO_ro_leaflet6_3400_RO32-OC2/ar/3400",
+        "slug": "https://leaflets.kaufland.com/ro-RO/RO_ro_leaflet6_3400_RO32-OC2/ar/3400",
+        "dateText": "05.08.2026-11.08.2026\n\t\t\t\t\t\t\t Kaufland\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tRăsfoiește"
+      },
+      {
+        "href": "https://leaflets.kaufland.com/ro-RO/RO_ro_Magazine3_3400_RO32-OC3/ar/3400",
+        "slug": "https://leaflets.kaufland.com/ro-RO/RO_ro_Magazine3_3400_RO32-OC3/ar/3400",
+        "dateText": "05.08.2026-11.08.2026\n\t\t\t\t\t\t\t Kaufland\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tRăsfoiește"
+      },
+      {
+        "href": "https://leaflets.kaufland.com/ro-RO/RO_ro_Wrapper2_3400_RO32-CL4/ar/3400",
+        "slug": "https://leaflets.kaufland.com/ro-RO/RO_ro_Wrapper2_3400_RO32-CL4/ar/3400",
+        "dateText": "05.08.2026-11.08.2026\n\t\t\t\t\t\t\t Kaufland\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tRăsfoiește"
+      }
+    ]
+  },
+  "expected": [
+    {
+      "store": "kaufland",
+      "country": "romania",
+      "slug": "https://leaflets.kaufland.com/ro-RO/RO_ro_leaflet6_3400_RO32-OC2/ar/3400",
+      "dateFrom": "05-08",
+      "dateTo": "11-08-2026",
+      "firstPageUrl": "https://leaflets.kaufland.com/ro-RO/RO_ro_leaflet6_3400_RO32-OC2/view/flyer/page/1",
+      "coverImageUrl": "https://leaflets.kaufland.com/ro-RO/RO_ro_leaflet6_3400_RO32-OC2/view/flyer/page/1",
+      "catalogType": "leaflet"
+    },
+    {
+      "store": "kaufland",
+      "country": "romania",
+      "slug": "https://leaflets.kaufland.com/ro-RO/RO_ro_Magazine3_3400_RO32-OC3/ar/3400",
+      "dateFrom": "05-08",
+      "dateTo": "11-08-2026",
+      "firstPageUrl": "https://leaflets.kaufland.com/ro-RO/RO_ro_Magazine3_3400_RO32-OC3/view/flyer/page/1",
+      "coverImageUrl": "https://leaflets.kaufland.com/ro-RO/RO_ro_Magazine3_3400_RO32-OC3/view/flyer/page/1",
+      "catalogType": "magazine"
+    },
+    {
+      "store": "kaufland",
+      "country": "romania",
+      "slug": "https://leaflets.kaufland.com/ro-RO/RO_ro_Wrapper2_3400_RO32-CL4/ar/3400",
+      "dateFrom": "05-08",
+      "dateTo": "11-08-2026",
+      "firstPageUrl": "https://leaflets.kaufland.com/ro-RO/RO_ro_Wrapper2_3400_RO32-CL4/view/flyer/page/1",
+      "coverImageUrl": "https://leaflets.kaufland.com/ro-RO/RO_ro_Wrapper2_3400_RO32-CL4/view/flyer/page/1",
+      "catalogType": "wrapper"
+    }
+  ]
+}

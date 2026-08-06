@@ -114,12 +114,17 @@ async function createStorage(): Promise<StorageAdapter> {
 
 const storage = await createStorage();
 
+// Single wall-clock read for this process. Threaded through the pipeline so
+// discovery/manifest logic never calls `new Date()` internally, making it
+// deterministic and testable — see runPipeline/discoverAll `now` params.
+const now = new Date();
+
 // --manifest-only: regenerate the root manifest.json from all ready catalogs
 // without running discovery or scraping. Used by the CI finalize job.
 if (values["manifest-only"]) {
   log.info("manifest-only mode: regenerating manifest.json");
   try {
-    await generateManifest(storage);
+    await generateManifest(storage, undefined, now);
     log.info("manifest regenerated");
   } catch (err) {
     log.error("manifest regeneration failed", { err: String(err) });
@@ -205,6 +210,7 @@ try {
     country: values.country,
     store: values.store,
     discoverOnly: values["discover-only"],
+    now,
   });
 
   writeStepSummary(report, values.country ?? "all");

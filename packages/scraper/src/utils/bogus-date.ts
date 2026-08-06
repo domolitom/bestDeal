@@ -7,8 +7,11 @@ export const BOGUS_EXPIRY_DAYS = 30;
 /**
  * Returns a reason string if the dateFrom/dateTo pair is bogus, null otherwise.
  * "Bogus" means: unparseable, inverted, too far in the future, or too far expired.
+ *
+ * `now` defaults to the current time; pass an explicit value for
+ * deterministic/testable callers instead of relying on the wall clock.
  */
-export function hasBogusDate(dateFrom: string, dateTo: string): string | null {
+export function hasBogusDate(dateFrom: string, dateTo: string, now: Date = new Date()): string | null {
   const from = new Date(dateFrom);
   const to = new Date(dateTo);
 
@@ -19,7 +22,7 @@ export function hasBogusDate(dateFrom: string, dateTo: string): string | null {
     return `inverted dates (dateTo before dateFrom)`;
   }
 
-  const today = new Date();
+  const today = new Date(now);
   today.setHours(0, 0, 0, 0);
 
   const maxFuture = new Date(today);

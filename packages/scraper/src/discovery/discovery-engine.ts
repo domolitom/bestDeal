@@ -17,14 +17,6 @@ export interface DiscoveredCatalog {
   catalogType?: string;
 }
 
-interface RawLink {
-  href: string;
-  slug: string;
-  dateText: string;
-  /** Overridden firstPageUrl extracted from an iframe on the linked page */
-  iframeUrl?: string;
-}
-
 interface LeafletsApiFlyer {
   offerStartDate?: string;
   offerEndDate?: string;
@@ -33,8 +25,14 @@ interface LeafletsApiFlyer {
   category?: string;
 }
 
+/** Raw JSON body returned by the Leaflets `/v4/flyer` endpoint. */
+export interface LeafletsApiRawResponse {
+  flyer?: LeafletsApiFlyer;
+}
+
 /**
- * Fetch date information for a single flyer slug from the Leaflets API.
+ * PURE. Given an already-fetched Leaflets API flyer object, decide whether it
+ * should be ingested and, if so, extract its dates.
  *
  * Date field selection:
  *   - Prefers `offerStartDate`/`offerEndDate` which represent the actual offer
@@ -52,6 +50,52 @@ interface LeafletsApiFlyer {
  * Lithuania, Denmark, Serbia where the Schwarz API returns a single category
  * for all flyer types).
  *
+ * Returns ISO-formatted dates or null if the flyer is missing/filtered.
+ */
+export function parseLeafletsApiFlyer(
+  flyer: LeafletsApiFlyer | undefined | null,
+  slug: string,
+  allowedCategories?: string[],
+  maxSpanDays?: number
+): { dateFrom: string; dateTo: string } | null {
+  if (!flyer) return null;
+
+  // Category filter: skip non-allowed flyer types when an allowlist is set
+  if (allowedCategories && allowedCategories.length > 0) {
+    const cat = flyer.category ?? "";
+    if (!allowedCategories.includes(cat)) {
+      log.info(`skipping flyer "${slug}" (category "${cat}" not in allowlist)`);
+      return null;
+    }
+  }
+
+  const dateFrom = flyer.offerStartDate || flyer.startDate;
+  const dateTo = flyer.offerEndDate || flyer.endDate;
+  if (!dateFrom || !dateTo) return null;
+
+  // Span guard: reject flyers whose offer window exceeds the configured limit.
+  // Used for locales where the Schwarz API returns a single category for both
+  // weekly grocery flyers and multi-month seasonal/non-food catalogs.
+  if (maxSpanDays !== undefined) {
+    const msPerDay = 86_400_000;
+    const spanDays = (new Date(dateTo).getTime() - new Date(dateFrom).getTime()) / msPerDay;
+    if (spanDays > maxSpanDays) {
+      log.info(
+        `skipping flyer "${slug}" (span ${spanDays} days exceeds max ${maxSpanDays} days)`
+      );
+      return null;
+    }
+  }
+
+  return { dateFrom, dateTo };
+}
+
+/**
+ * IMPURE (network). Fetch date information for a single flyer slug from the
+ * Leaflets API. Thin wrapper around `parseLeafletsApiFlyer` kept for backward
+ * compatibility — callers that don't need fixture replay can use this
+ * directly.
+ *
  * Returns ISO-formatted dates or null if the call fails or flyer is filtered.
  */
 export async function fetchLeafletsApiDates(
@@ -67,51 +111,44 @@ export async function fetchLeafletsApiDates(
       log.warn(`Leaflets API ${resp.status} for slug: ${slug}`);
       return null;
     }
-    const data = await resp.json();
-    const flyer: LeafletsApiFlyer = data.flyer;
-    if (!flyer) return null;
-
-    // Category filter: skip non-allowed flyer types when an allowlist is set
-    if (allowedCategories && allowedCategories.length > 0) {
-      const cat = flyer.category ?? "";
-      if (!allowedCategories.includes(cat)) {
-        log.info(`skipping flyer "${slug}" (category "${cat}" not in allowlist)`);
-        return null;
-      }
-    }
-
-    const dateFrom = flyer.offerStartDate || flyer.startDate;
-    const dateTo = flyer.offerEndDate || flyer.endDate;
-    if (!dateFrom || !dateTo) return null;
-
-    // Span guard: reject flyers whose offer window exceeds the configured limit.
-    // Used for locales where the Schwarz API returns a single category for both
-    // weekly grocery flyers and multi-month seasonal/non-food catalogs.
-    if (maxSpanDays !== undefined) {
-      const msPerDay = 86_400_000;
-      const spanDays = (new Date(dateTo).getTime() - new Date(dateFrom).getTime()) / msPerDay;
-      if (spanDays > maxSpanDays) {
-        log.info(
-          `skipping flyer "${slug}" (span ${spanDays} days exceeds max ${maxSpanDays} days)`
-        );
-        return null;
-      }
-    }
-
-    return { dateFrom, dateTo };
+    const data: LeafletsApiRawResponse = await resp.json();
+    return parseLeafletsApiFlyer(data.flyer, slug, allowedCategories, maxSpanDays);
   } catch (err) {
     log.warn(`Leaflets API error for slug: ${slug}`, { err: String(err) });
     return null;
   }
 }
 
+/** Raw link data collected from the browser before any date/URL parsing. */
+export interface BrowserRawLink {
+  href: string;
+  slug: string;
+  dateText: string;
+  /** Overridden firstPageUrl extracted from an iframe on the linked page */
+  iframeUrl?: string;
+  /**
+   * Raw Leaflets API response for this link's slug (dateSource: "leaflets_api"
+   * only). `null` means the fetch failed or returned a non-OK status.
+   * Absent when dateSource isn't "leaflets_api".
+   */
+  leafletsApiRaw?: LeafletsApiRawResponse | null;
+}
+
+/** Serialisable raw payload for the browser (DOM + regex) discovery path. */
+export interface BrowserRawPayload {
+  links: BrowserRawLink[];
+}
+
 /**
- * Discover catalogs from a store's landing page using Playwright.
+ * IMPURE (Playwright + network). Navigate the store's landing page, collect
+ * candidate links, visit them when needed for text-based dates / iframe
+ * extraction, and (for leaflets_api stores) fetch raw flyer JSON per slug.
+ * Performs no parsing beyond what's needed to know which pages to visit next.
  */
-export async function discoverStore(
+export async function fetchRawBrowserStore(
   page: Page,
   storeDef: StoreDefinition
-): Promise<DiscoveredCatalog[]> {
+): Promise<BrowserRawPayload> {
   log.info(`discovering ${storeDef.name} catalogs...`);
   await page.goto(storeDef.landingUrl, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(storeDef.waitAfterLoad);
@@ -124,7 +161,7 @@ export async function discoverStore(
   const customSelector = storeDef.linkSelector || null;
   const customAttribute = storeDef.linkAttribute || null;
 
-  const rawLinks: RawLink[] = await page.evaluate(
+  const rawLinks: BrowserRawLink[] = await page.evaluate(
     ({ patterns, domain, customSelector, customAttribute }) => {
       const results: { href: string; slug: string; dateText: string }[] = [];
 
@@ -268,14 +305,51 @@ export async function discoverStore(
     await page.waitForTimeout(storeDef.waitAfterLoad);
   }
 
-  // For leaflets_api dateSource, derive the API host from the landing URL
-  const leafletsApiHost =
-    storeDef.dateSource === "leaflets_api"
-      ? deriveLeafletsApiHost(storeDef.landingUrl)
-      : null;
+  // For leaflets_api dateSource, derive the API host from the landing URL and
+  // eagerly fetch raw flyer JSON per link — this is the last piece of network
+  // I/O for this store; everything after fetchRawBrowserStore returns is pure.
+  if (storeDef.dateSource === "leaflets_api") {
+    const leafletsApiHost = deriveLeafletsApiHost(storeDef.landingUrl);
+    if (leafletsApiHost) {
+      for (const raw of rawLinks) {
+        // Use the slug as the flyer identifier — it is extracted from the
+        // link pattern (slugGroup).
+        const apiUrl = `https://${leafletsApiHost}/v4/flyer?flyer_identifier=${encodeURIComponent(raw.slug)}`;
+        try {
+          const resp = await fetch(apiUrl);
+          if (resp.ok) {
+            raw.leafletsApiRaw = await resp.json();
+          } else {
+            log.warn(`Leaflets API ${resp.status} for slug: ${raw.slug}`);
+            raw.leafletsApiRaw = null;
+          }
+        } catch (err) {
+          log.warn(`Leaflets API error for slug: ${raw.slug}`, { err: String(err) });
+          raw.leafletsApiRaw = null;
+        }
+      }
+    }
+  }
+
+  log.info(`fetched ${rawLinks.length} raw ${storeDef.name} link(s)`);
+  return { links: rawLinks };
+}
+
+/**
+ * PURE. Turn a BrowserRawPayload into DiscoveredCatalog[]. No fetch, no page,
+ * no I/O. `now` is accepted for signature consistency with the other parse
+ * paths even though this store's date logic is relative (dateFrom/dateTo
+ * pairs from the payload), not wall-clock dependent.
+ */
+export function parseRawBrowserStore(
+  payload: BrowserRawPayload,
+  storeDef: StoreDefinition,
+  now: Date = new Date()
+): DiscoveredCatalog[] {
+  void now;
 
   const discovered: DiscoveredCatalog[] = [];
-  for (const raw of rawLinks) {
+  for (const raw of payload.links) {
     let firstPageUrl = raw.iframeUrl || raw.href;
     if (!raw.iframeUrl) {
       for (const lp of storeDef.linkPatterns) {
@@ -301,10 +375,13 @@ export async function discoverStore(
     ) {
       dates = parseDates(raw.dateText, storeDef.datePatterns);
     }
-    if (!dates && storeDef.dateSource === "leaflets_api" && leafletsApiHost) {
-      // Use the slug as the flyer identifier to fetch dates from the Leaflets API.
-      // The slug is extracted from the link pattern (slugGroup) — it is the flyer identifier.
-      dates = await fetchLeafletsApiDates(raw.slug, leafletsApiHost, storeDef.leafletsAllowedCategories, storeDef.leafletsMaxSpanDays);
+    if (!dates && storeDef.dateSource === "leaflets_api") {
+      dates = parseLeafletsApiFlyer(
+        raw.leafletsApiRaw?.flyer,
+        raw.slug,
+        storeDef.leafletsAllowedCategories,
+        storeDef.leafletsMaxSpanDays
+      );
     }
 
     if (!dates) {
@@ -334,14 +411,34 @@ export async function discoverStore(
 }
 
 /**
- * Discover catalogs via API-based discovery.
- * Extracts catalog IDs from DOM data attributes, then fetches
- * catalog metadata from an API endpoint.
+ * Discover catalogs from a store's landing page using Playwright.
+ * Thin composition of fetchRawBrowserStore + parseRawBrowserStore — kept for
+ * callers that don't need fixture replay (this is what the pipeline uses).
  */
-export async function discoverStoreViaApi(
+export async function discoverStore(
+  page: Page,
+  storeDef: StoreDefinition,
+  now: Date = new Date()
+): Promise<DiscoveredCatalog[]> {
+  const payload = await fetchRawBrowserStore(page, storeDef);
+  return parseRawBrowserStore(payload, storeDef, now);
+}
+
+/** Serialisable raw payload for the DOM-id + JSON-API discovery path. */
+export interface ApiDiscoveryRawPayload {
+  catalogIds: string[];
+  /** Raw JSON response body per catalog ID; `null` = fetch failed / non-OK. */
+  responses: Record<string, unknown | null>;
+}
+
+/**
+ * IMPURE (Playwright + network). Extract catalog IDs from DOM data
+ * attributes, then fetch each catalog's raw JSON from the API endpoint.
+ */
+export async function fetchRawViaApi(
   page: Page,
   storeDef: StoreDefinition
-): Promise<DiscoveredCatalog[]> {
+): Promise<ApiDiscoveryRawPayload> {
   const api = storeDef.apiDiscovery!;
   log.info(`discovering ${storeDef.name} catalogs via API...`);
 
@@ -364,12 +461,12 @@ export async function discoverStoreViaApi(
 
   if (catalogIds.length === 0) {
     log.info(`no catalog IDs found for ${storeDef.name}`);
-    return [];
+    return { catalogIds: [], responses: {} };
   }
 
   log.info(`found ${catalogIds.length} catalog ID(s) for ${storeDef.name}`);
 
-  const discovered: DiscoveredCatalog[] = [];
+  const responses: Record<string, unknown | null> = {};
 
   for (const id of catalogIds) {
     const apiUrl = api.apiUrl.replace("{id}", id);
@@ -377,51 +474,73 @@ export async function discoverStoreViaApi(
       const resp = await fetch(apiUrl);
       if (!resp.ok) {
         log.info(`API ${resp.status} for ${storeDef.name} catalog ${id}`);
+        responses[id] = null;
         continue;
       }
-
-      const data = await resp.json();
-
-      const firstPageUrl = data[api.fieldMap.firstPageUrl];
-      const rawDateFrom = data[api.fieldMap.dateFrom];
-      const rawDateTo = data[api.fieldMap.dateTo];
-
-      if (!firstPageUrl || !rawDateFrom || !rawDateTo) {
-        log.info(`skipping ${storeDef.name} catalog ${id} (missing fields)`);
-        continue;
-      }
-
-      // Parse dates through datePatterns if available, otherwise use raw
-      let dateFrom = rawDateFrom;
-      let dateTo = rawDateTo;
-      if (storeDef.datePatterns?.length) {
-        const parsedFrom = parseDates(rawDateFrom, storeDef.datePatterns);
-        const parsedTo = parseDates(rawDateTo, storeDef.datePatterns);
-        if (parsedFrom) dateFrom = parsedFrom.dateFrom;
-        if (parsedTo) dateTo = parsedTo.dateTo;
-      }
-
-      const coverImageUrl = api.fieldMap.coverImageUrl
-        ? data[api.fieldMap.coverImageUrl] || firstPageUrl
-        : firstPageUrl;
-
-      const catalogType = api.fieldMap.catalogType
-        ? data[api.fieldMap.catalogType]
-        : undefined;
-
-      discovered.push({
-        store: storeDef.name,
-        country: storeDef.country,
-        slug: id,
-        dateFrom,
-        dateTo,
-        firstPageUrl,
-        coverImageUrl,
-        catalogType: catalogType || undefined,
-      });
+      responses[id] = await resp.json();
     } catch (err) {
       log.warn(`API error for ${storeDef.name} catalog ${id}`, { err: String(err) });
+      responses[id] = null;
     }
+  }
+
+  return { catalogIds, responses };
+}
+
+/**
+ * PURE. Turn an ApiDiscoveryRawPayload into DiscoveredCatalog[]. No fetch,
+ * no page, no I/O.
+ */
+export function parseRawViaApi(
+  payload: ApiDiscoveryRawPayload,
+  storeDef: StoreDefinition,
+  now: Date = new Date()
+): DiscoveredCatalog[] {
+  void now;
+  const api = storeDef.apiDiscovery!;
+  const discovered: DiscoveredCatalog[] = [];
+
+  for (const id of payload.catalogIds) {
+    const data = payload.responses[id] as Record<string, unknown> | null | undefined;
+    if (data == null) continue;
+
+    const firstPageUrl = data[api.fieldMap.firstPageUrl] as string | undefined;
+    const rawDateFrom = data[api.fieldMap.dateFrom] as string | undefined;
+    const rawDateTo = data[api.fieldMap.dateTo] as string | undefined;
+
+    if (!firstPageUrl || !rawDateFrom || !rawDateTo) {
+      log.info(`skipping ${storeDef.name} catalog ${id} (missing fields)`);
+      continue;
+    }
+
+    // Parse dates through datePatterns if available, otherwise use raw
+    let dateFrom = rawDateFrom;
+    let dateTo = rawDateTo;
+    if (storeDef.datePatterns?.length) {
+      const parsedFrom = parseDates(rawDateFrom, storeDef.datePatterns);
+      const parsedTo = parseDates(rawDateTo, storeDef.datePatterns);
+      if (parsedFrom) dateFrom = parsedFrom.dateFrom;
+      if (parsedTo) dateTo = parsedTo.dateTo;
+    }
+
+    const coverImageUrl = api.fieldMap.coverImageUrl
+      ? (data[api.fieldMap.coverImageUrl] as string | undefined) || firstPageUrl
+      : firstPageUrl;
+
+    const catalogType = api.fieldMap.catalogType
+      ? (data[api.fieldMap.catalogType] as string | undefined)
+      : undefined;
+
+    discovered.push({
+      store: storeDef.name,
+      country: storeDef.country,
+      slug: id,
+      dateFrom,
+      dateTo,
+      firstPageUrl,
+      coverImageUrl,
+      catalogType: catalogType || undefined,
+    });
   }
 
   log.info(`found ${discovered.length} ${storeDef.name} catalog(s) via API`);
@@ -429,26 +548,69 @@ export async function discoverStoreViaApi(
 }
 
 /**
- * Discover catalogs via a plain JSON REST endpoint (no Playwright required).
- *
- * The endpoint must return a JSON array (or an object with an `arrayField`).
- * Each element is scanned for `urlField`.  Duplicate URLs are removed.
- *
- * Dates are fetched from the blaetterkatalog catalog viewer page:
- *   - catalogName contains "KW{n}-{yy}" which is parsed via toISODate()
- *   - The same KW value maps to the same date range, so duplicates are dropped
+ * Discover catalogs via API-based discovery.
+ * Extracts catalog IDs from DOM data attributes, then fetches
+ * catalog metadata from an API endpoint.
+ * Thin composition of fetchRawViaApi + parseRawViaApi.
+ */
+export async function discoverStoreViaApi(
+  page: Page,
+  storeDef: StoreDefinition,
+  now: Date = new Date()
+): Promise<DiscoveredCatalog[]> {
+  const payload = await fetchRawViaApi(page, storeDef);
+  return parseRawViaApi(payload, storeDef, now);
+}
+
+/** Serialisable raw payload for the plain-JSON REST endpoint discovery path. */
+export interface RestApiRawPayload {
+  /** Raw endpoint JSON, or `null` if the fetch failed / returned non-OK. */
+  endpointJson: unknown | null;
+  /** Raw HTML per unique viewer URL; `null` = fetch failed / non-OK. */
+  viewerPages: Record<string, string | null>;
+}
+
+/**
+ * PURE. Extract the unique, non-empty viewer URLs referenced by `cfg.urlField`
+ * from the endpoint JSON, in first-seen order. Shared by fetchRaw (to know
+ * which pages to fetch) and parseRaw (to iterate in the same order).
+ */
+function extractRestApiUrls(
+  endpointJson: unknown,
+  cfg: NonNullable<StoreDefinition["restApiDiscovery"]>
+): string[] {
+  let items: unknown[];
+  if (cfg.arrayField) {
+    items = ((endpointJson as Record<string, unknown> | null)?.[cfg.arrayField] as unknown[]) ?? [];
+  } else {
+    items = Array.isArray(endpointJson) ? endpointJson : [];
+  }
+
+  const uniqueUrls = new Set<string>();
+  for (const item of items) {
+    if (typeof item !== "object" || item === null) continue;
+    const val = (item as Record<string, unknown>)[cfg.urlField];
+    if (typeof val === "string" && val.trim()) {
+      uniqueUrls.add(val.trim());
+    }
+  }
+  return [...uniqueUrls];
+}
+
+/**
+ * IMPURE (network, no Playwright required). Fetch the JSON REST endpoint,
+ * then fetch each unique viewer page's raw HTML.
  *
  * This is used by Penny DE which exposes catalog viewer URLs via
  *   https://www.penny.de/.rest/market → [{flippingBookURL: "...catalogId=N"}, ...]
  */
-export async function discoverStoreViaRestApi(
+export async function fetchRawViaRestApi(
   storeDef: StoreDefinition
-): Promise<DiscoveredCatalog[]> {
+): Promise<RestApiRawPayload> {
   const cfg = storeDef.restApiDiscovery!;
   log.info(`discovering ${storeDef.name} catalogs via REST API: ${cfg.endpoint}`);
 
-  // 1. Fetch the JSON endpoint
-  let items: unknown[];
+  let endpointJson: unknown | null = null;
   try {
     const resp = await fetch(cfg.endpoint, {
       signal: AbortSignal.timeout(30000),
@@ -460,41 +622,23 @@ export async function discoverStoreViaRestApi(
     });
     if (!resp.ok) {
       log.warn(`REST API ${resp.status} for ${storeDef.name}`);
-      return [];
+      return { endpointJson: null, viewerPages: {} };
     }
-    const json = await resp.json();
-    if (cfg.arrayField) {
-      items = (json as Record<string, unknown>)[cfg.arrayField] as unknown[] ?? [];
-    } else {
-      items = Array.isArray(json) ? json : [];
-    }
+    endpointJson = await resp.json();
   } catch (err) {
     log.warn(`REST API fetch error for ${storeDef.name}`, { err: String(err) });
-    return [];
+    return { endpointJson: null, viewerPages: {} };
   }
 
-  // 2. Extract unique non-null viewer URLs
-  const uniqueUrls = new Set<string>();
-  for (const item of items) {
-    if (typeof item !== "object" || item === null) continue;
-    const val = (item as Record<string, unknown>)[cfg.urlField];
-    if (typeof val === "string" && val.trim()) {
-      uniqueUrls.add(val.trim());
-    }
-  }
-
-  if (uniqueUrls.size === 0) {
+  const uniqueUrls = extractRestApiUrls(endpointJson, cfg);
+  if (uniqueUrls.length === 0) {
     log.info(`no catalog URLs found for ${storeDef.name}`);
-    return [];
+    return { endpointJson, viewerPages: {} };
   }
 
-  log.info(`found ${uniqueUrls.size} unique catalog URL(s) for ${storeDef.name}`);
+  log.info(`found ${uniqueUrls.length} unique catalog URL(s) for ${storeDef.name}`);
 
-  // 3. For each unique URL, fetch the viewer page to get catalog dates
-  //    Deduplicate by date range (same KW week → same date range).
-  const seenDateRanges = new Set<string>();
-  const discovered: DiscoveredCatalog[] = [];
-
+  const viewerPages: Record<string, string | null> = {};
   for (const viewerUrl of uniqueUrls) {
     try {
       const resp = await fetch(viewerUrl, {
@@ -506,53 +650,93 @@ export async function discoverStoreViaRestApi(
       });
       if (!resp.ok) {
         log.info(`catalog page ${resp.status}: ${viewerUrl}`);
+        viewerPages[viewerUrl] = null;
         continue;
       }
-
-      const html = await resp.text();
-
-      // Extract catalogName from: var catalogName = 'PENNY-HZ-KW20-15A-08-26';
-      const nameMatch = html.match(/var\s+catalogName\s*=\s*['"]([^'"]+)['"]/);
-      if (!nameMatch) {
-        log.info(`no catalogName found in: ${viewerUrl}`);
-        continue;
-      }
-      const catalogName = nameMatch[1]!;
-
-      // Extract KW from catalog name, e.g. "PENNY-HZ-KW20-15A-08-26" → "KW20-26"
-      const kwMatch = catalogName.match(/KW(\d+)-(?:[\w]+-)*(\d{2})(?:$|-)/);
-      if (!kwMatch) {
-        log.info(`no KW date found in catalogName "${catalogName}": ${viewerUrl}`);
-        continue;
-      }
-
-      const kwCode = `KW${kwMatch[1]}-${kwMatch[2]}`;
-      const dateFrom = toISODate(kwCode);
-      const dateTo = toISODate(kwCode, undefined, true);
-      const dateKey = `${dateFrom}|${dateTo}`;
-
-      if (seenDateRanges.has(dateKey)) {
-        // Same week, different regional edition — skip duplicate
-        continue;
-      }
-      seenDateRanges.add(dateKey);
-
-      discovered.push({
-        store: storeDef.name,
-        country: storeDef.country,
-        slug: catalogName,
-        dateFrom,
-        dateTo,
-        firstPageUrl: viewerUrl,
-        coverImageUrl: viewerUrl,
-      });
+      viewerPages[viewerUrl] = await resp.text();
     } catch (err) {
       log.warn(`failed to fetch catalog page ${viewerUrl}`, { err: String(err) });
+      viewerPages[viewerUrl] = null;
     }
+  }
+
+  return { endpointJson, viewerPages };
+}
+
+/**
+ * PURE. Turn a RestApiRawPayload into DiscoveredCatalog[]. No fetch, no I/O.
+ *
+ * Dates come from the blaetterkatalog catalog viewer page HTML:
+ *   - catalogName contains "KW{n}-{yy}" which is parsed via toISODate()
+ *   - The same KW value maps to the same date range, so duplicates are dropped
+ */
+export function parseRawViaRestApi(
+  payload: RestApiRawPayload,
+  storeDef: StoreDefinition,
+  now: Date = new Date()
+): DiscoveredCatalog[] {
+  void now;
+  const cfg = storeDef.restApiDiscovery!;
+  const uniqueUrls = extractRestApiUrls(payload.endpointJson, cfg);
+
+  const seenDateRanges = new Set<string>();
+  const discovered: DiscoveredCatalog[] = [];
+
+  for (const viewerUrl of uniqueUrls) {
+    const html = payload.viewerPages[viewerUrl];
+    if (!html) continue;
+
+    // Extract catalogName from: var catalogName = 'PENNY-HZ-KW20-15A-08-26';
+    const nameMatch = html.match(/var\s+catalogName\s*=\s*['"]([^'"]+)['"]/);
+    if (!nameMatch) {
+      log.info(`no catalogName found in: ${viewerUrl}`);
+      continue;
+    }
+    const catalogName = nameMatch[1]!;
+
+    // Extract KW from catalog name, e.g. "PENNY-HZ-KW20-15A-08-26" → "KW20-26"
+    const kwMatch = catalogName.match(/KW(\d+)-(?:[\w]+-)*(\d{2})(?:$|-)/);
+    if (!kwMatch) {
+      log.info(`no KW date found in catalogName "${catalogName}": ${viewerUrl}`);
+      continue;
+    }
+
+    const kwCode = `KW${kwMatch[1]}-${kwMatch[2]}`;
+    const dateFrom = toISODate(kwCode);
+    const dateTo = toISODate(kwCode, undefined, true);
+    const dateKey = `${dateFrom}|${dateTo}`;
+
+    if (seenDateRanges.has(dateKey)) {
+      // Same week, different regional edition — skip duplicate
+      continue;
+    }
+    seenDateRanges.add(dateKey);
+
+    discovered.push({
+      store: storeDef.name,
+      country: storeDef.country,
+      slug: catalogName,
+      dateFrom,
+      dateTo,
+      firstPageUrl: viewerUrl,
+      coverImageUrl: viewerUrl,
+    });
   }
 
   log.info(`found ${discovered.length} unique ${storeDef.name} catalog(s) via REST API`);
   return discovered;
+}
+
+/**
+ * Discover catalogs via a plain JSON REST endpoint (no Playwright required).
+ * Thin composition of fetchRawViaRestApi + parseRawViaRestApi.
+ */
+export async function discoverStoreViaRestApi(
+  storeDef: StoreDefinition,
+  now: Date = new Date()
+): Promise<DiscoveredCatalog[]> {
+  const payload = await fetchRawViaRestApi(storeDef);
+  return parseRawViaRestApi(payload, storeDef, now);
 }
 
 // --- Shopfully Cloud types ---
@@ -577,18 +761,20 @@ interface ShopfullyFlyersResponse {
   };
 }
 
+/** Serialisable raw payload for the Shopfully Cloud discovery path. */
+export interface ShopfullyRawPayload {
+  /** Raw API response, or `null` if the fetch failed / returned non-OK. */
+  response: ShopfullyFlyersResponse | null;
+}
+
 /**
- * Discover catalogs via the Shopfully Cloud properties API.
- *
- * Calls the CloudFront-backed properties endpoint:
+ * IMPURE (network). Calls the Shopfully Cloud CloudFront-backed properties
+ * endpoint:
  *   GET /v1/{language}/{propertyId}/flyers?lat={lat}&lng={lng}
- *
- * Returns one DiscoveredCatalog per unique publication (deduplicated by
- * publication_url). The firstPageUrl is the PDF URL from lastPubblication.
  */
-export async function discoverStoreViaShopfully(
+export async function fetchRawShopfully(
   storeDef: StoreDefinition
-): Promise<DiscoveredCatalog[]> {
+): Promise<ShopfullyRawPayload> {
   const cfg = storeDef.shopfullyConfig!;
   log.info(`discovering ${storeDef.name} catalogs via Shopfully Cloud...`);
 
@@ -599,7 +785,6 @@ export async function discoverStoreViaShopfully(
     `${apiBase}/v1/${cfg.language}/${cfg.propertyId}/flyers` +
     `?lat=${cfg.lat}&lng=${cfg.lng}`;
 
-  let data: ShopfullyFlyersResponse;
   try {
     const resp = await fetch(url, {
       headers: {
@@ -612,14 +797,33 @@ export async function discoverStoreViaShopfully(
     });
     if (!resp.ok) {
       log.warn(`Shopfully API ${resp.status} for ${storeDef.name}`);
-      return [];
+      return { response: null };
     }
-    data = await resp.json();
+    const data: ShopfullyFlyersResponse = await resp.json();
+    return { response: data };
   } catch (err) {
     log.warn(`Shopfully API error for ${storeDef.name}`, { err: String(err) });
+    return { response: null };
+  }
+}
+
+/**
+ * PURE. Turn a ShopfullyRawPayload into DiscoveredCatalog[]. No fetch, no I/O.
+ *
+ * Returns one DiscoveredCatalog per unique publication (deduplicated by
+ * publication_url). The firstPageUrl is the PDF URL from lastPubblication.
+ */
+export function parseRawShopfully(
+  payload: ShopfullyRawPayload,
+  storeDef: StoreDefinition,
+  now: Date = new Date()
+): DiscoveredCatalog[] {
+  void now;
+  const data = payload.response;
+  if (!data) {
+    // Fetch failure was already logged by fetchRawShopfully.
     return [];
   }
-
   if (data.status !== "SUCCESS" || !data.data?.list) {
     log.warn(`Shopfully API bad response for ${storeDef.name}: ${data.status}`);
     return [];
@@ -666,6 +870,18 @@ export async function discoverStoreViaShopfully(
   return discovered;
 }
 
+/**
+ * Discover catalogs via the Shopfully Cloud properties API.
+ * Thin composition of fetchRawShopfully + parseRawShopfully.
+ */
+export async function discoverStoreViaShopfully(
+  storeDef: StoreDefinition,
+  now: Date = new Date()
+): Promise<DiscoveredCatalog[]> {
+  const payload = await fetchRawShopfully(storeDef);
+  return parseRawShopfully(payload, storeDef, now);
+}
+
 // --- Leaflets Overview API types ---
 
 interface LeafletsOverviewFlyer {
@@ -706,9 +922,19 @@ interface LeafletsOverviewResponse {
  * The `flyerUrlAbsolute` from the API is used as firstPageUrl after applying
  * the store's `linkPatterns` normalizeUrl transforms.
  */
-export async function discoverStoreViaLeafletsOverview(
+/** Serialisable raw payload for the Leaflets Schwarz overview API discovery path. */
+export interface LeafletsOverviewRawPayload {
+  /** Raw API response, or `null` if the fetch failed / returned non-OK. */
+  response: LeafletsOverviewResponse | null;
+}
+
+/**
+ * IMPURE (network). Calls the Leaflets Schwarz `/v4/overview` endpoint for
+ * the configured `client_locale`.
+ */
+export async function fetchRawLeafletsOverview(
   storeDef: StoreDefinition
-): Promise<DiscoveredCatalog[]> {
+): Promise<LeafletsOverviewRawPayload> {
   const cfg = storeDef.leafletsOverviewConfig!;
   log.info(`discovering ${storeDef.name} catalogs via Leaflets overview API...`);
 
@@ -716,7 +942,6 @@ export async function discoverStoreViaLeafletsOverview(
     `https://endpoints.leaflets.schwarz/v4/overview` +
     `?client_locale=${encodeURIComponent(cfg.clientLocale)}&region_id=0&store_id=0`;
 
-  let data: LeafletsOverviewResponse;
   try {
     const resp = await fetch(apiUrl, {
       headers: {
@@ -728,14 +953,33 @@ export async function discoverStoreViaLeafletsOverview(
     });
     if (!resp.ok) {
       log.warn(`Leaflets overview API ${resp.status} for ${storeDef.name}`);
-      return [];
+      return { response: null };
     }
-    data = await resp.json();
+    const data: LeafletsOverviewResponse = await resp.json();
+    return { response: data };
   } catch (err) {
     log.warn(`Leaflets overview API error for ${storeDef.name}`, { err: String(err) });
+    return { response: null };
+  }
+}
+
+/**
+ * PURE. Turn a LeafletsOverviewRawPayload into DiscoveredCatalog[]. No fetch,
+ * no I/O.
+ */
+export function parseRawLeafletsOverview(
+  payload: LeafletsOverviewRawPayload,
+  storeDef: StoreDefinition,
+  now: Date = new Date()
+): DiscoveredCatalog[] {
+  void now;
+  const cfg = storeDef.leafletsOverviewConfig!;
+  const data = payload.response;
+
+  if (!data) {
+    // Fetch failure was already logged by fetchRawLeafletsOverview.
     return [];
   }
-
   if (!data.success || !data.categories) {
     log.warn(`Leaflets overview API bad response for ${storeDef.name}`);
     return [];
@@ -804,4 +1048,27 @@ export async function discoverStoreViaLeafletsOverview(
 
   log.info(`found ${discovered.length} ${storeDef.name} catalog(s) via Leaflets overview`);
   return discovered;
+}
+
+/**
+ * Discover catalogs via the Leaflets Schwarz /v4/overview API.
+ * Thin composition of fetchRawLeafletsOverview + parseRawLeafletsOverview.
+ *
+ * This is used for Lidl country pages where weekly flyers are rendered as
+ * regionalized <button> elements (not <a> links), which prevents standard
+ * DOM-based link discovery.  The overview API returns all flyers for a given
+ * locale directly, without needing a browser.
+ *
+ * The `leafletsOverviewConfig.subcategoryFilter` restricts results to a single
+ * subcategory (e.g. "Volantini settimanali" for Lidl IT).
+ *
+ * The `flyerUrlAbsolute` from the API is used as firstPageUrl after applying
+ * the store's `linkPatterns` normalizeUrl transforms.
+ */
+export async function discoverStoreViaLeafletsOverview(
+  storeDef: StoreDefinition,
+  now: Date = new Date()
+): Promise<DiscoveredCatalog[]> {
+  const payload = await fetchRawLeafletsOverview(storeDef);
+  return parseRawLeafletsOverview(payload, storeDef, now);
 }

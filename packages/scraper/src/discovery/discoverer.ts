@@ -67,11 +67,15 @@ const MAX_DATE_SPAN_DAYS = 365;
  * - dateTo must not be more than 1 year in the future from today
  * - the span (dateTo - dateFrom) must not exceed 365 days
  *
+ * `now` defaults to the current time; pass an explicit value for
+ * deterministic/testable callers instead of relying on the wall clock.
+ *
  * Returns null when valid, or a human-readable rejection reason string.
  */
 export function validateCatalogDates(
   dateFrom: string,
-  dateTo: string
+  dateTo: string,
+  now: Date = new Date()
 ): string | null {
   const from = new Date(dateFrom);
   const to = new Date(dateTo);
@@ -84,7 +88,7 @@ export function validateCatalogDates(
     return `dateTo "${dateTo}" is before dateFrom "${dateFrom}" (inverted dates)`;
   }
 
-  const today = new Date();
+  const today = new Date(now);
   today.setHours(0, 0, 0, 0);
 
   const maxDateTo = new Date(today);
@@ -154,13 +158,16 @@ export interface DiscoverOptions {
   store?: string;
   discoverOnly?: boolean;
   storage: StorageAdapter;
+  /** Clock injection for deterministic runs; defaults to the current time. */
+  now?: Date;
 }
 
 export async function discoverAll(
   options: DiscoverOptions
 ): Promise<DiscoveryReport> {
+  const now = options.now ?? new Date();
   const report: DiscoveryReport = {
-    timestamp: new Date().toISOString(),
+    timestamp: now.toISOString(),
     stores: [],
     summary: { total: 0, new: 0, existing: 0 },
   };
@@ -210,15 +217,15 @@ export async function discoverAll(
       let catalogs: DiscoveredCatalog[];
       try {
         if (storeDef.shopfullyConfig) {
-          catalogs = await discoverStoreViaShopfully(storeDef);
+          catalogs = await discoverStoreViaShopfully(storeDef, now);
         } else if (storeDef.leafletsOverviewConfig) {
-          catalogs = await discoverStoreViaLeafletsOverview(storeDef);
+          catalogs = await discoverStoreViaLeafletsOverview(storeDef, now);
         } else if (storeDef.restApiDiscovery) {
-          catalogs = await discoverStoreViaRestApi(storeDef);
+          catalogs = await discoverStoreViaRestApi(storeDef, now);
         } else if (storeDef.apiDiscovery) {
-          catalogs = await discoverStoreViaApi(page, storeDef);
+          catalogs = await discoverStoreViaApi(page, storeDef, now);
         } else {
-          catalogs = await discoverStore(page, storeDef);
+          catalogs = await discoverStore(page, storeDef, now);
         }
       } catch (err) {
         log.error(`failed to discover ${storeDef.name}`, { err: String(err) });
@@ -262,11 +269,11 @@ export async function discoverAll(
           // Resolve ISO dates and validate before persisting
           const isoDateFrom = toISODate(
             catalog.dateFrom,
-            extractYear(catalog.dateTo)
+            extractYear(catalog.dateTo, now)
           );
           const isoDateTo = toISODate(catalog.dateTo, undefined, true);
 
-          const dateError = validateCatalogDates(isoDateFrom, isoDateTo);
+          const dateError = validateCatalogDates(isoDateFrom, isoDateTo, now);
           if (dateError) {
             log.warn(`skipping bogus catalog: ${catalogId} — ${dateError}`);
             continue;
@@ -283,7 +290,7 @@ export async function discoverAll(
             catalogType: catalog.catalogType,
             coverImage: "cover.jpg",
             pageCount: lastPage ?? 0,
-            discoveredAt: new Date().toISOString(),
+            discoveredAt: now.toISOString(),
             _scraping: {
               resolver: resolverName,
               firstPageUrl: catalog.firstPageUrl,
@@ -319,11 +326,11 @@ export async function discoverAll(
   return report;
 }
 
-function extractYear(dateTo: string): number {
+function extractYear(dateTo: string, now: Date): number {
   const parts = dateTo.split("-");
   if (parts.length === 3) {
     const year = parseInt(parts[2]!, 10);
     if (!isNaN(year)) return year;
   }
-  return new Date().getFullYear();
+  return now.getFullYear();
 }

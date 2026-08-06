@@ -5,7 +5,8 @@
   "scripts": {
     "scraper": "bun run src/cli.ts",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "record-fixtures": "bun run scripts/record-fixtures.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1009.0",

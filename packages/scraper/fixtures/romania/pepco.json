@@ -1,0 +1,10 @@
+{
+  "recordedAt": "2026-08-06T14:52:45.761Z",
+  "store": "pepco",
+  "country": "romania",
+  "path": "browser",
+  "payload": {
+    "links": []
+  },
+  "expected": []
+}

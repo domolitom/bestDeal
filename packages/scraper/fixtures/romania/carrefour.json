@@ -1,0 +1,74 @@
+{
+  "recordedAt": "2026-08-06T14:55:32.064Z",
+  "store": "carrefour",
+  "country": "romania",
+  "path": "api",
+  "payload": {
+    "catalogIds": [
+      "3207",
+      "3208",
+      "3209",
+      "3206"
+    ],
+    "responses": {
+      "3206": {
+        "catalog_link": "https://cataloage.carrefour.ro/28a-mr-nonfood-5-08-25-08-2026/page/1",
+        "start_date": "05-08-2026",
+        "end_date": "25-08-2026"
+      },
+      "3207": {
+        "catalog_link": "https://cataloage.carrefour.ro/28-hyper-mr-food-5-08-11-08-2026/page/1",
+        "start_date": "05-08-2026",
+        "end_date": "11-08-2026"
+      },
+      "3208": {
+        "catalog_link": "https://cataloage.carrefour.ro/28-market-mr-food-5-08-11-08-2026/page/1",
+        "start_date": "05-08-2026",
+        "end_date": "11-08-2026"
+      },
+      "3209": {
+        "catalog_link": "https://cataloage.carrefour.ro/28b-hyper-special-italian-week-5-08-18-08-2026/page/1",
+        "start_date": "05-08-2026",
+        "end_date": "18-08-2026"
+      }
+    }
+  },
+  "expected": [
+    {
+      "store": "carrefour",
+      "country": "romania",
+      "slug": "3207",
+      "dateFrom": "05-08-2026",
+      "dateTo": "11-08-2026",
+      "firstPageUrl": "https://cataloage.carrefour.ro/28-hyper-mr-food-5-08-11-08-2026/page/1",
+      "coverImageUrl": "https://cataloage.carrefour.ro/28-hyper-mr-food-5-08-11-08-2026/page/1"
+    },
+    {
+      "store": "carrefour",
+      "country": "romania",
+      "slug": "3208",
+      "dateFrom": "05-08-2026",
+      "dateTo": "11-08-2026",
+      "firstPageUrl": "https://cataloage.carrefour.ro/28-market-mr-food-5-08-11-08-2026/page/1",
+      "coverImageUrl": "https://cataloage.carrefour.ro/28-market-mr-food-5-08-11-08-2026/page/1"
+    },
+    {
+      "store": "carrefour",
+      "country": "romania",
+      "slug": "3209",
+      "dateFrom": "05-08-2026",
+      "dateTo": "18-08-2026",
+      "firstPageUrl": "https://cataloage.carrefour.ro/28b-hyper-special-italian-week-5-08-18-08-2026/page/1",
+      "coverImageUrl": "https://cataloage.carrefour.ro/28b-hyper-special-italian-week-5-08-18-08-2026/page/1"
+    },
+    {
+      "store": "carrefour",
+      "country": "romania",
+      "slug": "3206",
+      "dateFrom": "05-08-2026",
+      "dateTo": "25-08-2026",
+      "firstPageUrl": "https://cataloage.carrefour.ro/28a-mr-nonfood-5-08-25-08-2026/page/1",
+      "coverImageUrl": "https://cataloage.carrefour.ro/28a-mr-nonfood-5-08-25-08-2026/page/1"
+    }
+  ]
+}

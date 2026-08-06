@@ -1,0 +1,1257 @@
+{
+  "recordedAt": "2026-08-06T14:57:21.992Z",
+  "store": "lidl",
+  "country": "italy",
+  "path": "leafletsOverview",
+  "payload": {
+    "response": {
+      "self": "v4/overview?client_locale=lidl%2Fit-IT&region_id=0&store_id=0",
+      "version": 4,
+      "success": true,
+      "message": "5 flyers in 3 subcategories and 1 categories found.",
+      "dateTime": "2026-08-06T14:00:06+00:00",
+      "numberOfEntries": 1,
+      "warnings": [
+        "The request contains some unused filter attributes: region_code."
+      ],
+      "isRegionalized": true,
+      "categories": [
+        {
+          "id": "ed767470-f298-11e6-aabb-005056ab0fb6",
+          "name": "HHZ IT it-IT",
+          "subcategories": [
+            {
+              "id": "05fead62-6251-11e7-a039-005056ab0fb6",
+              "name": "Volantini settimanali",
+              "flyers": [
+                {
+                  "id": "019fb317-4131-7ad9-b8bf-9e5af6471e2d",
+                  "name": "Offerte valide dal 6/08 al 12/08",
+                  "title": "Volantino settimanale",
+                  "isActive": true,
+                  "pdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fb317-4131-7ad9-b8bf-9e5af6471e2d/Offerte-valide-dal-6-08-al-12-08-Volantino-settimanale-00.pdf",
+                  "enableSharing": true,
+                  "enableDownload": true,
+                  "hiResPdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fb317-4131-7ad9-b8bf-9e5af6471e2d/Offerte-valide-dal-6-08-al-12-08-Volantino-settimanale-00.pdf",
+                  "hiResFileSize": 54789292,
+                  "fileSize": 26960254,
+                  "thumbnailUrl": "https://imgproxy.leaflets.schwarz/ZWO0-mv9-bFC-ZkJOKgbOVx79i_zJpGIUKujDambNv0/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmIzMTctNDEzMS03YWQ5LWI4YmYtOWU1YWY2NDcxZTJkL3BhZ2UtMDFfOTk3MTkwOTljMTRjYjg1Nzg1OGY3MmYzOGZiZTA1ZWUucG5n.jpg",
+                  "publicThumbnail": "https://imgproxy.leaflets.schwarz/ZWO0-mv9-bFC-ZkJOKgbOVx79i_zJpGIUKujDambNv0/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmIzMTctNDEzMS03YWQ5LWI4YmYtOWU1YWY2NDcxZTJkL3BhZ2UtMDFfOTk3MTkwOTljMTRjYjg1Nzg1OGY3MmYzOGZiZTA1ZWUucG5n.jpg",
+                  "flyerUrlAbsolute": "https://www.lidl.it/l/it/volantini/offerte-valide-dal-6-08-al-12-08-volantino-settimanale-KA/ar/IT00172",
+                  "regionAliasAbsoluteUrl": "https://www.lidl.it/l/it/volantini/offerte-valide-dal-6-08-al-12-08-volantino-settimanale-KA/ar/IT00172",
+                  "flyerJson": "https://endpoints.leaflets.schwarz/v4/flyer?version=4&flyer_identifier=offerte-valide-dal-6-08-al-12-08-volantino-settimanale-KA&client=lidl",
+                  "startDate": "2026-08-02",
+                  "endDate": "2026-08-12",
+                  "offerStartDate": "2026-08-06",
+                  "offerEndDate": "2026-08-12",
+                  "status": "current",
+                  "discoverable": true,
+                  "target": "flyer",
+                  "teasers": {
+                    "teaser_666x475": "https://imgproxy.leaflets.schwarz/zXH_iriPDSTiX8j9u-MvlghUhsn230TaJHatTTTOMXY/rs:fill:666:475:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmIzMTctNDEzMS03YWQ5LWI4YmYtOWU1YWY2NDcxZTJkL3BhZ2UtMDFfOTk3MTkwOTljMTRjYjg1Nzg1OGY3MmYzOGZiZTA1ZWUucG5n.jpg",
+                    "teaser_2020x1440": "https://imgproxy.leaflets.schwarz/Ejy_yg02ik0TI1g8lxxZufwrgyM2DVqevZ4Obfz9cCo/rs:fill:2020:1440:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmIzMTctNDEzMS03YWQ5LWI4YmYtOWU1YWY2NDcxZTJkL3BhZ2UtMDFfOTk3MTkwOTljMTRjYjg1Nzg1OGY3MmYzOGZiZTA1ZWUucG5n.jpg",
+                    "teaser_w1010": "https://imgproxy.leaflets.schwarz/2U2ch8G_fixlYzySc-_7T-JbfgPoYibLLp-bZzM5e2o/rs:fit:1010:0:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmIzMTctNDEzMS03YWQ5LWI4YmYtOWU1YWY2NDcxZTJkL3BhZ2UtMDFfOTk3MTkwOTljMTRjYjg1Nzg1OGY3MmYzOGZiZTA1ZWUucG5n.jpg"
+                  },
+                  "regions": [
+                    {
+                      "type": "store",
+                      "code": "IT00172"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00213"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00235"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00241"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00243"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00246"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00262"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00264"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00270"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00273"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00277"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00278"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00283"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00284"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00286"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00287"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00289"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00296"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00297"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00299"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00316"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00327"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00357"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00360"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00362"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00364"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00367"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00387"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00398"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00411"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00429"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00434"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00470"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00480"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00481"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00482"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00484"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00490"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00492"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00512"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00516"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00517"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00530"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00533"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00543"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00551"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00572"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00582"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00584"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00585"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00588"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00596"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00654"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00662"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00664"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00665"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00901"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00902"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00903"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00908"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00911"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00914"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00917"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00923"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00941"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00944"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00946"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00954"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00964"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00970"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00975"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00981"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00994"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT00997"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01105"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01118"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01121"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01123"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01129"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01131"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01132"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01136"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01137"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01138"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01144"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01145"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01146"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01150"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01151"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01152"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01153"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01155"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01160"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01161"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01162"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01165"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01171"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01172"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01175"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01182"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01204"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01205"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01209"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01211"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01214"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01216"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01217"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01218"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01219"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01224"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01226"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01229"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01230"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01231"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01233"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01235"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01239"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01241"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01245"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01247"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01249"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01254"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01255"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01261"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01262"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01273"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01308"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01315"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01317"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01320"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01321"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01324"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01328"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01329"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01333"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01335"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01338"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01339"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01343"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01344"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01348"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01349"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01352"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01361"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01377"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01383"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01404"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01412"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01415"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01418"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01419"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01422"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01424"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01425"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01428"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01429"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01433"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01436"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01439"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01440"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01443"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01444"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01445"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01447"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01448"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01450"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01454"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01458"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01459"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01463"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01465"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01466"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01469"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01480"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01481"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01487"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01490"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01494"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT01496"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02012"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02024"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02025"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02027"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02028"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02030"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02036"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02040"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02041"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02042"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02048"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02049"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02050"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02053"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02055"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02059"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02060"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02063"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02065"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02067"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02069"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02070"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02072"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02074"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02076"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02079"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02088"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02090"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02098"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02109"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02110"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02112"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02128"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02507"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02516"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02526"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02527"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02529"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02532"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02538"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02540"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02541"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02542"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02547"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02554"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02555"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02556"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02563"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02569"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02574"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT02589"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04102"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04104"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04107"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04110"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04116"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04117"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04206"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04208"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04210"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04211"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04212"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04214"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04218"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04223"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04224"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04231"
+                    },
+                    {
+                      "type": "store",
+                      "code": "IT04232"
+                    }
+                  ],
+                  "thumbnailDimensions": {
+                    "width": 236,
+                    "height": 400
+                  }
+                }
+              ],
+              "overviewPromotions": []
+            },
+            {
+              "id": "ddf80c1c-6ae5-11e7-a039-005056ab0fb6",
+              "name": "Volantini speciali",
+              "flyers": [
+                {
+                  "id": "019fb729-991d-7d41-be5e-49ea916d29f1",
+                  "name": "Offerte valide dal 10/08 al 16/08",
+                  "title": "Offerte Speciali",
+                  "isActive": true,
+                  "pdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fb729-991d-7d41-be5e-49ea916d29f1/Offerte-valide-dal-10-08-al-16-08-Offerte-Speciali-01.pdf",
+                  "enableSharing": true,
+                  "enableDownload": true,
+                  "hiResPdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fb729-991d-7d41-be5e-49ea916d29f1/Offerte-valide-dal-10-08-al-16-08-Offerte-Speciali-01.pdf",
+                  "hiResFileSize": 13421124,
+                  "fileSize": 13421124,
+                  "thumbnailUrl": "https://imgproxy.leaflets.schwarz/U7n6-x-F5MVnqU7KTpStE_kIqepT805FMk03uGWeCeY/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmI3MjktOTkxZC03ZDQxLWJlNWUtNDllYTkxNmQyOWYxL3BhZ2UtMDFfMDFhNjI0NDVkOTVhODQ2Mzc1MDA2ZjA1ZTM5NjQxZDQucG5n.jpg",
+                  "publicThumbnail": "https://imgproxy.leaflets.schwarz/U7n6-x-F5MVnqU7KTpStE_kIqepT805FMk03uGWeCeY/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmI3MjktOTkxZC03ZDQxLWJlNWUtNDllYTkxNmQyOWYxL3BhZ2UtMDFfMDFhNjI0NDVkOTVhODQ2Mzc1MDA2ZjA1ZTM5NjQxZDQucG5n.jpg",
+                  "flyerUrlAbsolute": "https://www.lidl.it/l/it/volantini/offerte-valide-dal-3-08-al-9-08-offerte-speciale-estate/ar/0",
+                  "regionAliasAbsoluteUrl": "https://www.lidl.it/l/it/volantini/offerte-valide-dal-3-08-al-9-08-offerte-speciale-estate/ar/0",
+                  "flyerJson": "https://endpoints.leaflets.schwarz/v4/flyer?version=4&flyer_identifier=offerte-valide-dal-3-08-al-9-08-offerte-speciale-estate&client=lidl",
+                  "startDate": "2026-08-06",
+                  "endDate": "2026-08-16",
+                  "offerStartDate": "2026-08-10",
+                  "offerEndDate": "2026-08-16",
+                  "status": "current",
+                  "discoverable": false,
+                  "target": "flyer",
+                  "teasers": {
+                    "teaser_666x475": "https://imgproxy.leaflets.schwarz/vo-ULoEhuahcWstrlosJ6p7lDzepiPDIZou95FcZwxY/rs:fill:666:475:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmI3MjktOTkxZC03ZDQxLWJlNWUtNDllYTkxNmQyOWYxL3BhZ2UtMDFfMDFhNjI0NDVkOTVhODQ2Mzc1MDA2ZjA1ZTM5NjQxZDQucG5n.jpg",
+                    "teaser_2020x1440": "https://imgproxy.leaflets.schwarz/k9O2oLGb-t4iP8UTZH_AoV3ZzGSrKIFkEFbny8qzPlE/rs:fill:2020:1440:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmI3MjktOTkxZC03ZDQxLWJlNWUtNDllYTkxNmQyOWYxL3BhZ2UtMDFfMDFhNjI0NDVkOTVhODQ2Mzc1MDA2ZjA1ZTM5NjQxZDQucG5n.jpg",
+                    "teaser_w1010": "https://imgproxy.leaflets.schwarz/aL6yVOvVEpXNPjxvOHiSxtkghc1IZt4lplDbHbvXubY/rs:fit:1010:0:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmI3MjktOTkxZC03ZDQxLWJlNWUtNDllYTkxNmQyOWYxL3BhZ2UtMDFfMDFhNjI0NDVkOTVhODQ2Mzc1MDA2ZjA1ZTM5NjQxZDQucG5n.jpg"
+                  },
+                  "regions": [
+                    {
+                      "type": "national",
+                      "code": "0"
+                    }
+                  ],
+                  "thumbnailDimensions": {
+                    "width": 236,
+                    "height": 400
+                  }
+                },
+                {
+                  "id": "019fb72d-357f-7aad-96e1-e585018816e7",
+                  "name": "Offerte valide dal 6/08 al 12/08",
+                  "title": "Offerte Speciali",
+                  "isActive": true,
+                  "pdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fb72d-357f-7aad-96e1-e585018816e7/Offerte-valide-dal-6-08-al-12-08-Offerte-Speciali-00.pdf",
+                  "enableSharing": true,
+                  "enableDownload": true,
+                  "hiResPdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fb72d-357f-7aad-96e1-e585018816e7/Offerte-valide-dal-6-08-al-12-08-Offerte-Speciali-00.pdf",
+                  "hiResFileSize": 2687126,
+                  "fileSize": 2687126,
+                  "thumbnailUrl": "https://imgproxy.leaflets.schwarz/EeVTAbmyjp2lRb9Key01bXSWaQ7d9nxKMYNxCKgZ-v0/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmI3MmQtMzU3Zi03YWFkLTk2ZTEtZTU4NTAxODgxNmU3L3BhZ2UtMV8yMTUwZThlYzg1NmM5MTkzZTQ1MGU2ODg1NzNhZTY3Zi5wbmc.jpg",
+                  "publicThumbnail": "https://imgproxy.leaflets.schwarz/EeVTAbmyjp2lRb9Key01bXSWaQ7d9nxKMYNxCKgZ-v0/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmI3MmQtMzU3Zi03YWFkLTk2ZTEtZTU4NTAxODgxNmU3L3BhZ2UtMV8yMTUwZThlYzg1NmM5MTkzZTQ1MGU2ODg1NzNhZTY3Zi5wbmc.jpg",
+                  "flyerUrlAbsolute": "https://www.lidl.it/l/it/volantini/offerte-valide-dal-6-08-al-12-08-offerte-speciali/ar/0",
+                  "regionAliasAbsoluteUrl": "https://www.lidl.it/l/it/volantini/offerte-valide-dal-6-08-al-12-08-offerte-speciali/ar/0",
+                  "flyerJson": "https://endpoints.leaflets.schwarz/v4/flyer?version=4&flyer_identifier=offerte-valide-dal-6-08-al-12-08-offerte-speciali&client=lidl",
+                  "startDate": "2026-08-06",
+                  "endDate": "2026-08-12",
+                  "offerStartDate": "2026-08-06",
+                  "offerEndDate": "2026-08-12",
+                  "status": "current",
+                  "discoverable": false,
+                  "target": "flyer",
+                  "teasers": {
+                    "teaser_666x475": "https://imgproxy.leaflets.schwarz/4kUaLPRofT3rUPty192BFb7AI-1kLGneLjHYhhnMEUA/rs:fill:666:475:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmI3MmQtMzU3Zi03YWFkLTk2ZTEtZTU4NTAxODgxNmU3L3BhZ2UtMV8yMTUwZThlYzg1NmM5MTkzZTQ1MGU2ODg1NzNhZTY3Zi5wbmc.jpg",
+                    "teaser_2020x1440": "https://imgproxy.leaflets.schwarz/qohTWbNVsfJDI8HZmsXyBbKMWUlnwJPRfXmKkmoNHaI/rs:fill:2020:1440:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmI3MmQtMzU3Zi03YWFkLTk2ZTEtZTU4NTAxODgxNmU3L3BhZ2UtMV8yMTUwZThlYzg1NmM5MTkzZTQ1MGU2ODg1NzNhZTY3Zi5wbmc.jpg",
+                    "teaser_w1010": "https://imgproxy.leaflets.schwarz/h0M3cUts0QHcSTv_2eK79VagNOXBrY2a6c_IciUWuBY/rs:fit:1010:0:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmI3MmQtMzU3Zi03YWFkLTk2ZTEtZTU4NTAxODgxNmU3L3BhZ2UtMV8yMTUwZThlYzg1NmM5MTkzZTQ1MGU2ODg1NzNhZTY3Zi5wbmc.jpg"
+                  },
+                  "regions": [
+                    {
+                      "type": "national",
+                      "code": "0"
+                    }
+                  ],
+                  "thumbnailDimensions": {
+                    "width": 236,
+                    "height": 400
+                  }
+                }
+              ],
+              "overviewPromotions": []
+            },
+            {
+              "id": "1f7cf46b-6251-11e7-a039-005056ab0fb6",
+              "name": "Volantini Lidl Viaggi",
+              "flyers": [
+                {
+                  "id": "019cdd11-d5b6-76bc-bf49-7f72b4d1efef",
+                  "name": "Vacanze da sogno per la tua estate",
+                  "title": "Lidl Viaggi",
+                  "isActive": true,
+                  "pdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019cdd11-d5b6-76bc-bf49-7f72b4d1efef/Vacanze-da-sogno-per-la-tua-estate-Lidl-Viaggi-04.pdf",
+                  "enableSharing": true,
+                  "enableDownload": true,
+                  "hiResPdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019cdd11-d5b6-76bc-bf49-7f72b4d1efef/Vacanze-da-sogno-per-la-tua-estate-Lidl-Viaggi-04.pdf",
+                  "hiResFileSize": 10313664,
+                  "fileSize": 10313664,
+                  "thumbnailUrl": "https://imgproxy.leaflets.schwarz/7TeMrPvgPTUBDqZa7nYbDfHcQLHqpiaVKVkzL5T2jBw/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5Y2RkMTEtZDViNi03NmJjLWJmNDktN2Y3MmI0ZDFlZmVmL3BhZ2UtMDFfYzI0OTA4Nzc3NjBjM2UzNjgzYjM4NTNhZTI2MGZiOWMucG5n.jpg",
+                  "publicThumbnail": "https://imgproxy.leaflets.schwarz/7TeMrPvgPTUBDqZa7nYbDfHcQLHqpiaVKVkzL5T2jBw/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5Y2RkMTEtZDViNi03NmJjLWJmNDktN2Y3MmI0ZDFlZmVmL3BhZ2UtMDFfYzI0OTA4Nzc3NjBjM2UzNjgzYjM4NTNhZTI2MGZiOWMucG5n.jpg",
+                  "flyerUrlAbsolute": "https://www.lidl.it/l/it/volantini/vacanze-da-sogno-per-la-tua-estate-lidl-viaggi/ar/0",
+                  "regionAliasAbsoluteUrl": "https://www.lidl.it/l/it/volantini/vacanze-da-sogno-per-la-tua-estate-lidl-viaggi/ar/0",
+                  "flyerJson": "https://endpoints.leaflets.schwarz/v4/flyer?version=4&flyer_identifier=vacanze-da-sogno-per-la-tua-estate-lidl-viaggi&client=lidl",
+                  "startDate": "2026-03-11",
+                  "endDate": "2026-09-20",
+                  "offerStartDate": "2026-03-11",
+                  "offerEndDate": "2026-09-20",
+                  "status": "current",
+                  "discoverable": false,
+                  "target": "flyer",
+                  "teasers": {
+                    "teaser_666x475": "https://imgproxy.leaflets.schwarz/QI56JQym0ZKBtB8_IP3qAkeS-UL9-Wq5hWXbj-9KMhs/rs:fill:666:475:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5Y2RkMTEtZDViNi03NmJjLWJmNDktN2Y3MmI0ZDFlZmVmL3BhZ2UtMDFfYzI0OTA4Nzc3NjBjM2UzNjgzYjM4NTNhZTI2MGZiOWMucG5n.jpg",
+                    "teaser_2020x1440": "https://imgproxy.leaflets.schwarz/FALfuswaFr-BSpYQ_U1xECdKrk4YcwakqdEQhU8oUyc/rs:fill:2020:1440:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5Y2RkMTEtZDViNi03NmJjLWJmNDktN2Y3MmI0ZDFlZmVmL3BhZ2UtMDFfYzI0OTA4Nzc3NjBjM2UzNjgzYjM4NTNhZTI2MGZiOWMucG5n.jpg",
+                    "teaser_w1010": "https://imgproxy.leaflets.schwarz/xZ93Da2OL6qfisF2K0FIkmQfoGM92wQc0qMd2yLiH6o/rs:fit:1010:0:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5Y2RkMTEtZDViNi03NmJjLWJmNDktN2Y3MmI0ZDFlZmVmL3BhZ2UtMDFfYzI0OTA4Nzc3NjBjM2UzNjgzYjM4NTNhZTI2MGZiOWMucG5n.jpg"
+                  },
+                  "regions": [
+                    {
+                      "type": "national",
+                      "code": "0"
+                    }
+                  ],
+                  "thumbnailDimensions": {
+                    "width": 236,
+                    "height": 400
+                  }
+                },
+                {
+                  "id": "019eff6d-1252-7e45-86ee-addd1635f678",
+                  "name": "I viaggi del mese",
+                  "title": "Lidl Viaggi",
+                  "isActive": true,
+                  "pdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019eff6d-1252-7e45-86ee-addd1635f678/I-viaggi-del-mese-Lidl-Viaggi-00.pdf",
+                  "enableSharing": true,
+                  "enableDownload": true,
+                  "hiResPdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019eff6d-1252-7e45-86ee-addd1635f678/I-viaggi-del-mese-Lidl-Viaggi-00.pdf",
+                  "hiResFileSize": 5966214,
+                  "fileSize": 5966214,
+                  "thumbnailUrl": "https://imgproxy.leaflets.schwarz/trjFn9ixCjb8Pfl5NjC9FmwNO1gqftlFYT6CEwJsECM/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZWZmNmQtMTI1Mi03ZTQ1LTg2ZWUtYWRkZDE2MzVmNjc4L3BhZ2UtMDFfODhiMWIyYTI0MjNiN2Q4MTA1MTE1ZTUzZjc0NDU4YWYucG5n.jpg",
+                  "publicThumbnail": "https://imgproxy.leaflets.schwarz/trjFn9ixCjb8Pfl5NjC9FmwNO1gqftlFYT6CEwJsECM/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZWZmNmQtMTI1Mi03ZTQ1LTg2ZWUtYWRkZDE2MzVmNjc4L3BhZ2UtMDFfODhiMWIyYTI0MjNiN2Q4MTA1MTE1ZTUzZjc0NDU4YWYucG5n.jpg",
+                  "flyerUrlAbsolute": "https://www.lidl.it/l/it/volantini/i-viaggi-del-mese-lidl-viaggi-luglio-agosto-2026/ar/0",
+                  "regionAliasAbsoluteUrl": "https://www.lidl.it/l/it/volantini/i-viaggi-del-mese-lidl-viaggi-luglio-agosto-2026/ar/0",
+                  "flyerJson": "https://endpoints.leaflets.schwarz/v4/flyer?version=4&flyer_identifier=i-viaggi-del-mese-lidl-viaggi-luglio-agosto-2026&client=lidl",
+                  "startDate": "2026-07-01",
+                  "endDate": "2026-09-06",
+                  "offerStartDate": "2026-07-01",
+                  "offerEndDate": "2026-09-06",
+                  "status": "current",
+                  "discoverable": false,
+                  "target": "flyer",
+                  "teasers": {
+                    "teaser_666x475": "https://imgproxy.leaflets.schwarz/E18zBtPeOW-4gxAvByPLInaDrVsEqh4XYWNNv6jHDro/rs:fill:666:475:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZWZmNmQtMTI1Mi03ZTQ1LTg2ZWUtYWRkZDE2MzVmNjc4L3BhZ2UtMDFfODhiMWIyYTI0MjNiN2Q4MTA1MTE1ZTUzZjc0NDU4YWYucG5n.jpg",
+                    "teaser_2020x1440": "https://imgproxy.leaflets.schwarz/2wsk4zyV0oQd6mc_-OCZtlVBLt6TdHnXa2EMwl89Ztk/rs:fill:2020:1440:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZWZmNmQtMTI1Mi03ZTQ1LTg2ZWUtYWRkZDE2MzVmNjc4L3BhZ2UtMDFfODhiMWIyYTI0MjNiN2Q4MTA1MTE1ZTUzZjc0NDU4YWYucG5n.jpg",
+                    "teaser_w1010": "https://imgproxy.leaflets.schwarz/CUACcxPBFFN3PM_hmCBQYTTEXZjI_nq-EsKZthn4OXc/rs:fit:1010:0:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZWZmNmQtMTI1Mi03ZTQ1LTg2ZWUtYWRkZDE2MzVmNjc4L3BhZ2UtMDFfODhiMWIyYTI0MjNiN2Q4MTA1MTE1ZTUzZjc0NDU4YWYucG5n.jpg"
+                  },
+                  "regions": [
+                    {
+                      "type": "national",
+                      "code": "0"
+                    }
+                  ],
+                  "thumbnailDimensions": {
+                    "width": 236,
+                    "height": 400
+                  }
+                }
+              ],
+              "overviewPromotions": []
+            }
+          ]
+        }
+      ],
+      "translations": {
+        "overviewWidgetLeaflets": "Volantini",
+        "overviewWidgetDiscoverOffers": "Scopri nuove offerte ogni settimana!",
+        "overviewWidgetSelectStore": "Seleziona un punto vendita per vedere le offerte",
+        "overviewWidgetToLeaflet": "Sfoglia ora",
+        "overviewWidgetOverlayHeading": "Imposta il tuo punto vendita Lidl",
+        "overviewWidgetStoreFinderClaim": "Seleziona il tuo punto vendita",
+        "overviewWidgetStoreFinderSubClaim": "per scoprire le offerte",
+        "overviewWidgetStoreFinderButtonLabel": "Scopri di più",
+        "overviewWidgetOverlayText": "Per scoprire le nostre offerte e visionare i nostri volantini, seleziona il tuo punto vendita Lidl e approfitta delle offerte speciali anche nella tua zona.",
+        "overviewWidgetSelectStoreClaim": "Trova le offerte nel tuo punto vendita",
+        "overviewWidgetNextPromoLabel": "Nuova visualizzazione",
+        "overviewWidgetNextPromoHint": "Troverai la solita visualizzazione del volantino nella rispettiva pagina dell'offerta",
+        "overviewWidgetTitle": "Offerte & Volantini",
+        "overviewWidgetOverlayCloseButtonText": "Chiudi",
+        "overviewWidgetStoreSelection": "Selezione del punto vendita",
+        "overviewWidgetOverlayButtonText": "Seleziona il tuo punto vendita"
+      }
+    }
+  },
+  "expected": [
+    {
+      "store": "lidl",
+      "country": "italy",
+      "slug": "019fb317-4131-7ad9-b8bf-9e5af6471e2d",
+      "dateFrom": "2026-08-06",
+      "dateTo": "2026-08-12",
+      "firstPageUrl": "https://www.lidl.it/l/it/volantini/offerte-valide-dal-6-08-al-12-08-volantino-settimanale-KA/ar/IT00172",
+      "coverImageUrl": "https://imgproxy.leaflets.schwarz/ZWO0-mv9-bFC-ZkJOKgbOVx79i_zJpGIUKujDambNv0/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmIzMTctNDEzMS03YWQ5LWI4YmYtOWU1YWY2NDcxZTJkL3BhZ2UtMDFfOTk3MTkwOTljMTRjYjg1Nzg1OGY3MmYzOGZiZTA1ZWUucG5n.jpg"
+    }
+  ]
+}

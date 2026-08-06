@@ -1,0 +1,40 @@
+{
+  "recordedAt": "2026-08-06T14:57:21.282Z",
+  "store": "jysk",
+  "country": "poland",
+  "path": "browser",
+  "payload": {
+    "links": [
+      {
+        "href": "https://ipaper.ipapercms.dk/jysk/pl/CampaignPaper/55e342e8_3abc_40c8_83ce_df8c56bebe2c?page=2",
+        "slug": "55e342e8_3abc_40c8_83ce_df8c56bebe2c",
+        "dateText": "CP1005 W31.26 SUMMER SALE GF REA"
+      },
+      {
+        "href": "https://ipaper.ipapercms.dk/jysk/pl/CampaignPaper/30b022d8_d020_438c_8363_e9b2137e2bfd?page=2",
+        "slug": "30b022d8_d020_438c_8363_e9b2137e2bfd",
+        "dateText": "CP1005 W30.26 SUMMER SALE 2"
+      }
+    ]
+  },
+  "expected": [
+    {
+      "store": "jysk",
+      "country": "poland",
+      "slug": "55e342e8_3abc_40c8_83ce_df8c56bebe2c",
+      "dateFrom": "KW31-26",
+      "dateTo": "KW31-26",
+      "firstPageUrl": "https://ipaper.ipapercms.dk/jysk/pl/CampaignPaper/55e342e8_3abc_40c8_83ce_df8c56bebe2c",
+      "coverImageUrl": "https://ipaper.ipapercms.dk/jysk/pl/CampaignPaper/55e342e8_3abc_40c8_83ce_df8c56bebe2c"
+    },
+    {
+      "store": "jysk",
+      "country": "poland",
+      "slug": "30b022d8_d020_438c_8363_e9b2137e2bfd",
+      "dateFrom": "KW30-26",
+      "dateTo": "KW30-26",
+      "firstPageUrl": "https://ipaper.ipapercms.dk/jysk/pl/CampaignPaper/30b022d8_d020_438c_8363_e9b2137e2bfd",
+      "coverImageUrl": "https://ipaper.ipapercms.dk/jysk/pl/CampaignPaper/30b022d8_d020_438c_8363_e9b2137e2bfd"
+    }
+  ]
+}

@@ -15,6 +15,8 @@ export interface PipelineOptions {
   country?: string;
   store?: string;
   discoverOnly?: boolean;
+  /** Clock injection for deterministic runs; defaults to the current time. */
+  now?: Date;
 }
 
 export interface PipelineReport {
@@ -82,6 +84,7 @@ export async function runPipeline(
   options: PipelineOptions
 ): Promise<PipelineReport> {
   const { storage, country, store, discoverOnly } = options;
+  const now = options.now ?? new Date();
 
   // Phase 0: Housekeeping — recover stale + expire old catalogs
   const recovered = await recoverStaleCatalogs(storage);
@@ -99,6 +102,7 @@ export async function runPipeline(
     storage,
     country,
     store,
+    now,
   });
 
   const report: PipelineReport = {
@@ -129,7 +133,7 @@ export async function runPipeline(
 
   if (toScrape.length === 0) {
     log.info("no catalogs to scrape");
-    await generateManifest(storage, country);
+    await generateManifest(storage, country, now);
     return report;
   }
 
@@ -208,7 +212,7 @@ export async function runPipeline(
         ...metaUpdate,
         status: "ready",
         pageCount: pageCount,
-        scrapedAt: new Date().toISOString(),
+        scrapedAt: now.toISOString(),
         ...(coverThumb ? { coverThumb } : {}),
       });
 
@@ -258,8 +262,14 @@ const MANIFEST_MAX_SPAN_DAYS = 60;
  * - dateTo must not be before dateFrom (inverted)
  * - dateTo must not be more than 1 year ahead of today
  * - dateTo must not be more than 30 days in the past
+ *
+ * `now` defaults to the current time; pass an explicit value for
+ * deterministic/testable callers instead of relying on the wall clock.
  */
-export function isManifestEligible(meta: Pick<CatalogMeta, "id" | "dateFrom" | "dateTo">): boolean {
+export function isManifestEligible(
+  meta: Pick<CatalogMeta, "id" | "dateFrom" | "dateTo">,
+  now: Date = new Date()
+): boolean {
   const from = new Date(meta.dateFrom);
   const to = new Date(meta.dateTo);
 
@@ -279,7 +289,7 @@ export function isManifestEligible(meta: Pick<CatalogMeta, "id" | "dateFrom" | "
     return false;
   }
 
-  const today = new Date();
+  const today = new Date(now);
   today.setHours(0, 0, 0, 0);
 
   const maxFuture = new Date(today);
@@ -310,10 +320,14 @@ export function isManifestEligible(meta: Pick<CatalogMeta, "id" | "dateFrom" | "
  *
  * Uses CatalogSummary data from listCatalogs() directly — no per-catalog
  * getCatalog() calls needed, eliminating the N+1 reads against R2.
+ *
+ * `now` defaults to the current time; pass an explicit value for
+ * deterministic/testable callers instead of relying on the wall clock.
  */
 export async function generateManifest(
   storage: StorageAdapter,
-  country?: string
+  country?: string,
+  now: Date = new Date()
 ): Promise<void> {
   if (!storage.writeManifest) {
     return;
@@ -326,13 +340,13 @@ export async function generateManifest(
   // checks — no need to re-fetch each catalog individually.
   const byCountry = new Map<string, CatalogSummary[]>();
   for (const summary of summaries) {
-    if (!isManifestEligible(summary)) continue;
+    if (!isManifestEligible(summary, now)) continue;
     const arr = byCountry.get(summary.country) ?? [];
     arr.push(summary);
     byCountry.set(summary.country, arr);
   }
 
-  const updatedAt = new Date().toISOString();
+  const updatedAt = now.toISOString();
 
   // Determine which countries to write
   const countries = country ? [country] : [...byCountry.keys()];

@@ -1,0 +1,523 @@
+{
+  "recordedAt": "2026-08-06T14:52:46.817Z",
+  "store": "penny",
+  "country": "italy",
+  "path": "shopfully",
+  "payload": {
+    "response": {
+      "status": "SUCCESS",
+      "data": {
+        "list": {
+          "1648513": {
+            "id": "1648513",
+            "title": "OFFERTE SHOCK dal 6 al 12/08",
+            "description": "",
+            "settings": {
+              "spotlight": [
+                {
+                  "landing_url": "https://next.doveconviene.it/penny/1648513?lat={{lat}}&lng={{lng}}&muid={{muid}}&utm_source={{utm_source}}&utm_medium={{utm_medium}}&t=w&c=it_it",
+                  "deeplink": "dvc://www.shopfully.com/_screens/webview?url=https%3A%2F%2Fnext.doveconviene.it%2Fpenny%2F1648513%3Flat%3D%7B%7Blat%7D%7D%26lng%3D%7B%7Blng%7D%7D%26muid%3D%7B%7Bmuid%7D%7D%26utm_source%3D%7B%7Butm_source%7D%7D%26utm_medium%3D%7B%7Butm_medium%7D%7D%26t%3Dw%26c%3Dit_it%3Flat%3D%7B%7Blat%7D%7D%26lng%3D%7B%7Blng%7D%7D%26muid%3D%7B%7Bmuid%7D%7D%26utm_source%3D%7B%7Butm_source%7D%7D%26utm_medium%3D%7B%7Butm_medium%7D%7D%26t%3Dm%26c%3Dit_it"
+                }
+              ],
+              "youtube_video_id": "",
+              "tracking_url_type": "none",
+              "tracking_url": "",
+              "tracking_url_client": "",
+              "url_tracking_impression": [],
+              "tracking_url_offerista": {
+                "inherit": "1",
+                "url_tracking": "",
+                "url_tracking_impression": [
+                  ""
+                ]
+              },
+              "time_zone": {
+                "publish_at_iso": "2026-07-29T00:00:00+02:00",
+                "unpublish_at_iso": "2026-08-12T23:59:00+02:00",
+                "name": "Europe/Rome"
+              },
+              "spotlight_publication_id": "86555"
+            },
+            "start_date": "2026-08-06",
+            "end_date": "2026-08-12",
+            "publication_url": "http://viewer.zmags.com/publication/it_it_86555",
+            "is_active_retail_media": "0",
+            "publish_at": "2026-07-29 00:00:00",
+            "unpublish_at": "2026-08-12 23:59:00",
+            "type": "click-out",
+            "sub_type": "store-announcement",
+            "is_active": "1",
+            "distance": "2.5404711315337853",
+            "extras": {
+              "promo_code": "",
+              "custom_position": "",
+              "tracking_url": "",
+              "tracking_url_client": ""
+            },
+            "retailer": {
+              "id": "23",
+              "slug": "penny",
+              "name": "PENNY",
+              "category": {
+                "id": "6",
+                "slug": "discount"
+              },
+              "assets": {
+                "logo_segnalino2x": {
+                  "name": "logo_segnalino2x",
+                  "url": "https://it-it-media.shopfully.cloud/images/catene/segnalino_penny@2x.png"
+                }
+              }
+            },
+            "stores": {
+              "1302993": {
+                "id": "1302993",
+                "_id": "23_MzA0NDA=",
+                "retailer_id": "23",
+                "address": "Via Strigelli 16",
+                "city": "Milano",
+                "lat": "45.4560436",
+                "lng": "9.2192475",
+                "phone": "",
+                "extras": {
+                  "tiendeo_seo_slug": "via-strigelli"
+                },
+                "distance": "2.5404711315337853"
+              }
+            },
+            "otherStores": true,
+            "lastPubblication": {
+              "id": "891313",
+              "status": "3",
+              "variant": "",
+              "settings": {
+                "source": {
+                  "type": "dvc",
+                  "src": "shared://publications/requests/1648513_6a61e6a8-501c-465e-a859-00eb43be90da_2026-07-23-12-02-16.pdf",
+                  "flyer_id": "1648513"
+                },
+                "number_of_pages": 4,
+                "file_size": 2300457,
+                "page_size": "822.047x661.89"
+              },
+              "created": "2026-07-23 12:02:38",
+              "modified": "2026-07-23 12:04:06",
+              "pdf_url": "https://it-it-media-publications.shopfully.cloud/publications/requests/1648513_6a61e6a8-501c-465e-a859-00eb43be90da_2026-07-23-12-02-16.pdf"
+            }
+          },
+          "1648517": {
+            "id": "1648517",
+            "title": "14 giorni di grande convenienza dal 30/07 al 12/08",
+            "description": "",
+            "settings": {
+              "spotlight": [
+                {
+                  "landing_url": "https://next.doveconviene.it/penny/1648517?lat={{lat}}&lng={{lng}}&muid={{muid}}&utm_source={{utm_source}}&utm_medium={{utm_medium}}&t=w&c=it_it",
+                  "deeplink": "dvc://www.shopfully.com/_screens/webview?url=https%3A%2F%2Fnext.doveconviene.it%2Fpenny%2F1648517%3Flat%3D%7B%7Blat%7D%7D%26lng%3D%7B%7Blng%7D%7D%26muid%3D%7B%7Bmuid%7D%7D%26utm_source%3D%7B%7Butm_source%7D%7D%26utm_medium%3D%7B%7Butm_medium%7D%7D%26t%3Dw%26c%3Dit_it%3Flat%3D%7B%7Blat%7D%7D%26lng%3D%7B%7Blng%7D%7D%26muid%3D%7B%7Bmuid%7D%7D%26utm_source%3D%7B%7Butm_source%7D%7D%26utm_medium%3D%7B%7Butm_medium%7D%7D%26t%3Dm%26c%3Dit_it"
+                }
+              ],
+              "youtube_video_id": "",
+              "tracking_url_type": "none",
+              "tracking_url": "",
+              "tracking_url_client": "",
+              "url_tracking_impression": [
+                ""
+              ],
+              "tracking_url_offerista": {
+                "inherit": "1",
+                "url_tracking": "",
+                "url_tracking_impression": [
+                  ""
+                ]
+              },
+              "time_zone": {
+                "publish_at_iso": "2026-07-29T00:00:00+02:00",
+                "unpublish_at_iso": "2026-08-12T23:59:00+02:00",
+                "name": "Europe/Rome"
+              },
+              "spotlight_publication_id": "86555",
+              "cropping_option": "default"
+            },
+            "start_date": "2026-07-30",
+            "end_date": "2026-08-12",
+            "publication_url": "http://viewer.zmags.com/publication/it_it_86555",
+            "is_active_retail_media": "0",
+            "publish_at": "2026-07-29 00:00:00",
+            "unpublish_at": "2026-08-12 23:59:00",
+            "type": "click-out",
+            "sub_type": "store-announcement",
+            "is_active": "1",
+            "distance": "2.5404711315337853",
+            "extras": {
+              "promo_code": "",
+              "custom_position": "",
+              "tracking_url": "",
+              "tracking_url_client": ""
+            },
+            "retailer": {
+              "id": "23",
+              "slug": "penny",
+              "name": "PENNY",
+              "category": {
+                "id": "6",
+                "slug": "discount"
+              },
+              "assets": {
+                "logo_segnalino2x": {
+                  "name": "logo_segnalino2x",
+                  "url": "https://it-it-media.shopfully.cloud/images/catene/segnalino_penny@2x.png"
+                }
+              }
+            },
+            "stores": {
+              "1302993": {
+                "id": "1302993",
+                "_id": "23_MzA0NDA=",
+                "retailer_id": "23",
+                "address": "Via Strigelli 16",
+                "city": "Milano",
+                "lat": "45.4560436",
+                "lng": "9.2192475",
+                "phone": "",
+                "extras": {
+                  "tiendeo_seo_slug": "via-strigelli"
+                },
+                "distance": "2.5404711315337853"
+              }
+            },
+            "otherStores": true,
+            "lastPubblication": {
+              "id": "891317",
+              "status": "3",
+              "variant": "",
+              "settings": {
+                "source": {
+                  "type": "dvc",
+                  "src": "shared://publications/requests/1648517_6a61e7b6-54a0-435c-b618-023143be90da_2026-07-23-12-06-46.pdf",
+                  "flyer_id": "1648517"
+                },
+                "number_of_pages": 20,
+                "file_size": 11303630,
+                "page_size": "822.047x822.047"
+              },
+              "created": "2026-07-23 12:07:54",
+              "modified": "2026-07-23 12:08:06",
+              "pdf_url": "https://it-it-media-publications.shopfully.cloud/publications/requests/1648517_6a61e7b6-54a0-435c-b618-023143be90da_2026-07-23-12-06-46.pdf"
+            }
+          },
+          "1648537": {
+            "id": "1648537",
+            "title": "14 giorni di grande convenienza dal 30/07 al 12/08",
+            "description": "",
+            "settings": {
+              "spotlight": [
+                {
+                  "landing_url": "https://next.doveconviene.it/penny/1648537?lat={{lat}}&lng={{lng}}&muid={{muid}}&utm_source={{utm_source}}&utm_medium={{utm_medium}}&t=w&c=it_it",
+                  "deeplink": "dvc://www.shopfully.com/_screens/webview?url=https%3A%2F%2Fnext.doveconviene.it%2Fpenny%2F1648537%3Flat%3D%7B%7Blat%7D%7D%26lng%3D%7B%7Blng%7D%7D%26muid%3D%7B%7Bmuid%7D%7D%26utm_source%3D%7B%7Butm_source%7D%7D%26utm_medium%3D%7B%7Butm_medium%7D%7D%26t%3Dw%26c%3Dit_it%3Flat%3D%7B%7Blat%7D%7D%26lng%3D%7B%7Blng%7D%7D%26muid%3D%7B%7Bmuid%7D%7D%26utm_source%3D%7B%7Butm_source%7D%7D%26utm_medium%3D%7B%7Butm_medium%7D%7D%26t%3Dm%26c%3Dit_it"
+                }
+              ],
+              "youtube_video_id": "",
+              "tracking_url_type": "none",
+              "tracking_url": "",
+              "tracking_url_client": "",
+              "url_tracking_impression": [
+                ""
+              ],
+              "tracking_url_offerista": {
+                "inherit": "1",
+                "url_tracking": "",
+                "url_tracking_impression": [
+                  ""
+                ]
+              },
+              "time_zone": {
+                "publish_at_iso": "2026-07-29T00:00:00+02:00",
+                "unpublish_at_iso": "2026-08-12T23:59:00+02:00",
+                "name": "Europe/Rome"
+              },
+              "spotlight_publication_id": "86555",
+              "cropping_option": "default"
+            },
+            "start_date": "2026-07-30",
+            "end_date": "2026-08-12",
+            "publication_url": "http://viewer.zmags.com/publication/it_it_86555",
+            "is_active_retail_media": "0",
+            "publish_at": "2026-07-29 00:00:00",
+            "unpublish_at": "2026-08-12 23:59:00",
+            "type": "click-out",
+            "sub_type": "store-announcement",
+            "is_active": "1",
+            "distance": "1.484995654762221",
+            "extras": {
+              "promo_code": "",
+              "custom_position": "",
+              "tracking_url": "",
+              "tracking_url_client": ""
+            },
+            "retailer": {
+              "id": "23",
+              "slug": "penny",
+              "name": "PENNY",
+              "category": {
+                "id": "6",
+                "slug": "discount"
+              },
+              "assets": {
+                "logo_segnalino2x": {
+                  "name": "logo_segnalino2x",
+                  "url": "https://it-it-media.shopfully.cloud/images/catene/segnalino_penny@2x.png"
+                }
+              }
+            },
+            "stores": {
+              "1085243": {
+                "id": "1085243",
+                "_id": "23_IzEtMzA0MjY=",
+                "retailer_id": "23",
+                "address": "Via Bastioni Di Porta Volta, 7",
+                "city": "Milano",
+                "lat": "45.479702",
+                "lng": "9.182227",
+                "phone": "800 901290",
+                "extras": {
+                  "tiendeo_seo_slug": "via-bastioni-di-porta-volta"
+                },
+                "distance": "1.484995654762221"
+              }
+            },
+            "otherStores": true,
+            "lastPubblication": {
+              "id": "891324",
+              "status": "3",
+              "variant": "",
+              "settings": {
+                "source": {
+                  "type": "dvc",
+                  "src": "shared://publications/requests/1648537_6a620abe-a028-4676-a5a2-010743be90da_2026-07-23-14-36-14.pdf",
+                  "flyer_id": "1648537"
+                },
+                "number_of_pages": 20,
+                "file_size": 11400643,
+                "page_size": "822.047x822.047"
+              },
+              "created": "2026-07-23 14:36:24",
+              "modified": "2026-07-23 14:38:06",
+              "pdf_url": "https://it-it-media-publications.shopfully.cloud/publications/requests/1648537_6a620abe-a028-4676-a5a2-010743be90da_2026-07-23-14-36-14.pdf"
+            }
+          },
+          "1648538": {
+            "id": "1648538",
+            "title": "14 giorni di grande convenienza dal 30/07 al 12/08",
+            "description": "",
+            "settings": {
+              "spotlight": [
+                {
+                  "landing_url": "https://next.doveconviene.it/penny/1648538?lat={{lat}}&lng={{lng}}&muid={{muid}}&utm_source={{utm_source}}&utm_medium={{utm_medium}}&t=w&c=it_it",
+                  "deeplink": "dvc://www.shopfully.com/_screens/webview?url=https%3A%2F%2Fnext.doveconviene.it%2Fpenny%2F1648538%3Flat%3D%7B%7Blat%7D%7D%26lng%3D%7B%7Blng%7D%7D%26muid%3D%7B%7Bmuid%7D%7D%26utm_source%3D%7B%7Butm_source%7D%7D%26utm_medium%3D%7B%7Butm_medium%7D%7D%26t%3Dw%26c%3Dit_it%3Flat%3D%7B%7Blat%7D%7D%26lng%3D%7B%7Blng%7D%7D%26muid%3D%7B%7Bmuid%7D%7D%26utm_source%3D%7B%7Butm_source%7D%7D%26utm_medium%3D%7B%7Butm_medium%7D%7D%26t%3Dm%26c%3Dit_it"
+                }
+              ],
+              "youtube_video_id": "",
+              "tracking_url_type": "none",
+              "tracking_url": "",
+              "tracking_url_client": "",
+              "url_tracking_impression": [
+                ""
+              ],
+              "tracking_url_offerista": {
+                "inherit": "1",
+                "url_tracking": "",
+                "url_tracking_impression": [
+                  ""
+                ]
+              },
+              "time_zone": {
+                "publish_at_iso": "2026-07-29T00:00:00+02:00",
+                "unpublish_at_iso": "2026-08-12T23:59:00+02:00",
+                "name": "Europe/Rome"
+              },
+              "spotlight_publication_id": "86555",
+              "cropping_option": "default"
+            },
+            "start_date": "2026-07-30",
+            "end_date": "2026-08-12",
+            "publication_url": "http://viewer.zmags.com/publication/it_it_86555",
+            "is_active_retail_media": "0",
+            "publish_at": "2026-07-29 00:00:00",
+            "unpublish_at": "2026-08-12 23:59:00",
+            "type": "click-out",
+            "sub_type": "store-announcement",
+            "is_active": "1",
+            "distance": "2.396475615539347",
+            "extras": {
+              "promo_code": "",
+              "custom_position": "",
+              "tracking_url": "",
+              "tracking_url_client": ""
+            },
+            "retailer": {
+              "id": "23",
+              "slug": "penny",
+              "name": "PENNY",
+              "category": {
+                "id": "6",
+                "slug": "discount"
+              },
+              "assets": {
+                "logo_segnalino2x": {
+                  "name": "logo_segnalino2x",
+                  "url": "https://it-it-media.shopfully.cloud/images/catene/segnalino_penny@2x.png"
+                }
+              }
+            },
+            "stores": {
+              "1157497": {
+                "id": "1157497",
+                "_id": "23_IzEtMzA0MzA=",
+                "retailer_id": "23",
+                "address": "Via Ugo Bassi, 1",
+                "city": "Milano",
+                "lat": "45.488883",
+                "lng": "9.183705",
+                "phone": "800 901290",
+                "extras": {
+                  "tiendeo_seo_slug": "via-ugo-bassi"
+                },
+                "distance": "2.396475615539347"
+              }
+            },
+            "otherStores": true,
+            "lastPubblication": {
+              "id": "891325",
+              "status": "3",
+              "variant": "",
+              "settings": {
+                "source": {
+                  "type": "dvc",
+                  "src": "shared://publications/requests/1648538_6a620c42-5e50-46d6-b2a9-000a43be90da_2026-07-23-14-42-42.pdf",
+                  "flyer_id": "1648538"
+                },
+                "number_of_pages": 20,
+                "file_size": 11292215,
+                "page_size": "822.047x822.047"
+              },
+              "created": "2026-07-23 14:43:16",
+              "modified": "2026-07-23 14:44:06",
+              "pdf_url": "https://it-it-media-publications.shopfully.cloud/publications/requests/1648538_6a620c42-5e50-46d6-b2a9-000a43be90da_2026-07-23-14-42-42.pdf"
+            }
+          },
+          "1648541": {
+            "id": "1648541",
+            "title": "14 giorni di grande convenienza dal 30/07 al 12/08",
+            "description": "",
+            "settings": {
+              "spotlight": [
+                {
+                  "landing_url": "https://next.doveconviene.it/penny/1648541?lat={{lat}}&lng={{lng}}&muid={{muid}}&utm_source={{utm_source}}&utm_medium={{utm_medium}}&t=w&c=it_it",
+                  "deeplink": "dvc://www.shopfully.com/_screens/webview?url=https%3A%2F%2Fnext.doveconviene.it%2Fpenny%2F1648541%3Flat%3D%7B%7Blat%7D%7D%26lng%3D%7B%7Blng%7D%7D%26muid%3D%7B%7Bmuid%7D%7D%26utm_source%3D%7B%7Butm_source%7D%7D%26utm_medium%3D%7B%7Butm_medium%7D%7D%26t%3Dw%26c%3Dit_it%3Flat%3D%7B%7Blat%7D%7D%26lng%3D%7B%7Blng%7D%7D%26muid%3D%7B%7Bmuid%7D%7D%26utm_source%3D%7B%7Butm_source%7D%7D%26utm_medium%3D%7B%7Butm_medium%7D%7D%26t%3Dm%26c%3Dit_it"
+                }
+              ],
+              "youtube_video_id": "",
+              "tracking_url_type": "none",
+              "tracking_url": "",
+              "tracking_url_client": "",
+              "url_tracking_impression": [
+                ""
+              ],
+              "tracking_url_offerista": {
+                "inherit": "1",
+                "url_tracking": "",
+                "url_tracking_impression": [
+                  ""
+                ]
+              },
+              "time_zone": {
+                "publish_at_iso": "2026-07-29T00:00:00+02:00",
+                "unpublish_at_iso": "2026-08-12T23:59:00+02:00",
+                "name": "Europe/Rome"
+              },
+              "spotlight_publication_id": "86555",
+              "cropping_option": "default"
+            },
+            "start_date": "2026-07-30",
+            "end_date": "2026-08-12",
+            "publication_url": "http://viewer.zmags.com/publication/it_it_86555",
+            "is_active_retail_media": "0",
+            "publish_at": "2026-07-29 00:00:00",
+            "unpublish_at": "2026-08-12 23:59:00",
+            "type": "click-out",
+            "sub_type": "store-announcement",
+            "is_active": "1",
+            "distance": "14.519251959776376",
+            "extras": {
+              "promo_code": "",
+              "custom_position": "",
+              "tracking_url": "",
+              "tracking_url_client": ""
+            },
+            "retailer": {
+              "id": "23",
+              "slug": "penny",
+              "name": "PENNY",
+              "category": {
+                "id": "6",
+                "slug": "discount"
+              },
+              "assets": {
+                "logo_segnalino2x": {
+                  "name": "logo_segnalino2x",
+                  "url": "https://it-it-media.shopfully.cloud/images/catene/segnalino_penny@2x.png"
+                }
+              }
+            },
+            "stores": {
+              "1286026": {
+                "id": "1286026",
+                "_id": null,
+                "retailer_id": "23",
+                "address": "Via San Carlo Borromeo, 123",
+                "city": "Rho",
+                "lat": "45.5307397",
+                "lng": "9.027987",
+                "phone": "",
+                "extras": {
+                  "tiendeo_seo_slug": "via-san-carlo-borromeo"
+                },
+                "distance": "14.519251959776376"
+              }
+            },
+            "otherStores": true,
+            "lastPubblication": {
+              "id": "891327",
+              "status": "3",
+              "variant": "",
+              "settings": {
+                "source": {
+                  "type": "dvc",
+                  "src": "shared://publications/requests/1648541_6a620d12-e854-4761-9940-032743be90da_2026-07-23-14-46-10.pdf",
+                  "flyer_id": "1648541"
+                },
+                "number_of_pages": 20,
+                "file_size": 11136445,
+                "page_size": "822.047x822.047"
+              },
+              "created": "2026-07-23 14:47:47",
+              "modified": "2026-07-23 14:48:06",
+              "pdf_url": "https://it-it-media-publications.shopfully.cloud/publications/requests/1648541_6a620d12-e854-4761-9940-032743be90da_2026-07-23-14-46-10.pdf"
+            }
+          }
+        }
+      }
+    }
+  },
+  "expected": [
+    {
+      "store": "penny",
+      "country": "italy",
+      "slug": "1648513",
+      "dateFrom": "2026-08-06",
+      "dateTo": "2026-08-12",
+      "firstPageUrl": "https://it-it-media-publications.shopfully.cloud/publications/requests/1648513_6a61e6a8-501c-465e-a859-00eb43be90da_2026-07-23-12-02-16.pdf",
+      "coverImageUrl": "https://it-it-media-publications.shopfully.cloud/publications/requests/1648513_6a61e6a8-501c-465e-a859-00eb43be90da_2026-07-23-12-02-16.pdf"
+    }
+  ]
+}

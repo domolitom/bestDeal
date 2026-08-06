@@ -204,3 +204,17 @@ bun test packages/shared/tests/       # Shared only
 cd packages/web
 NEXT_PUBLIC_CDN_URL=https://cdn.best-deal-shops.com bun run build:cf
 ```
+
+### Secret scanning
+
+This repo runs [gitleaks](https://github.com/gitleaks/gitleaks) to catch hardcoded secrets before they land in the codebase.
+
+- **Locally**: install [pre-commit](https://pre-commit.com/) and enable the hook once per clone:
+  ```bash
+  pip install pre-commit
+  pre-commit install
+  ```
+  After that, every `git commit` runs gitleaks against staged changes automatically.
+- **In CI**: the `Secret Scan` workflow (`.github/workflows/secret-scan.yml`) runs gitleaks on every push and pull request to `master`, independent of the pre-commit hook.
+
+If a scan flags a false positive, fix the underlying pattern rather than disabling the check — never commit real credentials, even temporarily.

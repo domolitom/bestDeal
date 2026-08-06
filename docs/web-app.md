@@ -21,7 +21,7 @@ The web app is a read-only catalog browser. It reads catalog metadata and images
 
 The app is deployed on Cloudflare Pages with Edge runtime, meaning all server-side rendering happens at Cloudflare's edge network closest to the user.
 
-**Live URL:** `https://best-deal-shops.com` (also `https://bestdeal-9uy.pages.dev`)
+**Live URL:** `https://best-deal-shops.com` (also `https://<pages-project>.pages.dev`)
 
 ## Technology Stack
 

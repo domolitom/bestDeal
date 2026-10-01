@@ -52,17 +52,17 @@ describe("isManifestEligible", () => {
     ).toBe(false);
   });
 
-  test("dateTo exactly 365 days ahead passes (boundary)", () => {
+  test("dateTo exactly 90 days ahead passes (boundary)", () => {
     // dateFrom is set close to dateTo so span stays within the 60-day cap
     expect(
-      isManifestEligible({ id: "test", dateFrom: isoOffset(306), dateTo: isoOffset(365) })
+      isManifestEligible({ id: "test", dateFrom: isoOffset(31), dateTo: isoOffset(90) })
     ).toBe(true);
   });
 
-  test("dateTo 366 days ahead fails (just over boundary)", () => {
+  test("dateTo 91 days ahead fails (just over boundary)", () => {
     // dateFrom is set close to dateTo so span stays within the 60-day cap
     expect(
-      isManifestEligible({ id: "test", dateFrom: isoOffset(307), dateTo: isoOffset(366) })
+      isManifestEligible({ id: "test", dateFrom: isoOffset(32), dateTo: isoOffset(91) })
     ).toBe(false);
   });
 

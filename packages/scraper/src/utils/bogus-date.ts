@@ -1,5 +1,20 @@
-/** Maximum days dateTo may be in the future before a date is considered bogus. */
-export const BOGUS_MAX_FUTURE_DAYS = 365;
+/**
+ * Maximum days dateTo may be in the future before a date is considered bogus.
+ *
+ * Weekly retail leaflets are published days-to-weeks ahead. Live manifest data
+ * (2026-10-01, 78 catalogs) shows legitimate dateTo values at most 26 days
+ * ahead, while the bogus austria-lidl-2027-04-23 sat 204 days out. 90 days
+ * allows a 60-day catalog published ~30 days early and still rejects those.
+ */
+export const BOGUS_MAX_FUTURE_DAYS = 90;
+
+/**
+ * Default maximum dateFrom -> dateTo span (days) accepted at discovery time.
+ * Live data (2026-10-01) shows real catalogs up to 53 days (france/jysk);
+ * everything longer was already hidden by the manifest filter.
+ */
+export const DEFAULT_MAX_SPAN_DAYS = 60;
+
 
 /** Maximum days past dateTo before a date range is considered bogus. */
 export const BOGUS_EXPIRY_DAYS = 30;

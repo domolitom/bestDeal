@@ -58,3 +58,14 @@ describe("loadStoreDefinitions", () => {
     expect(loadStoreDefinitions("/nonexistent")).rejects.toThrow();
   });
 });
+
+describe("maxCatalogSpanDays override", () => {
+  test("when set, is a positive number", async () => {
+    const defs = await loadStoreDefinitions();
+    for (const def of defs) {
+      if (def.maxCatalogSpanDays !== undefined) {
+        expect(def.maxCatalogSpanDays).toBeGreaterThan(0);
+      }
+    }
+  });
+});

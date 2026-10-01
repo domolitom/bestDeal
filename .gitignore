@@ -49,3 +49,5 @@ english-corrections.md
 # Agent worktrees and scratch artifacts
 .worktrees/
 .tmp-shots/
+
+*.tsbuildinfo

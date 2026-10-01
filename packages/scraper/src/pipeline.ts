@@ -4,7 +4,7 @@ import { discoverAll } from "./discovery/discoverer.ts";
 import type { DiscoveryReport } from "./discovery/discoverer.ts";
 import { getResolver } from "./scraping/resolver-registry.ts";
 import { downloadCatalogImages } from "./scraping/downloader.ts";
-import { BOGUS_MAX_FUTURE_DAYS } from "./utils/bogus-date.ts";
+import { BOGUS_MAX_FUTURE_DAYS, DEFAULT_MAX_SPAN_DAYS } from "./utils/bogus-date.ts";
 import { createLogger } from "./logger.ts";
 
 const log = createLogger({ module: "pipeline" });
@@ -255,7 +255,7 @@ const MANIFEST_EXPIRY_DAYS = 30;
 const MANIFEST_MAX_FUTURE_DAYS = BOGUS_MAX_FUTURE_DAYS;
 
 /** Maximum allowed span (dateFrom → dateTo) in days before a catalog is excluded from the manifest. */
-const MANIFEST_MAX_SPAN_DAYS = 60;
+const MANIFEST_MAX_SPAN_DAYS = DEFAULT_MAX_SPAN_DAYS;
 
 /**
  * Return true when a catalog's dates are sane enough to include in the manifest:

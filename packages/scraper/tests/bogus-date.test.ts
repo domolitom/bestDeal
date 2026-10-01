@@ -43,13 +43,19 @@ describe("hasBogusDate", () => {
     expect(result).toContain("days in the future");
   });
 
-  test("dateTo exactly 365 days ahead returns null (boundary)", () => {
-    expect(hasBogusDate(VALID_FROM, isoOffset(365))).toBeNull();
+  test("dateTo exactly 90 days ahead returns null (boundary)", () => {
+    expect(hasBogusDate(VALID_FROM, isoOffset(90))).toBeNull();
   });
 
-  test("dateTo 366 days ahead returns reason", () => {
-    const result = hasBogusDate(VALID_FROM, isoOffset(366));
+  test("dateTo 91 days ahead returns reason", () => {
+    const result = hasBogusDate(VALID_FROM, isoOffset(91));
     expect(result).not.toBeNull();
+    expect(result).toContain("days in the future");
+  });
+
+  test("single-day catalog ~200 days ahead is bogus (austria-lidl-2027-04-23 case)", () => {
+    const now = new Date("2026-10-01T06:00:00.000Z");
+    const result = hasBogusDate("2027-04-23", "2027-04-23", now);
     expect(result).toContain("days in the future");
   });
 

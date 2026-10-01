@@ -7,6 +7,7 @@ import { discoverStore, discoverStoreViaApi, discoverStoreViaRestApi, discoverSt
 import type { DiscoveredCatalog } from "./discovery-engine.ts";
 import { toISODate } from "@bestdeal/shared";
 import { detectResolverName } from "../scraping/resolver-registry.ts";
+import { BOGUS_MAX_FUTURE_DAYS } from "../utils/bogus-date.ts";
 import { createLogger } from "../logger.ts";
 
 const log = createLogger({ module: "discovery" });
@@ -58,13 +59,12 @@ async function isPageValid(page: Page, url: string): Promise<boolean> {
 
 // --- Date sanity validation ---
 
-const MAX_DATE_TO_FUTURE_DAYS = 365;
 const MAX_DATE_SPAN_DAYS = 365;
 
 /**
  * Validate that a catalog's ISO dates are sane:
  * - dateTo must not be before dateFrom (inverted dates)
- * - dateTo must not be more than 1 year in the future from today
+ * - dateTo must not be more than BOGUS_MAX_FUTURE_DAYS in the future from today
  * - the span (dateTo - dateFrom) must not exceed 365 days
  *
  * `now` defaults to the current time; pass an explicit value for
@@ -92,11 +92,11 @@ export function validateCatalogDates(
   today.setHours(0, 0, 0, 0);
 
   const maxDateTo = new Date(today);
-  maxDateTo.setDate(maxDateTo.getDate() + MAX_DATE_TO_FUTURE_DAYS);
+  maxDateTo.setDate(maxDateTo.getDate() + BOGUS_MAX_FUTURE_DAYS);
 
   if (to > maxDateTo) {
     const daysAhead = Math.round((to.getTime() - today.getTime()) / 86400000);
-    return `dateTo "${dateTo}" is ${daysAhead} days in the future (max ${MAX_DATE_TO_FUTURE_DAYS})`;
+    return `dateTo "${dateTo}" is ${daysAhead} days in the future (max ${BOGUS_MAX_FUTURE_DAYS})`;
   }
 
   const spanDays = Math.round((to.getTime() - from.getTime()) / 86400000);

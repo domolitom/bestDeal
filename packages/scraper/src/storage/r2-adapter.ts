@@ -8,6 +8,7 @@ import type { StorageAdapter, CatalogMeta } from "@bestdeal/shared";
 import { R2ReadAdapter } from "@bestdeal/shared/storage/r2";
 import type { R2ReadAdapterConfig } from "@bestdeal/shared/storage/r2";
 import { parseCatalogId } from "@bestdeal/shared";
+import { mapWithConcurrency } from "../utils/concurrency.ts";
 
 /**
  * Read-write R2 storage adapter for the scraper.
@@ -67,6 +68,34 @@ export class R2StorageAdapter extends R2ReadAdapter implements StorageAdapter {
         CacheControl: "public, max-age=604800, immutable",
       })
     );
+  }
+
+  /**
+   * Read every catalog's meta.json with a SINGLE bucket listing (instead of
+   * one full listing per status filter) and bounded-concurrency GETs.
+   * Callers filter by status in memory.
+   */
+  async listAllCatalogMetas(concurrency = 16): Promise<CatalogMeta[]> {
+    const metaKeys: string[] = [];
+    let token: string | undefined;
+    do {
+      const resp = await this.s3.send(
+        new ListObjectsV2Command({ Bucket: this.bucket, ContinuationToken: token })
+      );
+      for (const obj of resp.Contents ?? []) {
+        if (obj.Key?.endsWith("/meta.json")) metaKeys.push(obj.Key);
+      }
+      token = resp.NextContinuationToken;
+    } while (token);
+
+    const results = await mapWithConcurrency(metaKeys, concurrency, async (key) => {
+      try {
+        return await this.fetchJson<CatalogMeta>(key);
+      } catch {
+        return null; // skip invalid meta.json
+      }
+    });
+    return results.filter((m): m is CatalogMeta => m !== null);
   }
 
   /** Delete all objects for a catalog from R2. */

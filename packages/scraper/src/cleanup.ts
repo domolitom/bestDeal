@@ -1,6 +1,7 @@
 import { R2StorageAdapter } from "./storage/r2-adapter.ts";
 import { createLogger } from "./logger.ts";
-import { hasBogusDate } from "./utils/bogus-date.ts";
+import { findBogus, deleteAll } from "./cleanup-core.ts";
+import { mapWithConcurrency } from "./utils/concurrency.ts";
 
 const log = createLogger({ module: "cleanup" });
 
@@ -23,62 +24,69 @@ const storage = new R2StorageAdapter({
   publicUrl,
 });
 
+const DELETE_CONCURRENCY = 8;
+const WRITE_CONCURRENCY = 8;
+// Stop starting new deletions after this budget so manifests are still
+// regenerated before the workflow timeout; leftovers are picked up next run.
+const DELETE_BUDGET_MS = Number(process.env.CLEANUP_DELETE_BUDGET_MS ?? 20 * 60 * 1000);
+const startedAt = Date.now();
+
+// One bucket listing for the whole run (previously one full listing per status).
+const metas = await storage.listAllCatalogMetas();
+log.info(`loaded ${metas.length} catalog meta(s)`);
+
 // --- Phase 0: mark catalogs with bogus dates as failed ---
-// This catches far-future dates, inverted dates, and over-expired entries
-// that slipped through before date validation was enforced. Marking them
-// failed here ensures the regular cleanup loop below deletes them.
+// Runs first and is cheap (meta already loaded, only PUTs), so it always
+// completes even if deletion is slow.
 
-let markedBogus = 0;
-for (const status of ["ready", "discovered", "scraping"] as const) {
-  const candidates = await storage.listCatalogs({ status });
-  for (const summary of candidates) {
-    const reason = hasBogusDate(summary.dateFrom, summary.dateTo);
-    if (!reason) continue;
-
-    const catalog = await storage.getCatalog(summary.id);
-    if (!catalog) continue;
-    const { pages, ...meta } = catalog;
+const bogus = findBogus(metas);
+await mapWithConcurrency(bogus, WRITE_CONCURRENCY, async ({ meta, reason }) => {
+  try {
     await storage.writeCatalogMeta({ ...meta, status: "failed" });
-    markedBogus++;
-    log.warn(`marked bogus as failed: ${summary.id} — ${reason}`);
+    meta.status = "failed"; // reflect in-memory so Phase 1 deletes it
+    log.warn(`marked bogus as failed: ${meta.id} — ${reason}`);
+  } catch (err) {
+    log.error(`failed to mark ${meta.id}`, { err: String(err) });
   }
-}
+});
 
-if (markedBogus > 0) {
-  log.info(`marked ${markedBogus} catalog(s) with bogus dates as failed`);
+if (bogus.length > 0) {
+  log.info(`marked ${bogus.length} catalog(s) with bogus dates as failed`);
 }
 
 // --- Phase 1: delete expired + failed catalogs ---
 
-const expired = await storage.listCatalogs({ status: "expired" });
-const failed = await storage.listCatalogs({ status: "failed" });
-const toDelete = [...expired, ...failed];
+const toDelete = metas.filter((m) => m.status === "expired" || m.status === "failed");
 
 if (toDelete.length === 0) {
   log.info("nothing to delete");
   process.exit(0);
 }
 
-log.info(`found ${expired.length} expired + ${failed.length} failed catalog(s)`);
+log.info(`found ${toDelete.length} expired/failed catalog(s)`);
 
-let deleted = 0;
-for (const catalog of toDelete) {
-  try {
-    await storage.deleteCatalog(catalog.id);
-    deleted++;
-    log.info(`deleted ${catalog.id}`);
-  } catch (err) {
-    log.error(`failed to delete ${catalog.id}`, { err: String(err) });
-  }
-}
+const byId = new Map(toDelete.map((m) => [m.id, m]));
+const outcome = await deleteAll(
+  toDelete.map((m) => m.id),
+  async (id) => {
+    try {
+      await storage.deleteCatalog(id);
+      log.info(`deleted ${id}`);
+    } catch (err) {
+      log.error(`failed to delete ${id}`, { err: String(err) });
+      throw err;
+    }
+  },
+  { concurrency: DELETE_CONCURRENCY, deadline: startedAt + DELETE_BUDGET_MS }
+);
 
-log.info(`done: ${deleted}/${toDelete.length} deleted`);
+log.info(
+  `done: ${outcome.deleted.length}/${toDelete.length} deleted, ${outcome.failed.length} failed, ${outcome.skipped.length} deferred to next run`
+);
 
 // Regenerate per-country manifests for affected countries
-if (deleted > 0) {
+if (outcome.deleted.length > 0) {
   const { generateManifest } = await import("./pipeline.ts");
-  const affectedCountries = new Set(toDelete.map((c) => c.country));
-  for (const country of affectedCountries) {
-    await generateManifest(storage, country);
-  }
+  const affectedCountries = new Set(outcome.deleted.map((id) => byId.get(id)!.country));
+  await mapWithConcurrency([...affectedCountries], 4, (country) => generateManifest(storage, country));
 }

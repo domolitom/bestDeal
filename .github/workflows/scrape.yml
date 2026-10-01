@@ -90,6 +90,10 @@ jobs:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
+        # Step-level timeout (< job timeout) makes a hang a real step failure
+        # instead of a job cancellation, so notify-failure fires and the run
+        # conclusion is "failure" rather than "cancelled".
+        timeout-minutes: 35
         run: bun run scraper -- --storage=r2 --country=${{ matrix.country }}
 
   finalize:
@@ -98,6 +102,9 @@ jobs:
     needs: scrape
     # Run even when some country jobs failed so the manifest is always fresh
     if: always()
+    permissions:
+      contents: read
+      actions: read
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
@@ -124,11 +131,29 @@ jobs:
           R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
         run: bun run scraper -- --storage=r2 --manifest-only
 
+      - name: Per-country summary
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "## Scrape results by country"
+            echo
+            echo "| Country | Result | Duration |"
+            echo "|---|---|---|"
+            gh api --paginate "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs?per_page=100" \
+              --jq '.jobs[] | select(.name | startswith("scrape (")) | [.name[8:-1], .conclusion, ((((.completed_at // now | if type=="string" then fromdate else . end) - (.started_at | fromdate)) / 60 | floor | tostring) + " min")] | "| " + join(" | ") + " |"' | sort
+            echo
+            echo "Scrape matrix aggregate: \`${{ needs.scrape.result }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   notify-failure:
     name: Open failure issue
     runs-on: ubuntu-latest
     needs: scrape
-    if: failure()
+    # failure() is false when jobs are cancelled (e.g. job timeout), so also
+    # check the aggregate matrix result explicitly.
+    if: always() && (needs.scrape.result == 'failure' || needs.scrape.result == 'cancelled')
     permissions:
       issues: write
     steps:

@@ -215,6 +215,10 @@ try {
 
   writeStepSummary(report, values.country ?? "all");
   console.log("\n" + JSON.stringify(report, null, 2));
+  // Exit explicitly: lingering handles (Playwright browser, keep-alive
+  // sockets) otherwise keep the process alive after the pipeline completes,
+  // which made CI jobs hang until the job timeout cancelled them (bestDeal-riz).
+  process.exit(0);
 } catch (err) {
   log.error("fatal", { err: String(err) });
   process.exit(1);

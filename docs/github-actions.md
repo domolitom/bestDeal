@@ -67,7 +67,7 @@ strategy:
 Each country runs as a **separate parallel job**. This provides:
 - **Isolation:** A failure in one country doesn't block others
 - **Parallelism:** All countries scrape simultaneously
-- **Timeouts:** Each country has its own 30-minute timeout
+- **Timeouts:** Each country has its own timeout (35-min step, 45-min job backstop)
 
 `fail-fast: false` is critical — without it, a single country failure would cancel all other running jobs.
 
@@ -129,13 +129,15 @@ This triggers all matrix jobs. If you only want to scrape one country, you curre
 
 ### Timeouts and Failures
 
-- **Job timeout:** 30 minutes per country
-- **Common timeout causes:**
-  - Browser resolver is too slow (5+ seconds per page × 60+ pages)
+- **Step timeout:** 35 minutes on the scrape step; **job timeout:** 45 minutes as a backstop. A hung scrape therefore fails the step (run conclusion `failure`) instead of being cancelled by the job timeout.
+- **Known cause of past "cancelled" runs (bestDeal-riz):** the scraper finished its work in 10-15 minutes but the process never exited (lingering Playwright/socket handles), so jobs idled until the 45-min timeout. `cli.ts` now calls `process.exit(0)` after the report is written.
+- **Other timeout causes:**
+  - Browser resolver is too slow (5+ seconds per page x 60+ pages)
   - Store website is unresponsive or rate-limiting
   - Too many stores in a single country
 - **On failure:** The failed catalog is marked as `"failed"` in R2. Other catalogs and other countries continue normally.
-- **On timeout:** GitHub kills the job. Catalogs stuck in `"scraping"` status are recovered on the next run (Phase 0 housekeeping).
+- **On timeout:** Catalogs stuck in `"scraping"` status are recovered on the next run (Phase 0 housekeeping).
+- **Signals:** the `finalize` job writes a per-country result/duration table to the run's step summary. `notify-failure` opens a `scraper-failure` issue when the scrape matrix result is `failure` or `cancelled`.
 
 ## Cleanup Workflow
 

@@ -7,7 +7,7 @@ import { discoverStore, discoverStoreViaApi, discoverStoreViaRestApi, discoverSt
 import type { DiscoveredCatalog } from "./discovery-engine.ts";
 import { toISODate } from "@bestdeal/shared";
 import { detectResolverName } from "../scraping/resolver-registry.ts";
-import { BOGUS_MAX_FUTURE_DAYS } from "../utils/bogus-date.ts";
+import { BOGUS_MAX_FUTURE_DAYS, DEFAULT_MAX_SPAN_DAYS } from "../utils/bogus-date.ts";
 import { createLogger } from "../logger.ts";
 
 const log = createLogger({ module: "discovery" });
@@ -59,13 +59,13 @@ async function isPageValid(page: Page, url: string): Promise<boolean> {
 
 // --- Date sanity validation ---
 
-const MAX_DATE_SPAN_DAYS = 365;
-
 /**
  * Validate that a catalog's ISO dates are sane:
  * - dateTo must not be before dateFrom (inverted dates)
  * - dateTo must not be more than BOGUS_MAX_FUTURE_DAYS in the future from today
- * - the span (dateTo - dateFrom) must not exceed 365 days
+ * - the span (dateTo - dateFrom) must not exceed `maxSpanDays`
+ *   (default DEFAULT_MAX_SPAN_DAYS; stores may opt in to more via
+ *   `StoreDefinition.maxCatalogSpanDays`)
  *
  * `now` defaults to the current time; pass an explicit value for
  * deterministic/testable callers instead of relying on the wall clock.
@@ -75,7 +75,8 @@ const MAX_DATE_SPAN_DAYS = 365;
 export function validateCatalogDates(
   dateFrom: string,
   dateTo: string,
-  now: Date = new Date()
+  now: Date = new Date(),
+  maxSpanDays: number = DEFAULT_MAX_SPAN_DAYS
 ): string | null {
   const from = new Date(dateFrom);
   const to = new Date(dateTo);
@@ -100,8 +101,8 @@ export function validateCatalogDates(
   }
 
   const spanDays = Math.round((to.getTime() - from.getTime()) / 86400000);
-  if (spanDays > MAX_DATE_SPAN_DAYS) {
-    return `date span is ${spanDays} days (max ${MAX_DATE_SPAN_DAYS})`;
+  if (spanDays > maxSpanDays) {
+    return `date span is ${spanDays} days (max ${maxSpanDays})`;
   }
 
   return null;
@@ -273,7 +274,12 @@ export async function discoverAll(
           );
           const isoDateTo = toISODate(catalog.dateTo, undefined, true);
 
-          const dateError = validateCatalogDates(isoDateFrom, isoDateTo, now);
+          const dateError = validateCatalogDates(
+            isoDateFrom,
+            isoDateTo,
+            now,
+            storeDef.maxCatalogSpanDays
+          );
           if (dateError) {
             log.warn(`skipping bogus catalog: ${catalogId} — ${dateError}`);
             continue;

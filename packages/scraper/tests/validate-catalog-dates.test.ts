@@ -19,3 +19,19 @@ describe("validateCatalogDates (future guard)", () => {
     expect(validateCatalogDates("2026-12-01", "2026-12-31", NOW)).toContain("days in the future");
   });
 });
+
+describe("validateCatalogDates (span guard)", () => {
+  test("60-day span passes, 61-day span is rejected by default", () => {
+    expect(validateCatalogDates("2026-10-01", "2026-11-30", NOW)).toBeNull();
+    expect(validateCatalogDates("2026-10-01", "2026-12-01", NOW)).toContain("date span is 61 days (max 60)");
+  });
+
+  test("246-day span (Lithuania Lidl case) is rejected by default", () => {
+    expect(validateCatalogDates("2026-01-31", "2026-10-04", NOW)).toContain("date span");
+  });
+
+  test("per-store override allows a longer span", () => {
+    expect(validateCatalogDates("2026-10-01", "2026-12-15", NOW, 90)).toBeNull();
+    expect(validateCatalogDates("2026-10-01", "2026-12-15", NOW, 60)).toContain("date span");
+  });
+});

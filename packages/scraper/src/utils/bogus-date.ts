@@ -8,6 +8,13 @@
  */
 export const BOGUS_MAX_FUTURE_DAYS = 90;
 
+/**
+ * Default maximum dateFrom -> dateTo span (days) accepted at discovery time.
+ * Live data (2026-10-01) shows real catalogs up to 53 days (france/jysk);
+ * everything longer was already hidden by the manifest filter.
+ */
+export const DEFAULT_MAX_SPAN_DAYS = 60;
+
 
 /** Maximum days past dateTo before a date range is considered bogus. */
 export const BOGUS_EXPIRY_DAYS = 30;

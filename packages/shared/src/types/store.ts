@@ -200,6 +200,14 @@ export interface StoreDefinition {
    * ingested as weekly grocery catalogs. Omit to allow any span.
    */
   leafletsMaxSpanDays?: number;
+  /**
+   * Opt-in override of the discovery-time maximum catalog span (dateFrom ->
+   * dateTo, in days). Defaults to 60. Only set this for stores that
+   * legitimately publish long-running (monthly/quarterly) catalogs. Note the
+   * manifest writer keeps its own 60-day backstop, so a store needing more
+   * than 60 days must also be exempted there.
+   */
+  maxCatalogSpanDays?: number;
   catalogTypePattern?: CatalogTypePattern;
   imageExtraction?: ImageExtraction;
   resolver?: string; // override auto-detection ("leaflets" | "browser" | etc.)

@@ -87,6 +87,7 @@ log.info(
 // Regenerate per-country manifests for affected countries
 if (outcome.deleted.length > 0) {
   const { generateManifest } = await import("./pipeline.ts");
-  const affectedCountries = new Set(outcome.deleted.map((id) => byId.get(id)!.country));
-  await mapWithConcurrency([...affectedCountries], 4, (country) => generateManifest(storage, country));
+  // Single unscoped call rewrites every per-country manifest and the root one
+  // (country-scoped calls no longer touch the root manifest).
+  await generateManifest(storage);
 }

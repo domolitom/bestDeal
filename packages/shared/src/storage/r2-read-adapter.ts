@@ -50,6 +50,13 @@ export class R2ReadAdapter implements ReadonlyStorageAdapter {
         accessKeyId: config.accessKeyId,
         secretAccessKey: config.secretAccessKey,
       },
+      // Without these a single stuck socket hangs the run forever.
+      // Plain options object: the SDK builds its NodeHttpHandler from it.
+      requestHandler: {
+        connectionTimeout: 10_000,
+        requestTimeout: 60_000,
+      },
+      maxAttempts: 3,
     });
     this.bucket = config.bucket;
     // Remove trailing slash

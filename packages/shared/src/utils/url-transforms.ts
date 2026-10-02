@@ -3,9 +3,9 @@ import type { UrlTransform, CatalogTypePattern } from "../types/store";
 /**
  * Apply a chain of URL transforms (replace, append, conditional).
  */
-export function applyUrlTransforms(url: string, transforms: UrlTransform[]): string {
+export function applyUrlTransforms(url: string, transforms: UrlTransform[] | undefined = []): string {
   let result = url;
-  for (const t of transforms) {
+  for (const t of transforms ?? []) {
     if (t.type === "replace") {
       result = result.replace(new RegExp(t.match), t.replacement);
     } else if (t.type === "append") {

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { extractPageNumber, buildPageURL } from "@bestdeal/shared";
+import { extractPageNumber, buildPageURL, applyUrlTransforms } from "@bestdeal/shared";
 
 describe("extractPageNumber", () => {
   test("standard URL extracts correct number", () => {

@@ -30,11 +30,21 @@ export interface PipelineReport {
 /**
  * Recover catalogs stuck in "scraping" status from a previous crashed run.
  * Resets them to "discovered" so they get retried on the next scrape phase.
+ *
+ * When `country` is given, only that country's catalogs are touched. CI runs
+ * one job per country in parallel, so an unscoped recovery would reset
+ * catalogs another job is scraping right now.
+ *
+ * A catalog that already carries `scrapedAt` and a positive `pageCount` is
+ * marked "ready" instead (the scrape finished, only the status write raced).
  */
 export async function recoverStaleCatalogs(
-  storage: StorageAdapter
+  storage: StorageAdapter,
+  country?: string
 ): Promise<string[]> {
-  const stale = await storage.listCatalogs({ status: "scraping" });
+  const stale = await storage.listCatalogs(
+    country ? { status: "scraping", country } : { status: "scraping" }
+  );
   const recovered: string[] = [];
 
   for (const summary of stale) {
@@ -42,9 +52,15 @@ export async function recoverStaleCatalogs(
     if (!catalog) continue;
 
     const { pages, ...meta } = catalog;
-    await storage.writeCatalogMeta({ ...meta, status: "discovered" });
+    const completed = Boolean(meta.scrapedAt) && meta.pageCount > 0;
+    await storage.writeCatalogMeta({
+      ...meta,
+      status: completed ? "ready" : "discovered",
+    });
     recovered.push(summary.id);
-    log.warn(`recovered stale catalog: ${summary.id}`);
+    log.warn(`recovered stale catalog: ${summary.id}`, {
+      status: completed ? "ready" : "discovered",
+    });
   }
 
   if (recovered.length > 0) {
@@ -56,11 +72,15 @@ export async function recoverStaleCatalogs(
 
 /**
  * Mark catalogs whose dateTo has passed as "expired".
+ * When `country` is given, only that country's catalogs are touched.
  */
 export async function expireOldCatalogs(
-  storage: StorageAdapter
+  storage: StorageAdapter,
+  country?: string
 ): Promise<string[]> {
-  const ready = await storage.listCatalogs({ status: "ready" });
+  const ready = await storage.listCatalogs(
+    country ? { status: "ready", country } : { status: "ready" }
+  );
   const expired: string[] = [];
 
   for (const summary of ready) {
@@ -88,9 +108,9 @@ export async function runPipeline(
   const now = options.now ?? new Date();
 
   // Phase 0: Housekeeping — recover stale + expire old catalogs
-  const recovered = await recoverStaleCatalogs(storage);
+  const recovered = await recoverStaleCatalogs(storage, country);
 
-  const expired = await expireOldCatalogs(storage);
+  const expired = await expireOldCatalogs(storage, country);
   if (expired.length > 0) {
     log.info(`expired ${expired.length} old catalog(s)`);
   }

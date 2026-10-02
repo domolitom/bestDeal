@@ -171,8 +171,13 @@ export async function runPipeline(
 
       const scrapingInfo = fullCatalog._scraping ?? null;
       if (!scrapingInfo) {
-        log.warn(`no scraping info`, { catalogId: catalog.catalogId });
+        // Nothing to resolve from and discovery will never re-create it
+        // (the id already exists), so mark it failed and let cleanup remove it
+        // instead of warning on every run.
+        log.warn(`no scraping info, marking failed`, { catalogId: catalog.catalogId });
         report.failed.push(catalog.catalogId);
+        const { pages, ...meta } = fullCatalog;
+        await storage.writeCatalogMeta({ ...meta, status: "failed" });
         continue;
       }
 
@@ -189,7 +194,9 @@ export async function runPipeline(
         pageCount: fullCatalog.pageCount,
         discoveredAt: fullCatalog.discoveredAt,
       };
-      await storage.writeCatalogMeta(metaUpdate);
+      // Keep _scraping on the in-progress record so a crash (or recovery)
+      // leaves a catalog that can still be retried.
+      await storage.writeCatalogMeta({ ...metaUpdate, _scraping: scrapingInfo });
 
       // Resolve image URLs via registry-dispatched resolver
       const catalogTimer = log.time();

@@ -334,7 +334,11 @@ export async function generateManifest(
     return;
   }
 
-  const summaries = await storage.listCatalogs({ status: "ready" });
+  // Scope the listing to the country prefix when given; an unscoped listing
+  // walks the whole bucket and GETs every meta.json (hung CI per-country jobs).
+  const summaries = await storage.listCatalogs(
+    country ? { status: "ready", country } : { status: "ready" }
+  );
 
   // Group summaries by country, filtering out any with bogus dates.
   // CatalogSummary has all fields needed for the manifest and for eligibility
@@ -359,8 +363,12 @@ export async function generateManifest(
     log.info(`wrote ${c}/manifest.json`, { catalogs: countryCatalogs.length });
   }
 
-  // Always write a root manifest.json covering all countries so the web app
-  // can fetch a single file instead of one per country.
+  // A country-scoped run only saw one country, so writing the root manifest
+  // here would clobber it. The finalize job (--manifest-only) owns the root.
+  if (country) return;
+
+  // Root manifest.json covers all countries so the web app can fetch a single
+  // file instead of one per country.
   const allCatalogs = [...byCountry.values()].flat();
   const rootManifest = { updatedAt, catalogs: allCatalogs };
   await storage.writeManifest!(JSON.stringify(rootManifest, null, 2));

@@ -92,7 +92,7 @@ bun run scraper -- --help
 | `--store=NAME` | string | all | Filter by store name (e.g., `lidl`, `kaufland`) |
 | `--discover-only` | boolean | false | Only run discovery, skip scraping phase |
 | `--storage=TYPE` | string | `fs` | Storage backend: `fs` (local filesystem) or `r2` (Cloudflare R2) |
-| `--data-dir=PATH` | string | `../../data/catalogs` | Data directory for filesystem storage |
+| `--data-dir=PATH` | string | `packages/data/catalogs` | Data directory for filesystem storage; relative paths resolve against the working directory |
 | `--auto-discover` | boolean | false | Generate a store config using an LLM (requires `--url`, `--store`, `--country`) |
 | `--url=URL` | string | — | Landing URL for auto-discover mode |
 | `-h, --help` | boolean | false | Show help text |
@@ -725,7 +725,7 @@ HTTP downloads include a `Referer` header (set to the image URL's origin) and a 
 
 ### Filesystem (`--storage=fs`, default)
 
-Writes to `{data-dir}/{country}/{store}/{catalogId}/`. Default data directory is `../../data/catalogs` relative to the scraper source.
+Writes to `{data-dir}/{country}/{store}/{catalogId}/`. Default data directory is `packages/data/catalogs` (anchored to the scraper source); an explicit `--data-dir` resolves against the working directory.
 
 Used for local development and testing. Supports manifest generation (`writeManifest()`) and catalog deletion (`deleteCatalog()`).
 

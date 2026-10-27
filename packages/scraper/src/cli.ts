@@ -1,5 +1,5 @@
 import { parseArgs } from "node:util";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { appendFileSync } from "node:fs";
 import type { StorageAdapter } from "@bestdeal/shared";
 import { FilesystemAdapter } from "./storage/fs-adapter.ts";
@@ -18,7 +18,7 @@ const { values } = parseArgs({
     "manifest-only": { type: "boolean", default: false },
     "auto-discover": { type: "boolean", default: false },
     url: { type: "string" },
-    "data-dir": { type: "string", default: "../../data/catalogs" },
+    "data-dir": { type: "string" },
     storage: { type: "string", default: "fs" },
     help: { type: "boolean", short: "h", default: false },
   },
@@ -47,7 +47,7 @@ Options:
   --manifest-only      Regenerate manifest.json only, skip all scraping
   --auto-discover      Generate a store config from a landing URL
   --url=URL            Landing URL (required with --auto-discover)
-  --data-dir=PATH      Data directory (default: ../../data/catalogs)
+  --data-dir=PATH      Data directory (default: packages/data/catalogs; relative paths resolve against the working directory)
   --storage=TYPE       Storage backend: fs (default) or r2
                        R2 requires env vars: R2_ENDPOINT, R2_BUCKET,
                        R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_PUBLIC_URL
@@ -104,10 +104,11 @@ async function createStorage(): Promise<StorageAdapter> {
     });
   }
 
-  const dataDir = join(
-    import.meta.dir,
-    values["data-dir"] ?? "../../data/catalogs"
-  );
+  // Explicit --data-dir is cwd-relative; the default is anchored to this file.
+  const explicitDataDir = values["data-dir"];
+  const dataDir = explicitDataDir
+    ? resolve(process.cwd(), explicitDataDir)
+    : join(import.meta.dir, "../../data/catalogs");
   log.info(`data directory: ${dataDir}`);
   return new FilesystemAdapter(dataDir);
 }

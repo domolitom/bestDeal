@@ -104,9 +104,7 @@ async function createStorage(): Promise<StorageAdapter> {
     });
   }
 
-  // An explicit --data-dir is resolved against the working directory. The
-  // built-in default is anchored to this file so it stays packages/data/catalogs
-  // regardless of where the CLI is launched from.
+  // Explicit --data-dir is cwd-relative; the default is anchored to this file.
   const explicitDataDir = values["data-dir"];
   const dataDir = explicitDataDir
     ? resolve(process.cwd(), explicitDataDir)
